@@ -418,6 +418,72 @@
   .empty-state { text-align: center; padding: 48px 20px; color: #bbb; }
   .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
   .empty-state p { font-size: 14px; }
+
+  /* ─── MODAL CONFIRMATION ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.active {
+    display: flex;
+  }
+  .modal-content {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    text-align: center;
+  }
+  .modal-icon { font-size: 48px; margin-bottom: 16px; }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .modal-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    margin: 16px 0;
+  }
+  .modal-detail {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 24px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .modal-actions .btn {
+    flex: 1;
+  }
+  .btn-accept {
+    background: var(--success);
+    color: white;
+  }
+  .btn-accept:hover {
+    background: #1f5a3a;
+  }
+  .btn-refuse {
+    background: var(--error);
+    color: white;
+  }
+  .btn-refuse:hover {
+    background: #7a1a2a;
+  }
 </style>
 </head>
 <body>
@@ -589,6 +655,21 @@
     </table>
   </div>
 </div>
+
+<!-- ═══════════════ MODAL CONFIRMATION ═══════════════ -->
+<div class="modal-overlay" id="confirmation-modal">
+  <div class="modal-content">
+    <div class="modal-icon" id="modal-icon">❓</div>
+    <div class="modal-title" id="modal-title">Confirmer</div>
+    <div class="modal-code" id="modal-code">CODE</div>
+    <div class="modal-detail" id="modal-detail">Détails du ticket</div>
+    <div class="modal-actions">
+      <button class="btn btn-accept" onclick="confirmTicket()">✓ Accepter</button>
+      <button class="btn btn-refuse" onclick="refuseTicket()">✕ Refuser</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script>
@@ -685,6 +766,7 @@ let state = loadState();
 let scanLog = loadScanLog();
 let cameraStream = null;
 let scanInterval = null;
+let pendingConfirmation = null; // Stocke le ticket en attente de confirmation
 
 // ─── NAVIGATION ───
 function showView(name, btn) {
@@ -962,13 +1044,57 @@ function validateCode(rawCode) {
     return;
   }
 
-  // Valid!
+  // Afficher la modal de confirmation
+  showConfirmationModal(code, ticket);
+}
+
+function showConfirmationModal(code, ticket) {
+  pendingConfirmation = { code, ticket };
+  document.getElementById('modal-icon').textContent = '🎟️';
+  document.getElementById('modal-title').textContent = 'Confirmer l\'entrée ?';
+  document.getElementById('modal-code').textContent = code;
+  document.getElementById('modal-detail').innerHTML = `<strong>${ticket.type}</strong> — Lot <strong>${ticket.lot}</strong><br>Ticket n° ${ticket.num}`;
+  document.getElementById('confirmation-modal').classList.add('active');
+}
+
+function confirmTicket() {
+  if (!pendingConfirmation) return;
+  
+  const { code, ticket } = pendingConfirmation;
+  
+  // Marquer comme utilisé
   ticket.used = true;
   ticket.usedAt = new Date().toISOString();
   saveState();
+  
+  // Mettre à jour l'affichage du résultat
+  const result = document.getElementById('scan-result');
   result.className = 'scan-result valid';
   result.innerHTML = `<div class="result-icon">✅</div><div class="result-title">Entrée validée !</div><div class="result-code">${code}</div><div class="result-detail">Type : <strong>${ticket.type}</strong> — Lot <strong>${ticket.lot}</strong><br>Ticket n° ${ticket.num}</div>`;
   addLog(code, true, ticket.type);
+  
+  // Fermer la modal
+  closeConfirmationModal();
+}
+
+function refuseTicket() {
+  if (!pendingConfirmation) return;
+  
+  const { code, ticket } = pendingConfirmation;
+  
+  // Afficher le résultat de refus
+  const result = document.getElementById('scan-result');
+  result.className = 'scan-result invalid';
+  result.innerHTML = `<div class="result-icon">❌</div><div class="result-title">Entrée refusée</div><div class="result-code">${code}</div><div class="result-detail">Cette entrée a été refusée.<br>Type : ${ticket.type} — Lot ${ticket.lot}</div>`;
+  addLog(code, false, 'Refusé');
+  
+  // Fermer la modal
+  closeConfirmationModal();
+}
+
+function closeConfirmationModal() {
+  document.getElementById('confirmation-modal').classList.remove('active');
+  pendingConfirmation = null;
 }
 
 function addLog(code, ok, detail) {
