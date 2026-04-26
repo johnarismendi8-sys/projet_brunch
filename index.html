@@ -7,6 +7,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -484,9 +486,204 @@
   .btn-refuse:hover {
     background: #7a1a2a;
   }
+
+  /* ─── LOGIN PAGE ─── */
+  .login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+  }
+  .login-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 48px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    text-align: center;
+  }
+  .login-icon {
+    font-size: 56px;
+    margin-bottom: 20px;
+  }
+  .login-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .login-subtitle {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 32px;
+  }
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .login-form input {
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .login-form input:focus {
+    border-color: var(--gold);
+  }
+  .login-btn {
+    padding: 13px 24px;
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .login-btn:hover {
+    background: var(--gold-light);
+  }
+  .login-error {
+    display: none;
+    color: var(--error);
+    font-size: 13px;
+    padding: 12px;
+    background: #FDECEA;
+    border-radius: 6px;
+    border: 1px solid #F1AFAF;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .login-error.show {
+    display: block;
+  }
+
+  /* ─── SETTINGS MODAL ─── */
+  .settings-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    z-index: 50;
+    transition: transform 0.2s;
+  }
+  .settings-btn:hover {
+    transform: scale(1.1);
+  }
+  .settings-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+  }
+  .settings-modal.active {
+    display: flex;
+  }
+  .settings-content {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+  .settings-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+  .settings-section {
+    margin-bottom: 24px;
+  }
+  .settings-section label {
+    display: block;
+    font-size: 12px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+  .settings-section input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    box-sizing: border-box;
+  }
+  .settings-section input:focus {
+    border-color: var(--gold);
+  }
+  .settings-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .settings-actions .btn {
+    flex: 1;
+  }
+  .current-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface-2);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  .current-user span:first-child {
+    color: #888;
+  }
+  .current-user span:last-child {
+    font-weight: 600;
+    color: var(--gold);
+  }
 </style>
 </head>
 <body>
+
+<!-- ═══════════════ LOGIN PAGE ═══════════════ -->
+<div class="login-page" id="login-page">
+  <div class="login-card">
+    <div class="login-icon">🥂</div>
+    <div class="login-title">The Brunch</div>
+    <div class="login-subtitle">Gestion des tickets</div>
+    <div class="login-error" id="login-error"></div>
+    <form class="login-form" onsubmit="handleLogin(event)">
+      <input type="text" id="login-username" placeholder="Nom d'utilisateur" required>
+      <input type="password" id="login-password" placeholder="Mot de passe" required>
+      <button type="submit" class="login-btn">Se connecter</button>
+    </form>
+  </div>
+</div>
 
 <header>
   <div class="header-inner">
@@ -499,9 +696,40 @@
       <button class="nav-tab" onclick="showView('generator', this)">Générer</button>
       <button class="nav-tab" onclick="showView('scanner', this)">Scanner</button>
       <button class="nav-tab" onclick="showView('export', this)">Export</button>
+      <button class="nav-tab" onclick="logout()" style="margin-left: auto;">Déconnexion</button>
     </nav>
   </div>
 </header>
+
+<!-- ═══════════════ SETTINGS MODAL ═══════════════ -->
+<div class="settings-modal" id="settings-modal">
+  <div class="settings-content">
+    <h2 class="settings-title">⚙️ Paramètres</h2>
+    <div class="current-user">
+      <span>Utilisateur actif:</span>
+      <span id="current-username">-</span>
+    </div>
+    <div class="settings-section">
+      <label>Ancien mot de passe</label>
+      <input type="password" id="old-password" placeholder="Entrez votre mot de passe actuel">
+    </div>
+    <div class="settings-section">
+      <label>Nouveau mot de passe</label>
+      <input type="password" id="new-password" placeholder="Entrez le nouveau mot de passe">
+    </div>
+    <div class="settings-section">
+      <label>Confirmer le nouveau mot de passe</label>
+      <input type="password" id="confirm-password" placeholder="Confirmez le nouveau mot de passe">
+    </div>
+    <div class="settings-actions">
+      <button class="btn btn-gold" onclick="changePassword()">💾 Sauvegarder</button>
+      <button class="btn btn-outline" onclick="closeSettings()">✕ Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SETTINGS BUTTON ═══════════════ -->
+<button class="settings-btn" onclick="openSettings()" title="Paramètres">⚙️</button>
 
 <!-- ═══════════════ DASHBOARD ═══════════════ -->
 <div class="view active" id="view-dashboard">
@@ -636,10 +864,10 @@
       <h3>Journal de scan</h3>
       <p>Historique complet des validations</p>
     </div>
-    <div class="export-card" onclick="printTickets()">
-      <div class="icon">🖨️</div>
-      <h3>Imprimer lot</h3>
-      <p>Impression des QR codes en grille</p>
+    <div class="export-card" onclick="exportQRCodesPDF()">
+      <div class="icon">📄</div>
+      <h3>QR Codes PDF</h3>
+      <p>Tous les QR codes en fichier PDF</p>
     </div>
   </div>
 
@@ -673,6 +901,362 @@
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script>
+// ─── AUTHENTIFICATION ───
+
+// Hachage simple des mots de passe (pour démo - utiliser bcrypt en production)
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Conversion en 32-bit integer
+  }
+  return Math.abs(hash).toString(16);
+}
+
+// Comptes prédéfinis
+const DEFAULT_ACCOUNTS = {
+  'user': {
+    username: 'user',
+    passwordHash: simpleHash('user123'),
+    displayName: 'Utilisateur'
+  },
+  'admin': {
+    username: 'admin',
+    passwordHash: simpleHash('admin@brunch2024'),
+    displayName: 'Administrateur'
+  }
+};
+
+// Variables globales d'authentification
+let currentUser = null;
+let isLoggedIn = false;
+
+function initializeAccounts() {
+  const accounts = localStorage.getItem('brunch_accounts');
+  if (!accounts) {
+    localStorage.setItem('brunch_accounts', JSON.stringify(DEFAULT_ACCOUNTS));
+  }
+}
+
+function getAccounts() {
+  return JSON.parse(localStorage.getItem('brunch_accounts') || JSON.stringify(DEFAULT_ACCOUNTS));
+}
+
+function saveAccounts(accounts) {
+  localStorage.setItem('brunch_accounts', JSON.stringify(accounts));
+}
+
+function handleLogin(event) {
+  event.preventDefault();
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+  const errorDiv = document.getElementById('login-error');
+  
+  if (!username || !password) {
+    errorDiv.textContent = 'Veuillez remplir tous les champs';
+    errorDiv.classList.add('show');
+    return;
+  }
+
+  const accounts = getAccounts();
+  const account = accounts[username];
+
+  if (!account || account.passwordHash !== simpleHash(password)) {
+    errorDiv.textContent = 'Nom d\'utilisateur ou mot de passe incorrect';
+    errorDiv.classList.add('show');
+    document.getElementById('login-password').value = '';
+    return;
+  }
+
+  // Connexion réussie
+  isLoggedIn = true;
+  currentUser = username;
+  localStorage.setItem('brunch_currentUser', username);
+  
+  // Masquer la page de login
+  document.getElementById('login-page').style.display = 'none';
+  document.body.style.overflow = 'auto';
+  
+  // Afficher le dashboard
+  renderDashboard();
+  document.getElementById('current-username').textContent = account.displayName;
+}
+
+function logout() {
+  if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+    isLoggedIn = false;
+    currentUser = null;
+    localStorage.removeItem('brunch_currentUser');
+    
+    // Masquer le contenu principal
+    document.getElementById('login-page').style.display = 'flex';
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    
+    // Réinitialiser le formulaire
+    document.getElementById('login-username').value = '';
+    document.getElementById('login-password').value = '';
+    document.getElementById('login-error').classList.remove('show');
+  }
+}
+
+function checkAuthentication() {
+  initializeAccounts();
+  const savedUser = localStorage.getItem('brunch_currentUser');
+  
+  if (savedUser) {
+    currentUser = savedUser;
+    isLoggedIn = true;
+    const accounts = getAccounts();
+    const account = accounts[savedUser];
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('current-username').textContent = account.displayName;
+    renderDashboard();
+  } else {
+    document.getElementById('login-page').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function openSettings() {
+  if (!isLoggedIn) return;
+  document.getElementById('settings-modal').classList.add('active');
+  document.getElementById('old-password').value = '';
+  document.getElementById('new-password').value = '';
+  document.getElementById('confirm-password').value = '';
+}
+
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('active');
+}
+
+function changePassword() {
+  const oldPass = document.getElementById('old-password').value;
+  const newPass = document.getElementById('new-password').value;
+  const confirmPass = document.getElementById('confirm-password').value;
+
+  if (!oldPass || !newPass || !confirmPass) {
+    alert('⚠️ Tous les champs sont obligatoires');
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    alert('⚠️ Les nouveaux mots de passe ne correspondent pas');
+    return;
+  }
+
+  if (newPass.length < 6) {
+    alert('⚠️ Le nouveau mot de passe doit contenir au moins 6 caractères');
+    return;
+  }
+
+  // Vérifier l'ancien mot de passe
+  const accounts = getAccounts();
+  const account = accounts[currentUser];
+
+  if (account.passwordHash !== simpleHash(oldPass)) {
+    alert('❌ L\'ancien mot de passe est incorrect');
+    return;
+  }
+
+  // Mettre à jour le mot de passe
+  account.passwordHash = simpleHash(newPass);
+  saveAccounts(accounts);
+
+  alert('✅ Mot de passe modifié avec succès !');
+  closeSettings();
+}
+
+// ─── IMPRESSION QR CODES ───
+function printAllQRCodes() {
+  const printWindow = window.open('', '', 'height=1200,width=900');
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Impression - QR Codes The Brunch</title>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: white; }
+        .print-header { text-align: center; margin-bottom: 30px; }
+        .print-header h1 { margin: 0; font-size: 28px; }
+        .print-header p { margin: 5px 0; color: #666; }
+        .qr-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .qr-item {
+          border: 2px solid #ccc;
+          padding: 10px;
+          text-align: center;
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+        .qr-code { margin: 10px 0; display: inline-block; }
+        .qr-label { font-weight: bold; font-size: 16px; margin: 10px 0; }
+        .qr-type { font-size: 11px; color: #666; }
+        @media print {
+          body { margin: 10px; }
+          .qr-item { page-break-inside: avoid; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="print-header">
+        <h1>🥂 The Brunch — Tickets</h1>
+        <p>Liste complète des QR codes à imprimer</p>
+        <p style="font-size: 12px; color: #999;">Générés le ${new Date().toLocaleDateString('fr-FR')}</p>
+      </div>
+      <div class="qr-grid" id="qr-container"></div>
+      <script>
+        const state = ${JSON.stringify(state)};
+        const container = document.getElementById('qr-container');
+        
+        Object.values(state).sort((a, b) => {
+          if (a.lot !== b.lot) return a.lot.localeCompare(b.lot);
+          return a.num - b.num;
+        }).forEach(ticket => {
+          const div = document.createElement('div');
+          div.className = 'qr-item';
+          const codeDiv = document.createElement('div');
+          codeDiv.id = 'qr-' + ticket.code;
+          codeDiv.className = 'qr-code';
+          
+          div.innerHTML = '<div class="qr-label">' + ticket.code + '</div>' +
+                         '<div class="qr-type">' + ticket.type + ' - Lot ' + ticket.lot + ' (#' + ticket.num + ')</div>';
+          div.appendChild(codeDiv);
+          container.appendChild(div);
+          
+          // Générer le QR code
+          new QRCode(codeDiv, {
+            text: ticket.code + '|' + ticket.type + '|' + ticket.lot,
+            width: 120,
+            height: 120,
+            colorDark: '#1A1208',
+            colorLight: '#FFFFFF',
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        });
+        
+        setTimeout(() => { window.print(); }, 500);
+      <\/script>
+    </body>
+    </html>
+  `;
+  
+  printWindow.document.write(html);
+  printWindow.document.close();
+}
+
+async function exportQRCodesPDF() {
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    
+    // Entête
+    doc.setFontSize(18);
+    doc.text('The Brunch - QR Codes', 105, 15, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text('Date: ' + new Date().toLocaleDateString('fr-FR'), 105, 22, { align: 'center' });
+    
+    // Créer un conteneur invisible pour générer les QR codes
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '-9999px';
+    document.body.appendChild(container);
+    
+    // Grille des QR codes
+    const qrSize = 38; // millimètres
+    const marginLeft = 8;
+    const marginTop = 30;
+    const perRow = 4;
+    const gapX = 3;
+    const gapY = 12;
+    
+    let x = marginLeft;
+    let y = marginTop;
+    let count = 0;
+    
+    const tickets = Object.values(state).sort((a, b) => {
+      if (a.lot !== b.lot) return a.lot.localeCompare(b.lot);
+      return a.num - b.num;
+    });
+    
+    for (const ticket of tickets) {
+      // Créer le QR code dans le conteneur caché
+      const qrDiv = document.createElement('div');
+      container.appendChild(qrDiv);
+      
+      new QRCode(qrDiv, {
+        text: ticket.code + '|' + ticket.type + '|' + ticket.lot,
+        width: 150,
+        height: 150,
+        colorDark: '#1A1208',
+        colorLight: '#FFFFFF',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      
+      // Attendre que l'image soit générée
+      await new Promise(resolve => {
+        const checkImage = setInterval(() => {
+          const img = qrDiv.querySelector('img');
+          if (img && img.complete) {
+            clearInterval(checkImage);
+            
+            // Ajouter une nouvelle page si nécessaire
+            if (count > 0 && count % 12 === 0) {
+              doc.addPage();
+              x = marginLeft;
+              y = marginTop;
+            }
+            
+            // Ajouter l'image au PDF
+            try {
+              doc.addImage(img, 'PNG', x, y, qrSize, qrSize);
+              
+              // Ajouter le texte
+              doc.setFontSize(8);
+              doc.text(ticket.code, x + qrSize / 2, y + qrSize + 3, { align: 'center' });
+              
+              doc.setFontSize(6);
+              doc.text(ticket.type + ' - Lot ' + ticket.lot, x + qrSize / 2, y + qrSize + 6, { align: 'center' });
+            } catch(e) {
+              console.error('Erreur ajout image:', e);
+            }
+            
+            // Position suivante
+            x += qrSize + gapX;
+            count++;
+            
+            if (count % perRow === 0) {
+              x = marginLeft;
+              y += qrSize + gapY;
+            }
+            
+            resolve();
+          }
+        }, 50);
+        
+        // Timeout de sécurité
+        setTimeout(() => resolve(), 2000);
+      });
+      
+      // Nettoyer
+      container.removeChild(qrDiv);
+    }
+    
+    // Supprimer le conteneur
+    document.body.removeChild(container);
+    
+    // Télécharger
+    doc.save('QRCodes_TheBrunch_' + new Date().toISOString().slice(0, 10) + '.pdf');
+    
+  } catch(e) {
+    alert('Erreur lors de la génération du PDF: ' + e.message);
+    console.error(e);
+  }
+}
+
 // ─── ÉTAT GLOBAL ───
  
 // Supabase : remplacedz ces valeurs par votre URL et votre clé API
@@ -1097,6 +1681,24 @@ function closeConfirmationModal() {
   pendingConfirmation = null;
 }
 
+// Fermer la modal de confirmation au clic en dehors
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('confirmation-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeConfirmationModal();
+  });
+  document.getElementById('settings-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeSettings();
+  });
+  
+  // Fermer les modals à la touche Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeConfirmationModal();
+      closeSettings();
+    }
+  });
+});
+
 function addLog(code, ok, detail) {
   const now = new Date();
   const timeStr = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
@@ -1162,14 +1764,8 @@ function downloadFile(name, content, mime) {
   a.click();
 }
 
-function printTickets() {
-  const lot = prompt('Quel lot imprimer ? (A, B, C, D, E, F, G ou H)', 'A');
-  if (!lot) return;
-  alert('Génère d\'abord le lot dans l\'onglet Générer, puis utilise Ctrl+P depuis cette page pour imprimer.');
-}
-
 // ─── INIT ───
-renderDashboard();
+checkAuthentication();
 </script>
 </body>
 </html>
