@@ -1,0 +1,1048 @@
+ <!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Brunch — Gestion des Tickets</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-dark: #8B6914;
+    --cream: #FAF6EE;
+    --ink: #1A1208;
+    --ink-soft: #3D2E0F;
+    --surface: #FFFFFF;
+    --surface-2: #F5F0E8;
+    --border: #E2D5B8;
+    --success: #2D6A4F;
+    --error: #9B2335;
+    --standard: #5C6BC0;
+    --vip: #C9A84C;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--ink);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 32px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .brand-icon {
+    width: 40px; height: 40px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .brand-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--cream);
+    letter-spacing: 0.04em;
+  }
+  .brand-name span { color: var(--gold); }
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+  }
+  .nav-tab {
+    padding: 8px 20px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: #999;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+  .nav-tab:hover { color: var(--gold-light); background: rgba(201,168,76,0.08); }
+  .nav-tab.active { background: var(--gold); color: var(--ink); }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; padding: 32px; }
+  .view.active { display: block; }
+
+  /* ─── DASHBOARD ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .stat-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .stat-value { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; color: var(--ink); }
+  .stat-sub { font-size: 12px; color: #bbb; margin-top: 4px; }
+
+  .lots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .lot-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.15s;
+  }
+  .lot-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.1); transform: translateY(-2px); }
+  .lot-card::before {
+    content: attr(data-lot);
+    position: absolute;
+    right: -8px; top: -8px;
+    font-family: 'Playfair Display', serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: rgba(201,168,76,0.07);
+    line-height: 1;
+  }
+  .lot-letter {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .lot-title { font-size: 13px; color: #888; margin-bottom: 12px; }
+  .lot-progress-bar { background: var(--surface-2); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
+  .lot-progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--gold-dark), var(--gold)); transition: width 0.5s; }
+  .lot-counts { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; }
+  .lot-counts span { font-family: 'DM Mono', monospace; }
+
+  /* ─── GENERATOR ─── */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+  .section-sub { font-size: 14px; color: #888; margin-bottom: 24px; }
+
+  .gen-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 6px; }
+  .ctrl-group label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.06em; }
+  select, input[type=number] {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  select:focus, input:focus { border-color: var(--gold); }
+
+  .btn {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-gold { background: var(--gold); color: var(--ink); }
+  .btn-gold:hover { background: var(--gold-light); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--ink-soft); }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold-dark); }
+  .btn-danger { background: var(--error); color: white; }
+  .btn-success { background: var(--success); color: white; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+
+  .ticket-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .ticket-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+  }
+  .ticket-card.used { opacity: 0.5; }
+  .ticket-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+  }
+  .ticket-type {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .ticket-type.standard { background: #EEF0FC; color: var(--standard); }
+  .ticket-type.vip { background: #FBF4E0; color: var(--gold-dark); }
+
+  .qr-container canvas, .qr-container img { border-radius: 4px; }
+
+  .ticket-status {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #E8F5EC;
+    color: var(--success);
+  }
+  .ticket-status.used { background: #FDECEA; color: var(--error); }
+
+  .ticket-card .tick-btn {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface-2);
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s;
+  }
+  .ticket-card .tick-btn:hover { background: #FFE0E0; }
+
+  /* ─── SCANNER ─── */
+  .scanner-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .scan-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .scan-box-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-weight: 500; font-size: 14px; }
+  .scan-box-body { padding: 20px; }
+
+  #video-preview {
+    width: 100%;
+    border-radius: 8px;
+    background: #000;
+    display: block;
+  }
+
+  .manual-input-row { display: flex; gap: 8px; margin-top: 12px; }
+  .manual-input-row input { flex: 1; }
+
+  .scan-result {
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 16px;
+    display: none;
+  }
+  .scan-result.valid { background: #E8F5EC; border: 1px solid #A8D5B5; }
+  .scan-result.invalid { background: #FDECEA; border: 1px solid #F1AFAF; }
+  .scan-result.already { background: #FFF8E1; border: 1px solid #FFD54F; }
+
+  .result-icon { font-size: 40px; text-align: center; margin-bottom: 12px; }
+  .result-title { font-family: 'Playfair Display', serif; font-size: 20px; text-align: center; margin-bottom: 8px; }
+  .result-detail { font-size: 13px; color: #555; text-align: center; }
+  .result-code { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; text-align: center; margin: 8px 0; }
+
+  .scan-log {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-code { font-family: 'DM Mono', monospace; font-weight: 500; }
+  .log-time { color: #aaa; font-size: 11px; }
+  .log-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .log-badge.ok { background: #E8F5EC; color: var(--success); }
+  .log-badge.fail { background: #FDECEA; color: var(--error); }
+
+  /* ─── EXPORT ─── */
+  .export-options { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+  .export-card {
+    flex: 1; min-width: 200px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-align: center;
+  }
+  .export-card:hover { border-color: var(--gold); box-shadow: 0 4px 16px rgba(201,168,76,0.1); }
+  .export-card .icon { font-size: 32px; margin-bottom: 10px; }
+  .export-card h3 { font-size: 15px; margin-bottom: 4px; }
+  .export-card p { font-size: 12px; color: #aaa; }
+
+  .codes-table { width: 100%; border-collapse: collapse; }
+  .codes-table th { text-align: left; padding: 10px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #aaa; border-bottom: 2px solid var(--border); }
+  .codes-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--surface-2); }
+  .codes-table tr:hover td { background: var(--surface-2); }
+
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; max-height: 400px; overflow-y: auto; }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 700px) {
+    .header-inner { padding: 10px 14px; gap: 8px; flex-wrap: nowrap; }
+    .brand-name { font-size: 16px; }
+    .brand-icon { width: 32px; height: 32px; font-size: 14px; flex-shrink: 0; }
+    .nav-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 2px; flex-shrink: 1; }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tab { padding: 6px 10px; font-size: 11px; white-space: nowrap; min-height: 34px; }
+    .view { padding: 14px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 18px; }
+    .stat-card { padding: 14px; }
+    .stat-value { font-size: 22px; }
+    .lots-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .lot-card { padding: 14px; }
+    .lot-letter { font-size: 24px; }
+    .gen-controls { flex-direction: column; gap: 12px; padding: 14px; }
+    .ctrl-group { width: 100%; }
+    select, input[type=number], input[type=text] { width: 100%; font-size: 16px; padding: 12px 14px; }
+    .ctrl-group:last-child > div { flex-direction: row; width: 100%; }
+    .ctrl-group:last-child .btn { flex: 1; padding: 12px 8px; font-size: 13px; }
+    .ticket-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; max-height: none; }
+    .ticket-card { padding: 12px 8px; gap: 7px; }
+    .ticket-code { font-size: 14px; }
+    .qr-container canvas, .qr-container img { width: 80px !important; height: 80px !important; }
+    .scanner-layout { grid-template-columns: 1fr; gap: 16px; }
+    .scan-box-body { padding: 14px; }
+    #video-preview { max-height: 55vw; object-fit: cover; border-radius: 8px; }
+    #btn-cam { width: 100%; padding: 13px; font-size: 15px; margin-top: 10px; }
+    .manual-input-row { flex-direction: column; gap: 8px; margin-top: 16px; }
+    .manual-input-row input { width: 100%; }
+    .manual-input-row .btn { width: 100%; padding: 13px; font-size: 15px; }
+    .scan-result { margin-top: 12px; padding: 16px; }
+    .result-icon { font-size: 30px; margin-bottom: 8px; }
+    .result-title { font-size: 17px; }
+    .result-code { font-size: 18px; }
+    .scan-log { max-height: 200px; }
+    .log-item { flex-wrap: wrap; gap: 4px; font-size: 12px; padding: 8px 0; }
+    .log-code { flex: 1 0 auto; }
+    .log-time { width: 100%; }
+    .export-options { flex-direction: column; gap: 10px; }
+    .export-card { min-width: unset; padding: 14px 16px; display: flex; align-items: center; gap: 14px; text-align: left; }
+    .export-card .icon { font-size: 26px; margin-bottom: 0; flex-shrink: 0; }
+    .export-card h3 { font-size: 14px; margin-bottom: 2px; }
+    .export-card p { font-size: 11px; }
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .codes-table { min-width: 480px; }
+    .section-title { font-size: 20px; }
+    .section-sub { font-size: 12px; }
+    .btn { min-height: 44px; }
+    .tick-btn { width: 32px !important; height: 32px !important; font-size: 14px !important; }
+  }
+
+  .badge-lot {
+    display: inline-block;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    line-height: 26px;
+  }
+
+  .empty-state { text-align: center; padding: 48px 20px; color: #bbb; }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-icon">🥂</div>
+      <div class="brand-name">The <span>Brunch</span></div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" onclick="showView('dashboard', this)">Dashboard</button>
+      <button class="nav-tab" onclick="showView('generator', this)">Générer</button>
+      <button class="nav-tab" onclick="showView('scanner', this)">Scanner</button>
+      <button class="nav-tab" onclick="showView('export', this)">Export</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div class="view active" id="view-dashboard">
+  <h2 class="section-title">Vue d'ensemble</h2>
+  <p class="section-sub">Ticket du Brunch </p>
+
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:16px;color:var(--ink-soft)">Lots de tickets</h3>
+  <div class="lots-grid" id="lots-grid"></div>
+</div>
+
+<!-- ═══════════════ GENERATOR ═══════════════ -->
+<div class="view" id="view-generator">
+  <h2 class="section-title">Génération des tickets</h2>
+  <p class="section-sub">Sélectionne un lot et un type pour générer les QR codes.</p>
+
+  <div class="gen-controls">
+    <div class="ctrl-group">
+      <label>Lot</label>
+      <select id="sel-lot" onchange="onLotChange(this.value)">
+        <option value="ALL">Tous les lots (A–U)</option>
+        <option value="A">Lot A — Standard (30)</option>
+        <option value="B">Lot B — Standard (30)</option>
+        <option value="C">Lot C — Standard (30)</option>
+        <option value="D">Lot D — Standard (30)</option>
+        <option value="E">Lot E — Standard (30)</option>
+        <option value="F">Lot F — Standard (30)</option>
+        <option value="G">Lot G — Standard (30)</option>
+        <option value="H">Lot H — Standard (30)</option>
+        <option value="I">Lot I — Standard (30)</option>
+        <option value="J">Lot J — Standard (30)</option>
+        <option value="K">Lot K — Standard (30)</option>
+        <option value="L">Lot L — Standard (30)</option>
+        <option value="M">Lot M — Standard (30)</option>
+        <option value="N">Lot N — Standard (30)</option>
+        <option value="O">Lot O — Standard (30)</option>
+        <option value="P">Lot P — Standard (30)</option>
+        <option value="Q">Lot Q — Standard (30)</option>
+        <option value="R">Lot R — Standard (30)</option>
+        <option value="S">Lot S — Standard (30)</option>
+        <option value="T">Lot T — Standard (30)</option>
+        <option value="U">Lot U — VIP (20)</option>
+      </select>
+    </div>
+    <div class="ctrl-group">
+      <label>Type</label>
+      <select id="sel-type">
+        <option value="STANDARD">Standard</option>
+        <option value="VIP">VIP</option>
+      </select>
+    </div>
+    <div class="ctrl-group" style="justify-content:flex-end;">
+      <label>&nbsp;</label>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-gold" onclick="generateTickets()">⚡ Générer</button>
+        <button class="btn btn-outline" onclick="clearDisplay()">✕ Effacer</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="gen-info" style="margin-bottom:16px;font-size:13px;color:#888;"></div>
+  <div class="ticket-grid" id="ticket-grid">
+    <div class="empty-state" style="grid-column:1/-1">
+      <div class="icon">🎟️</div>
+      <p>Sélectionne un lot et clique sur Générer</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SCANNER ═══════════════ -->
+<div class="view" id="view-scanner">
+  <h2 class="section-title">Scanner & Valider</h2>
+  <p class="section-sub">Scanne un QR code ou entre le code manuellement pour valider l'entrée.</p>
+
+  <div class="scanner-layout">
+    <div>
+      <div class="scan-box">
+        <div class="scan-box-header">📷 Caméra</div>
+        <div class="scan-box-body">
+          <video id="video-preview" autoplay playsinline></video>
+          <div style="margin-top:12px;text-align:center;">
+            <button class="btn btn-gold" id="btn-cam" onclick="toggleCamera()">▶ Activer la caméra</button>
+          </div>
+          <div id="cam-status" style="margin-top:10px;font-size:12px;text-align:center;min-height:18px;padding:0 4px;"></div>
+          <div class="manual-input-row" style="margin-top:20px;">
+            <input type="text" id="manual-code" placeholder="Ex: A01 ou B12" style="text-transform:uppercase" maxlength="5"
+              oninput="this.value=this.value.toUpperCase()"
+              onkeydown="if(event.key==='Enter')validateCode(document.getElementById('manual-code').value)">
+            <button class="btn btn-gold" onclick="validateCode(document.getElementById('manual-code').value)">Valider</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="scan-result" id="scan-result"></div>
+    </div>
+
+    <div>
+      <div class="scan-box">
+        <div class="scan-box-header" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>📋 Journal des scans</span>
+          <span id="scan-count" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold)">0 validé(s)</span>
+        </div>
+        <div class="scan-box-body">
+          <div class="scan-log" id="scan-log">
+            <div class="empty-state"><p>Aucun scan pour l'instant</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ EXPORT ═══════════════ -->
+<div class="view" id="view-export">
+  <h2 class="section-title">Export & Sauvegarde</h2>
+  <p class="section-sub">Exporte la liste des codes ou télécharge les données de scan.</p>
+
+  <div class="export-options">
+    <div class="export-card" onclick="exportCSV()">
+      <div class="icon">📊</div>
+      <h3>Export CSV</h3>
+      <p>Liste complète des codes avec leur statut</p>
+    </div>
+    <div class="export-card" onclick="exportJSON()">
+      <div class="icon">🗂️</div>
+      <h3>Export JSON</h3>
+      <p>Données structurées pour intégration</p>
+    </div>
+    <div class="export-card" onclick="exportScanLog()">
+      <div class="icon">📋</div>
+      <h3>Journal de scan</h3>
+      <p>Historique complet des validations</p>
+    </div>
+    <div class="export-card" onclick="printTickets()">
+      <div class="icon">🖨️</div>
+      <h3>Imprimer lot</h3>
+      <p>Impression des QR codes en grille</p>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin:24px 0 12px;color:var(--ink-soft)">Tous les codes générés</h3>
+  <div class="table-wrap">
+    <table class="codes-table" id="codes-table">
+      <thead>
+        <tr>
+          <th>Code</th><th>Lot</th><th>N°</th><th>Type</th><th>Statut</th><th>Scanné à</th>
+        </tr>
+      </thead>
+      <tbody id="codes-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script>
+// ─── ÉTAT GLOBAL ───
+// Supabase : remplacedz ces valeurs par votre URL et votre clé API
+const SUPABASE_URL = 'https://rpmkyczwtufxldcnesqz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwbWt5Y3p3dHVmeGxkY25lc3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxOTg4ODUsImV4cCI6MjA5Mjc3NDg4NX0.Eu2PHTZ5hvF4Cgk36_00OA-JRpmwfDHYo2DgL2d2PWM';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Lots A-T : 30 Standard chacun | Lot U : 20 VIP
+const LOT_CONFIG = {
+  A: { count: 30, type: 'STANDARD' },
+  B: { count: 30, type: 'STANDARD' },
+  C: { count: 30, type: 'STANDARD' },
+  D: { count: 30, type: 'STANDARD' },
+  E: { count: 30, type: 'STANDARD' },
+  F: { count: 30, type: 'STANDARD' },
+  G: { count: 30, type: 'STANDARD' },
+  H: { count: 30, type: 'STANDARD' },
+  I: { count: 30, type: 'STANDARD' },
+  J: { count: 30, type: 'STANDARD' },
+  K: { count: 30, type: 'STANDARD' },
+  L: { count: 30, type: 'STANDARD' },
+  M: { count: 30, type: 'STANDARD' },
+  N: { count: 30, type: 'STANDARD' },
+  O: { count: 30, type: 'STANDARD' },
+  P: { count: 30, type: 'STANDARD' },
+  Q: { count: 30, type: 'STANDARD' },
+  R: { count: 30, type: 'STANDARD' },
+  S: { count: 30, type: 'STANDARD' },
+  T: { count: 30, type: 'STANDARD' },
+  U: { count: 20, type: 'VIP'      },
+};
+const LOTS = Object.keys(LOT_CONFIG);
+
+// Load from localStorage
+function buildFreshState() {
+  const tickets = {};
+  LOTS.forEach(lot => {
+    const cfg = LOT_CONFIG[lot];
+    for (let i = 1; i <= cfg.count; i++) {
+      const c = lot + String(i).padStart(3, '0');
+      tickets[c] = { code: c, lot, num: i, type: cfg.type, used: false, usedAt: null };
+    }
+  });
+  return tickets;
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('brunch_tickets');
+    if (!raw) return buildFreshState();
+
+    const saved = JSON.parse(raw);
+
+    // Vérifier que tous les lots de LOT_CONFIG sont présents
+    // Si un lot manque (structure mise à jour), on fusionne
+    const fresh = buildFreshState();
+    let needsMerge = false;
+    for (const code of Object.keys(fresh)) {
+      if (!saved[code]) { needsMerge = true; break; }
+    }
+
+    if (!needsMerge) return saved;
+
+    // Fusionner : garder les données existantes, ajouter les manquants
+    const merged = { ...fresh };
+    for (const [code, ticket] of Object.entries(saved)) {
+      if (merged[code]) merged[code] = ticket; // préserver l'état (used, etc.)
+    }
+    localStorage.setItem('brunch_tickets', JSON.stringify(merged));
+    return merged;
+
+  } catch(e) {
+    // localStorage corrompu ou indispo (mode privé iOS) → état frais en mémoire
+    return buildFreshState();
+  }
+}
+
+function saveState() {
+  localStorage.setItem('brunch_tickets', JSON.stringify(state));
+}
+
+function loadScanLog() {
+  const raw = localStorage.getItem('brunch_scanlog');
+  return raw ? JSON.parse(raw) : [];
+}
+function saveScanLog() {
+  localStorage.setItem('brunch_scanlog', JSON.stringify(scanLog));
+}
+
+let state = loadState();
+let scanLog = loadScanLog();
+let cameraStream = null;
+let scanInterval = null;
+
+// ─── NAVIGATION ───
+function showView(name, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'export') renderExport();
+  if (name !== 'scanner') stopCamera();
+}
+
+// ─── LOT CHANGE ───
+function onLotChange(lot) {
+  const typeSelect = document.getElementById('sel-type');
+  if (lot !== 'ALL' && LOT_CONFIG[lot]) {
+    const cfg = LOT_CONFIG[lot];
+    typeSelect.value = cfg.type;
+    // Désactiver le sélecteur si le type est fixe (VIP uniquement pour U)
+    const isLocked = true; // tous les lots sont verrouillés sur leur type
+    typeSelect.disabled = isLocked;
+    typeSelect.title = isLocked ? `Ce lot est réservé ${cfg.type} — type non modifiable` : '';
+    typeSelect.style.opacity = isLocked ? '0.5' : '1';
+    typeSelect.style.cursor = isLocked ? 'not-allowed' : '';
+  } else {
+    typeSelect.disabled = false;
+    typeSelect.style.opacity = '1';
+    typeSelect.style.cursor = '';
+    typeSelect.title = '';
+  }
+}
+
+// ─── DASHBOARD ───
+function renderDashboard() {
+  const all = Object.values(state);
+  const total = all.length;
+  const used = all.filter(t => t.used).length;
+  const vip = all.filter(t => t.type === 'VIP').length;
+  const std = all.filter(t => t.type === 'STANDARD').length;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total tickets</div>
+      <div class="stat-value">${total}</div>
+      <div class="stat-sub">A–T: 30 std · U: 20 VIP</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Validés</div>
+      <div class="stat-value" style="color:var(--success)">${used}</div>
+      <div class="stat-sub">${((used/total)*100).toFixed(1)}% du total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Disponibles</div>
+      <div class="stat-value">${total - used}</div>
+      <div class="stat-sub">non encore scannés</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Standard</div>
+      <div class="stat-value" style="color:var(--standard)">${std}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">VIP</div>
+      <div class="stat-value" style="color:var(--gold)">${vip}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Scans aujourd'hui</div>
+      <div class="stat-value">${scanLog.length}</div>
+    </div>
+  `;
+
+  const lotsGrid = document.getElementById('lots-grid');
+  lotsGrid.innerHTML = '';
+  LOTS.forEach(lot => {
+    const tickets = all.filter(t => t.lot === lot);
+    const usedCount = tickets.filter(t => t.used).length;
+    const pct = (usedCount / tickets.length) * 100;
+    const div = document.createElement('div');
+    div.className = 'lot-card';
+    div.setAttribute('data-lot', lot);
+    div.onclick = () => {
+      const btn = document.querySelector('.nav-tab[onclick*=generator]');
+      showView('generator', btn);
+      document.getElementById('sel-lot').value = lot;
+      document.getElementById('sel-type').value = LOT_CONFIG[lot].type;
+      generateTickets();
+    };
+    const cfg = LOT_CONFIG[lot];
+    div.innerHTML = `
+      <div class="lot-letter">Lot ${lot}</div>
+      <div class="lot-title"><span class="ticket-type ${cfg.type.toLowerCase()}" style="font-size:9px;padding:1px 6px">${cfg.type}</span> · ${tickets.length} tickets</div>
+      <div class="lot-progress-bar"><div class="lot-progress-fill" style="width:${pct}%"></div></div>
+      <div class="lot-counts"><span>${usedCount} validés</span><span>${tickets.length - usedCount} restants</span></div>
+    `;
+    lotsGrid.appendChild(div);
+  });
+}
+
+// ─── GENERATOR ───
+function generateTickets() {
+  const lot = document.getElementById('sel-lot').value;
+  const type = document.getElementById('sel-type').value;
+  const grid = document.getElementById('ticket-grid');
+  const info = document.getElementById('gen-info');
+  grid.innerHTML = '';
+
+  let tickets;
+  if (lot === 'ALL') {
+    tickets = Object.values(state);
+  } else {
+    tickets = Object.values(state).filter(t => t.lot === lot);
+  }
+
+  // Type: for specific lot, override sauf si le lot a un type fixe (ex: U=VIP)
+  const isAllLots = (lot === 'ALL');
+  if (!isAllLots) {
+    // Type toujours dicté par LOT_CONFIG, le sélecteur est informatif uniquement
+    const lockedType = LOT_CONFIG[lot].type;
+    tickets.forEach(t => { t.type = lockedType; });
+    document.getElementById('sel-type').value = lockedType;
+  }
+  saveState();
+
+  info.textContent = `${tickets.length} ticket(s) — Lot ${isAllLots ? 'A–U' : lot} — ${isAllLots ? 'multi-type' : type}`;
+
+  tickets.forEach(t => {
+    const tType = t.type;
+    const card = document.createElement('div');
+    card.className = 'ticket-card' + (t.used ? ' used' : '');
+    card.id = 'tcard-' + t.code;
+    card.innerHTML = `
+      <span class="ticket-code">${t.code}</span>
+      <span class="ticket-type ${tType.toLowerCase()}">${tType}</span>
+      <div class="qr-container" id="qr-${t.code}"></div>
+      <span class="ticket-status ${t.used ? 'used' : ''}">${t.used ? '✓ Validé' : '● Disponible'}</span>
+      <button class="tick-btn" title="Marquer comme utilisé" onclick="toggleUsed('${t.code}')">✕</button>
+    `;
+    grid.appendChild(card);
+
+    // QR content = CODE|TYPE|LOT
+    new QRCode(document.getElementById('qr-' + t.code), {
+      text: `${t.code}|${tType}|${t.lot}`,
+      width: 100, height: 100,
+      colorDark: '#1A1208', colorLight: '#FFFFFF',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  });
+}
+
+function toggleUsed(code) {
+  state[code].used = !state[code].used;
+  state[code].usedAt = state[code].used ? new Date().toISOString() : null;
+  saveState();
+  const card = document.getElementById('tcard-' + code);
+  if (card) {
+    card.className = 'ticket-card' + (state[code].used ? ' used' : '');
+    card.querySelector('.ticket-status').textContent = state[code].used ? '✓ Validé' : '● Disponible';
+    card.querySelector('.ticket-status').className = 'ticket-status' + (state[code].used ? ' used' : '');
+  }
+}
+
+function clearDisplay() {
+  document.getElementById('ticket-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">🎟️</div><p>Sélectionne un lot et clique sur Générer</p></div>';
+  document.getElementById('gen-info').textContent = '';
+}
+
+// ─── SCANNER ───
+function toggleCamera() {
+  if (cameraStream) { stopCamera(); return; }
+  startCamera();
+}
+
+function setCamStatus(msg, color) {
+  const s = document.getElementById('cam-status');
+  if (s) { s.textContent = msg; s.style.color = color || '#888'; }
+}
+
+async function startCamera() {
+  const btn = document.getElementById('btn-cam');
+  btn.disabled = true;
+  setCamStatus('Demande d\'autorisation caméra…', '#888');
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    setCamStatus('❌ Caméra non supportée. Utilise Safari (iOS) ou Chrome (Android).', 'var(--error)');
+    btn.disabled = false;
+    return;
+  }
+
+  if (navigator.permissions) {
+    try {
+      const perm = await navigator.permissions.query({ name: 'camera' });
+      if (perm.state === 'denied') {
+        setCamStatus('❌ Accès refusé. Va dans Réglages > Confidentialité > Caméra pour autoriser.', 'var(--error)');
+        btn.disabled = false;
+        return;
+      }
+    } catch(e) { /* permissions API non dispo, on continue */ }
+  }
+
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    const video = document.getElementById('video-preview');
+    video.srcObject = cameraStream;
+    video.play().catch(() => {});
+    btn.textContent = '⏹ Arrêter la caméra';
+    btn.disabled = false;
+    setCamStatus('✅ Caméra active — pointez vers un QR code', 'var(--success)');
+
+    if (typeof jsQR !== 'undefined') {
+      const canvas = document.createElement('canvas');
+      let lastCode = null, lastCodeTime = 0;
+      scanInterval = setInterval(() => {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          canvas.getContext('2d').drawImage(video, 0, 0);
+          const img = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+          const qr = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+          if (qr) {
+            const now = Date.now();
+            if (qr.data !== lastCode || now - lastCodeTime > 3000) {
+              lastCode = qr.data;
+              lastCodeTime = now;
+              const parts = qr.data.split('|');
+              validateCode(parts[0]);
+            }
+          }
+        }
+      }, 400);
+    } else {
+      setCamStatus('⚠️ jsQR non chargé — utilise la saisie manuelle.', '#e67e22');
+    }
+  } catch(e) {
+    btn.disabled = false;
+    if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+      setCamStatus('❌ Permission refusée. Autorise la caméra dans les réglages du navigateur.', 'var(--error)');
+    } else if (e.name === 'NotFoundError') {
+      setCamStatus('❌ Aucune caméra détectée.', 'var(--error)');
+    } else if (e.name === 'NotReadableError') {
+      setCamStatus('❌ Caméra utilisée par une autre app. Ferme-la et réessaie.', 'var(--error)');
+    } else {
+      setCamStatus('❌ Erreur : ' + e.message, 'var(--error)');
+    }
+  }
+}
+
+function stopCamera() {
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
+  const btn = document.getElementById('btn-cam');
+  if (btn) { btn.textContent = '▶ Activer la caméra'; btn.disabled = false; }
+  setCamStatus('', '#888');
+}
+
+function validateCode(rawCode) {
+  if (!rawCode) return;
+  const code = rawCode.trim().toUpperCase();
+  document.getElementById('manual-code').value = '';
+
+  const result = document.getElementById('scan-result');
+  result.style.display = 'block';
+
+  const ticket = state[code];
+  if (!ticket) {
+    result.className = 'scan-result invalid';
+    result.innerHTML = `<div class="result-icon">❌</div><div class="result-title">Code invalide</div><div class="result-code">${code}</div><div class="result-detail">Ce code n'existe pas dans la base.</div>`;
+    addLog(code, false, 'Code inconnu');
+    return;
+  }
+  if (ticket.used) {
+    result.className = 'scan-result already';
+    result.innerHTML = `<div class="result-icon">⚠️</div><div class="result-title">Déjà validé</div><div class="result-code">${code}</div><div class="result-detail">Ce ticket a déjà été utilisé.<br>Type : ${ticket.type} — Lot ${ticket.lot}</div>`;
+    addLog(code, false, 'Déjà utilisé');
+    return;
+  }
+
+  // Valid!
+  ticket.used = true;
+  ticket.usedAt = new Date().toISOString();
+  saveState();
+  result.className = 'scan-result valid';
+  result.innerHTML = `<div class="result-icon">✅</div><div class="result-title">Entrée validée !</div><div class="result-code">${code}</div><div class="result-detail">Type : <strong>${ticket.type}</strong> — Lot <strong>${ticket.lot}</strong><br>Ticket n° ${ticket.num}</div>`;
+  addLog(code, true, ticket.type);
+}
+
+function addLog(code, ok, detail) {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const entry = { code, ok, detail, time: timeStr, ts: now.toISOString() };
+  scanLog.unshift(entry);
+  saveScanLog();
+
+  const log = document.getElementById('scan-log');
+  if (log.querySelector('.empty-state')) log.innerHTML = '';
+  const item = document.createElement('div');
+  item.className = 'log-item';
+  item.innerHTML = `
+    <span class="log-code">${code}</span>
+    <span style="font-size:11px;color:#888">${detail}</span>
+    <span class="log-badge ${ok ? 'ok' : 'fail'}">${ok ? '✓ OK' : '✕ Refus'}</span>
+    <span class="log-time">${timeStr}</span>
+  `;
+  log.prepend(item);
+
+  const count = document.getElementById('scan-count');
+  const validated = scanLog.filter(l => l.ok).length;
+  count.textContent = `${validated} validé(s)`;
+}
+
+// ─── EXPORT ───
+function renderExport() {
+  const tbody = document.getElementById('codes-tbody');
+  tbody.innerHTML = '';
+  Object.values(state).forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span style="font-family:'DM Mono',monospace;font-weight:500">${t.code}</span></td>
+      <td><span class="badge-lot">${t.lot}</span></td>
+      <td style="font-family:'DM Mono',monospace">${t.num}</td>
+      <td><span class="ticket-type ${t.type.toLowerCase()}">${t.type}</span></td>
+      <td><span class="ticket-status ${t.used?'used':''}">${t.used ? '✓ Validé' : '● Disponible'}</span></td>
+      <td style="font-size:12px;color:#aaa">${t.usedAt ? new Date(t.usedAt).toLocaleString('fr-FR') : '—'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function exportCSV() {
+  const rows = [['Code','Lot','Numero','Type','Statut','Date_validation']];
+  Object.values(state).forEach(t => {
+    rows.push([t.code, t.lot, t.num, t.type, t.used ? 'Validé' : 'Disponible', t.usedAt || '']);
+  });
+  downloadFile('tickets_brunch.csv', rows.map(r => r.join(',')).join('\n'), 'text/csv');
+}
+
+function exportJSON() {
+  downloadFile('tickets_brunch.json', JSON.stringify(Object.values(state), null, 2), 'application/json');
+}
+
+function exportScanLog() {
+  downloadFile('scan_log_brunch.json', JSON.stringify(scanLog, null, 2), 'application/json');
+}
+
+function downloadFile(name, content, mime) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type: mime }));
+  a.download = name;
+  a.click();
+}
+
+function printTickets() {
+  const lot = prompt('Quel lot imprimer ? (A, B, C, D, E, F, G ou H)', 'A');
+  if (!lot) return;
+  alert('Génère d\'abord le lot dans l\'onglet Générer, puis utilise Ctrl+P depuis cette page pour imprimer.');
+}
+
+// ─── INIT ───
+renderDashboard();
+</script>
+</body>
+</html>
