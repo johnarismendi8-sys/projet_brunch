@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Brunch — Gestion des Tickets</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -483,186 +484,9 @@
   .btn-refuse:hover {
     background: #7a1a2a;
   }
-
-  /* ─── LOGIN PAGE ─── */
-  .login-container {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
-    z-index: 2000;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-  }
-  .login-container.active {
-    display: flex;
-  }
-  .login-box {
-    background: var(--surface);
-    border-radius: 16px;
-    padding: 40px;
-    max-width: 380px;
-    width: 90%;
-    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.4);
-  }
-  .login-header {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-  .login-icon {
-    font-size: 56px;
-    margin-bottom: 16px;
-  }
-  .login-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 28px;
-    color: var(--ink);
-    margin-bottom: 6px;
-  }
-  .login-subtitle {
-    font-size: 13px;
-    color: #888;
-  }
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .login-form input {
-    padding: 12px 14px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--cream);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .login-form input:focus {
-    border-color: var(--gold);
-  }
-  .login-form button {
-    padding: 12px;
-    background: var(--gold);
-    color: var(--ink);
-    border: none;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .login-form button:hover {
-    background: var(--gold-light);
-  }
-  .login-error {
-    display: none;
-    background: #FDECEA;
-    border: 1px solid #F1AFAF;
-    color: var(--error);
-    padding: 10px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    text-align: center;
-  }
-
-  /* ─── ADMIN CONTROLS ─── */
-  .admin-section {
-    background: linear-gradient(135deg, #FBF4E0 0%, #FAF6EE 100%);
-    border: 1px solid var(--gold-light);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 24px;
-  }
-  .admin-section h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 16px;
-    color: var(--gold-dark);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .admin-section .btn-group {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .btn-danger-secondary {
-    background: #FFE0E0;
-    color: var(--error);
-    border: 1px solid #F1AFAF;
-  }
-  .btn-danger-secondary:hover {
-    background: #FDECEA;
-  }
-
-  /* ─── USER INFO ─── */
-  .user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: var(--gold);
-    font-size: 12px;
-  }
-  .user-status {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--gold);
-  }
-  .logout-btn {
-    background: transparent;
-    color: var(--gold);
-    border: 1px solid var(--gold);
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 11px;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-  .logout-btn:hover {
-    background: var(--gold);
-    color: var(--ink);
-  }
-
-  @media (max-width: 700px) {
-    .login-box {
-      padding: 24px;
-    }
-    .login-title {
-      font-size: 24px;
-    }
-    .admin-section {
-      padding: 14px;
-    }
-    .admin-section h3 {
-      font-size: 14px;
-    }
-  }
 </style>
 </head>
 <body>
-
-<div class="login-container" id="login-container">
-  <div class="login-box">
-    <div class="login-header">
-      <div class="login-icon">🔐</div>
-      <div class="login-title">The Brunch</div>
-      <div class="login-subtitle">Espace admin — Propriétaire seulement</div>
-    </div>
-    <div class="login-form">
-      <div class="login-error" id="login-error"></div>
-      <input type="password" id="login-password" placeholder="Mot de passe admin" autocomplete="off">
-      <button onclick="handleLogin()">Accéder au tableau de bord</button>
-    </div>
-  </div>
-</div>
 
 <header>
   <div class="header-inner">
@@ -676,29 +500,13 @@
       <button class="nav-tab" onclick="showView('scanner', this)">Scanner</button>
       <button class="nav-tab" onclick="showView('export', this)">Export</button>
     </nav>
-    <div class="user-info">
-      <span class="user-status"></span>
-      <span id="user-label">Admin</span>
-      <button class="logout-btn" onclick="handleLogout()">Déconnexion</button>
-    </div>
   </div>
 </header>
-<div style="background:#1A1208;padding:3px 16px;text-align:center;">
-  <span id="db-status" style="font-size:11px;color:#888;">⏳ Connexion…</span>
-</div>
 
 <!-- ═══════════════ DASHBOARD ═══════════════ -->
 <div class="view active" id="view-dashboard">
   <h2 class="section-title">Vue d'ensemble</h2>
   <p class="section-sub">Ticket du Brunch </p>
-
-  <div class="admin-section">
-    <h3>🛠️ Outils Admin</h3>
-    <div class="btn-group">
-      <button class="btn btn-danger-secondary btn-sm" onclick="confirmResetAll()">🔄 Réinitialiser tous les tickets</button>
-      <button class="btn btn-danger-secondary btn-sm" onclick="confirmClearLogs()">📋 Effacer le journal</button>
-    </div>
-  </div>
 
   <div class="stats-grid" id="stats-grid"></div>
 
@@ -862,14 +670,15 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script>
 // ─── ÉTAT GLOBAL ───
  
 // Supabase : remplacedz ces valeurs par votre URL et votre clé API
-const SUPABASE_URL = 'https://lqdlysrezzgmiebpsadt.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZGx5c3JlenpnbWllYnBzYWR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxOTA0NTQsImV4cCI6MjA5Mjc2NjQ1NH0.QD7j7o39nNmH3r9eFaNIXxddBK1oEbQh5urJwTrDW-Y';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = 'https://rpmkyczwtufxldcnesqz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwbWt5Y3p3dHVmeGxkY25lc3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxOTg4ODUsImV4cCI6MjA5Mjc3NDg4NX0.Eu2PHTZ5hvF4Cgk36_00OA-JRpmwfDHYo2DgL2d2PWM';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Lots A-T : 30 Standard chacun | Lot U : 20 VIP
 const LOT_CONFIG = {
@@ -910,171 +719,54 @@ function buildFreshState() {
   return tickets;
 }
 
-// ── SUPABASE : chargement + sync temps réel ──
-async function initSupabase() {
-  setDbStatus('⏳ Connexion…', '#888');
+function loadState() {
+  try {
+    const raw = localStorage.getItem('brunch_tickets');
+    if (!raw) return buildFreshState();
 
-  // Charger tickets
-  const { data: rows, error } = await sb.from('tickets').select('*');
-  if (error) {
-    setDbStatus('❌ Erreur DB', '#c0392b');
-    state = buildFreshState();
-  } else if (!rows || rows.length === 0) {
-    // Première fois : peupler la base
-    setDbStatus('⏳ Initialisation des tickets…', '#888');
+    const saved = JSON.parse(raw);
+
+    // Vérifier que tous les lots de LOT_CONFIG sont présents
+    // Si un lot manque (structure mise à jour), on fusionne
     const fresh = buildFreshState();
-    const inserts = Object.values(fresh).map(t => ({ code: t.code, lot: t.lot, num: t.num, type: t.type, used: false, used_at: null }));
-    for (let i = 0; i < inserts.length; i += 200) await sb.from('tickets').insert(inserts.slice(i, i + 200));
-    state = fresh;
-    setDbStatus('✅ ' + Object.keys(fresh).length + ' tickets initialisés', '#27ae60');
-  } else {
-    state = {};
-    const fresh = buildFreshState();
-    for (const t of Object.values(fresh)) state[t.code] = t;
-    for (const row of rows) {
-      if (state[row.code]) { state[row.code].used = row.used; state[row.code].usedAt = row.used_at; state[row.code].type = row.type; }
+    let needsMerge = false;
+    for (const code of Object.keys(fresh)) {
+      if (!saved[code]) { needsMerge = true; break; }
     }
-    setDbStatus('✅ ' + rows.length + ' tickets synchronisés', '#27ae60');
+
+    if (!needsMerge) return saved;
+
+    // Fusionner : garder les données existantes, ajouter les manquants
+    const merged = { ...fresh };
+    for (const [code, ticket] of Object.entries(saved)) {
+      if (merged[code]) merged[code] = ticket; // préserver l'état (used, etc.)
+    }
+    localStorage.setItem('brunch_tickets', JSON.stringify(merged));
+    return merged;
+
+  } catch(e) {
+    // localStorage corrompu ou indispo (mode privé iOS) → état frais en mémoire
+    return buildFreshState();
   }
-
-  // Charger journal
-  const { data: logs } = await sb.from('scan_log').select('*').order('scanned_at', { ascending: false }).limit(200);
-  if (logs) {
-    scanLog = logs.map(l => ({ code: l.code, ok: l.ok, detail: l.detail, time: new Date(l.scanned_at).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' }), ts: l.scanned_at }));
-    renderScanLog();
-  }
-
-  // Temps réel
-  sb.channel('brunch-realtime')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets' }, payload => {
-      const row = payload.new;
-      if (state[row.code]) { state[row.code].used = row.used; state[row.code].usedAt = row.used_at; }
-      const card = document.getElementById('tcard-' + row.code);
-      if (card) {
-        card.className = 'ticket-card' + (row.used ? ' used' : '');
-        const st = card.querySelector('.ticket-status');
-        if (st) { st.textContent = row.used ? '✓ Validé' : '● Disponible'; st.className = 'ticket-status' + (row.used ? ' used' : ''); }
-      }
-    })
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'scan_log' }, payload => {
-      const l = payload.new;
-      if (scanLog.find(x => x.ts === l.scanned_at && x.code === l.code)) return;
-      const entry = { code: l.code, ok: l.ok, detail: l.detail, time: new Date(l.scanned_at).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' }), ts: l.scanned_at };
-      scanLog.unshift(entry);
-      prependLogItem(entry);
-      const count = document.getElementById('scan-count');
-      if (count) count.textContent = scanLog.filter(x => x.ok).length + ' validé(s)';
-    })
-    .subscribe();
-
-  renderDashboard();
 }
 
-function setDbStatus(msg, color) {
-  const el = document.getElementById('db-status');
-  if (el) { el.textContent = msg; el.style.color = color || '#888'; }
+function saveState() {
+  localStorage.setItem('brunch_tickets', JSON.stringify(state));
 }
 
-async function saveState() {
-  // no-op : on sauvegarde ticket par ticket via saveTicketUsed
+function loadScanLog() {
+  const raw = localStorage.getItem('brunch_scanlog');
+  return raw ? JSON.parse(raw) : [];
+}
+function saveScanLog() {
+  localStorage.setItem('brunch_scanlog', JSON.stringify(scanLog));
 }
 
-async function saveTicketUsed(code) {
-  const t = state[code];
-  await sb.from('tickets').update({ used: t.used, used_at: t.usedAt }).eq('code', code);
-}
-
-async function writeScanLog(entry) {
-  await sb.from('scan_log').insert({ code: entry.code, ok: entry.ok, detail: entry.detail, scanned_at: entry.ts });
-}
-
-function renderScanLog() {
-  const log = document.getElementById('scan-log');
-  if (!log) return;
-  log.innerHTML = '';
-  if (!scanLog.length) { log.innerHTML = '<div class="empty-state"><p>Aucun scan pour l\'instant</p></div>'; return; }
-  scanLog.forEach(e => prependLogItem(e));
-  const count = document.getElementById('scan-count');
-  if (count) count.textContent = scanLog.filter(l => l.ok).length + ' validé(s)';
-}
-
-function prependLogItem(entry) {
-  const log = document.getElementById('scan-log');
-  if (!log) return;
-  if (log.querySelector('.empty-state')) log.innerHTML = '';
-  const item = document.createElement('div');
-  item.className = 'log-item';
-  item.innerHTML = `<span class="log-code">${entry.code}</span><span style="font-size:11px;color:#888">${entry.detail}</span><span class="log-badge ${entry.ok ? 'ok' : 'fail'}">${entry.ok ? '✓ OK' : '✕ Refus'}</span><span class="log-time">${entry.time}</span>`;
-  log.prepend(item);
-}
-
-let state = {};
-let scanLog = [];
+let state = loadState();
+let scanLog = loadScanLog();
 let cameraStream = null;
 let scanInterval = null;
-let pendingConfirmation = null;
-let isAuthenticated = false;
-
-// ─── AUTHENTICATION ───
-function initAuth() {
-  const auth = localStorage.getItem('brunch_auth');
-  isAuthenticated = auth === 'true';
-  if (!isAuthenticated) {
-    showLoginPage();
-  } else {
-    hideLoginPage(); // hideLoginPage appelle initSupabase
-  }
-}
-
-function showLoginPage() {
-  isAuthenticated = false;
-  document.getElementById('login-container').classList.add('active');
-  const header = document.querySelector('header');
-  const mainContent = document.getElementById('view-dashboard').parentElement;
-  if (header) header.style.display = 'none';
-  if (mainContent) mainContent.style.display = 'none';
-}
-
-function hideLoginPage() {
-  isAuthenticated = true;
-  document.getElementById('login-container').classList.remove('active');
-  const header = document.querySelector('header');
-  const mainContent = document.getElementById('view-dashboard').parentElement;
-  if (header) header.style.display = 'block';
-  if (mainContent) mainContent.style.display = 'block';
-  initSupabase(); // ← lancer la synchro Supabase après login
-}
-
-function handleLogin() {
-  const password = document.getElementById('login-password').value;
-  const correctPassword = 'Admin2025'; // Mot de passe à modifier
-  
-  if (password === correctPassword) {
-    localStorage.setItem('brunch_auth', 'true');
-    document.getElementById('login-password').value = '';
-    document.getElementById('login-error').style.display = 'none';
-    hideLoginPage();
-  } else {
-    document.getElementById('login-error').textContent = '❌ Mot de passe incorrect';
-    document.getElementById('login-error').style.display = 'block';
-    document.getElementById('login-password').value = '';
-  }
-}
-
-function handleLogout() {
-  if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-    localStorage.setItem('brunch_auth', 'false');
-    showLoginPage();
-  }
-}
-
-// Gestion de la touche Entrée dans le formulaire de connexion
-const loginInput = document.getElementById('login-password');
-if (loginInput) {
-  loginInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleLogin();
-  });
-}
+let pendingConfirmation = null; // Stocke le ticket en attente de confirmation
 
 // ─── NAVIGATION ───
 function showView(name, btn) {
@@ -1085,37 +777,6 @@ function showView(name, btn) {
   if (name === 'dashboard') renderDashboard();
   if (name === 'export') renderExport();
   if (name !== 'scanner') stopCamera();
-}
-
-// ─── ADMIN FUNCTIONS ───
-function confirmResetAll() {
-  if (confirm('⚠️ Cela supprimera TOUS les tickets et les marquera comme non utilisés.\n\nÊtes-vous VRAIMENT sûr ?')) {
-    resetAllTickets();
-  }
-}
-
-async function resetAllTickets() {
-  const fresh = buildFreshState();
-  for (let i = 0; i < Object.keys(fresh).length; i += 200) {
-    const batch = Object.keys(fresh).slice(i, i + 200);
-    for (const code of batch) await sb.from('tickets').update({ used: false, used_at: null }).eq('code', code);
-  }
-  state = fresh;
-  renderDashboard();
-  alert('✅ Tous les tickets ont été réinitialisés !');
-}
-
-async function confirmClearLogs() {
-  if (confirm('Cela effacera tout l\'historique des scans.\n\nContinuer ?')) {
-    await sb.from('scan_log').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    scanLog = [];
-    const log = document.getElementById('scan-log');
-    if (log) log.innerHTML = '<div class="empty-state"><p>Aucun scan pour l\'instant</p></div>';
-    const count = document.getElementById('scan-count');
-    if (count) count.textContent = '0 validé(s)';
-    renderDashboard();
-    alert('✅ Journal des scans effacé !');
-  }
 }
 
 // ─── LOT CHANGE ───
@@ -1404,7 +1065,7 @@ function confirmTicket() {
   // Marquer comme utilisé
   ticket.used = true;
   ticket.usedAt = new Date().toISOString();
-  saveTicketUsed(code);
+  saveState();
   
   // Mettre à jour l'affichage du résultat
   const result = document.getElementById('scan-result');
@@ -1441,11 +1102,23 @@ function addLog(code, ok, detail) {
   const timeStr = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
   const entry = { code, ok, detail, time: timeStr, ts: now.toISOString() };
   scanLog.unshift(entry);
-  writeScanLog(entry); // sauvegarde Supabase (le realtime met à jour les autres appareils)
-  prependLogItem(entry);
+  saveScanLog();
+
+  const log = document.getElementById('scan-log');
+  if (log.querySelector('.empty-state')) log.innerHTML = '';
+  const item = document.createElement('div');
+  item.className = 'log-item';
+  item.innerHTML = `
+    <span class="log-code">${code}</span>
+    <span style="font-size:11px;color:#888">${detail}</span>
+    <span class="log-badge ${ok ? 'ok' : 'fail'}">${ok ? '✓ OK' : '✕ Refus'}</span>
+    <span class="log-time">${timeStr}</span>
+  `;
+  log.prepend(item);
+
   const count = document.getElementById('scan-count');
   const validated = scanLog.filter(l => l.ok).length;
-  if (count) count.textContent = `${validated} validé(s)`;
+  count.textContent = `${validated} validé(s)`;
 }
 
 // ─── EXPORT ───
@@ -1496,7 +1169,7 @@ function printTickets() {
 }
 
 // ─── INIT ───
-initAuth();
+renderDashboard();
 </script>
 </body>
 </html>
