@@ -1192,13 +1192,6 @@ async function exportQRCodesPDF() {
     doc.setFontSize(10);
     doc.text('Date: ' + new Date().toLocaleDateString('fr-FR'), 105, 22, { align: 'center' });
     
-    // Créer un conteneur invisible pour générer les QR codes
-    const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    container.style.top = '-9999px';
-    document.body.appendChild(container);
-    
     // Grille des QR codes
     const qrSize = 38; // millimètres
     const marginLeft = 8;
@@ -1219,75 +1212,99 @@ async function exportQRCodesPDF() {
     progressTotal.textContent = tickets.length;
     
     for (const ticket of tickets) {
-      // Créer le QR code dans le conteneur caché
-      const qrDiv = document.createElement('div');
-      container.appendChild(qrDiv);
+      // Ajouter une nouvelle page si nécessaire
+      if (count > 0 && count % 12 === 0) {
+        doc.addPage();
+        x = marginLeft;
+        y = marginTop;
+      }
       
-      new QRCode(qrDiv, {
-        text: ticket.code + '|' + ticket.type + '|' + ticket.lot,
-        width: 150,
-        height: 150,
-        colorDark: '#1A1208',
-        colorLight: '#FFFFFF',
-        correctLevel: QRCode.CorrectLevel.M
-      });
+      // Générer le QR code
+      const qrData = ticket.code + '|' + ticket.type + '|' + ticket.lot;
+      const qrCanvas = document.createElement('canvas');
       
-      // Attendre que l'image soit générée
-      await new Promise(resolve => {
-        const checkImage = setInterval(() => {
-          const img = qrDiv.querySelector('img');
-          if (img && img.complete) {
-            clearInterval(checkImage);
-            
-            // Ajouter une nouvelle page si nécessaire
-            if (count > 0 && count % 12 === 0) {
-              doc.addPage();
-              x = marginLeft;
-              y = marginTop;
-            }
-            
-            // Ajouter l'image au PDF
-            try {
-              doc.addImage(img, 'PNG', x, y, qrSize, qrSize);
-              
-              // Ajouter le texte
-              doc.setFontSize(8);
-              doc.text(ticket.code, x + qrSize / 2, y + qrSize + 3, { align: 'center' });
-              
-              doc.setFontSize(6);
-              doc.text(ticket.type + ' - Lot ' + ticket.lot, x + qrSize / 2, y + qrSize + 6, { align: 'center' });
-            } catch(e) {
-              console.error('Erreur ajout image:', e);
-            }
-            
-            // Position suivante
-            x += qrSize + gapX;
-            count++;
-            
-            if (count % perRow === 0) {
-              x = marginLeft;
-              y += qrSize + gapY;
-            }
-            
-            // Mettre à jour la barre de progression
-            const percentage = Math.round((count / tickets.length) * 100);
-            progressFill.style.width = percentage + '%';
-            progressCount.textContent = count;
-            
-            resolve();
-          }
-        }, 50);
+      // Utiliser html2canvas si disponible, sinon générer directement
+      try {
+        // Créer un div invisible avec le QR code
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'fixed';
+        tempDiv.style.left = '-9999px';
+        tempDiv.style.top = '-9999px';
+        tempDiv.style.width = '200px';
+        tempDiv.style.height = '200px';
+        document.body.appendChild(tempDiv);
         
-        // Timeout de sécurité
-        setTimeout(() => resolve(), 2000);
-      });
-      
-      // Nettoyer
-      container.removeChild(qrDiv);
+        // Générer le QR code
+        new QRCode(tempDiv, {
+          text: qrData,
+          width: 200,
+          height: 200,
+          colorDark: '#1A1208',
+          colorLight: '#FFFFFF',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        
+        // Attendre que l'image soit bien générée
+        await new Promise(resolve => {
+          const checkInterval = setInterval(() => {
+            const img = tempDiv.querySelector('img');
+            if (img && img.complete && img.naturalWidth > 0) {
+              clearInterval(checkInterval);
+              
+              // Convertir l'image en dataURL
+              const canvas = document.createElement('canvas');
+              canvas.width = 200;
+              canvas.height = 200;
+              const ctx = canvas.getContext('2d');
+              
+              // Dessiner l'image sur le canvas
+              ctx.drawImage(img, 0, 0, 200, 200);
+              const imgData = canvas.toDataURL('image/png');
+              
+              // Ajouter l'image au PDF
+              try {
+                doc.addImage(imgData, 'PNG', x, y, qrSize, qrSize);
+                
+                // Ajouter le texte
+                doc.setFontSize(8);
+                doc.text(ticket.code, x + qrSize / 2, y + qrSize + 3, { align: 'center' });
+                
+                doc.setFontSize(6);
+                doc.text(ticket.type + ' - Lot ' + ticket.lot, x + qrSize / 2, y + qrSize + 6, { align: 'center' });
+              } catch(e) {
+                console.error('Erreur ajout image:', e);
+              }
+              
+              // Position suivante
+              x += qrSize + gapX;
+              count++;
+              
+              if (count % perRow === 0) {
+                x = marginLeft;
+                y += qrSize + gapY;
+              }
+              
+              // Mettre à jour la barre de progression
+              const percentage = Math.round((count / tickets.length) * 100);
+              progressFill.style.width = percentage + '%';
+              progressCount.textContent = count;
+              
+              // Nettoyer
+              document.body.removeChild(tempDiv);
+              resolve();
+            }
+          }, 100);
+          
+          // Timeout de sécurité
+          setTimeout(() => {
+            if (tempDiv.parentNode) document.body.removeChild(tempDiv);
+            resolve();
+          }, 3000);
+        });
+      } catch(e) {
+        console.error('Erreur génération QR:', e);
+      }
     }
-    
-    // Supprimer le conteneur
-    document.body.removeChild(container);
     
     // Masquer la modal et télécharger
     modal.classList.remove('active');
