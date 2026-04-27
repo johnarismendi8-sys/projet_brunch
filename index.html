@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Brunch — Gestion des Tickets</title>
+<title>The Brunch â€” Gestion des Tickets</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
@@ -37,7 +37,7 @@
     min-height: 100vh;
   }
 
-  /* ─── HEADER ─── */
+  /* â”€â”€â”€ HEADER â”€â”€â”€ */
   header {
     background: var(--ink);
     padding: 0;
@@ -91,11 +91,11 @@
   .nav-tab:hover { color: var(--gold-light); background: rgba(201,168,76,0.08); }
   .nav-tab.active { background: var(--gold); color: var(--ink); }
 
-  /* ─── VIEWS ─── */
+  /* â”€â”€â”€ VIEWS â”€â”€â”€ */
   .view { display: none; padding: 32px; }
   .view.active { display: block; }
 
-  /* ─── DASHBOARD ─── */
+  /* â”€â”€â”€ DASHBOARD â”€â”€â”€ */
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -151,7 +151,7 @@
   .lot-counts { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; }
   .lot-counts span { font-family: 'DM Mono', monospace; }
 
-  /* ─── GENERATOR ─── */
+  /* â”€â”€â”€ GENERATOR â”€â”€â”€ */
   .section-title {
     font-family: 'Playfair Display', serif;
     font-size: 24px;
@@ -267,7 +267,7 @@
   }
   .ticket-card .tick-btn:hover { background: #FFE0E0; }
 
-  /* ─── SCANNER ─── */
+  /* â”€â”€â”€ SCANNER â”€â”€â”€ */
   .scanner-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -328,7 +328,7 @@
   .log-badge.ok { background: #E8F5EC; color: var(--success); }
   .log-badge.fail { background: #FDECEA; color: var(--error); }
 
-  /* ─── EXPORT ─── */
+  /* â”€â”€â”€ EXPORT â”€â”€â”€ */
   .export-options { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
   .export-card {
     flex: 1; min-width: 200px;
@@ -345,7 +345,7 @@
   .export-card h3 { font-size: 15px; margin-bottom: 4px; }
   .export-card p { font-size: 12px; color: #aaa; }
 
-  /* ─── MOBILE ─── */
+  /* â”€â”€â”€ MOBILE â”€â”€â”€ */
   @media (max-width: 700px) {
     .header-inner { padding: 10px 14px; gap: 8px; flex-wrap: nowrap; }
     .brand-name { font-size: 16px; }
@@ -412,7 +412,7 @@
   .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
   .empty-state p { font-size: 14px; }
 
-  /* ─── MODAL CONFIRMATION ─── */
+  /* â”€â”€â”€ MODAL CONFIRMATION â”€â”€â”€ */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -478,7 +478,7 @@
     background: #7a1a2a;
   }
 
-  /* ─── LOGIN PAGE ─── */
+  /* â”€â”€â”€ LOGIN PAGE â”€â”€â”€ */
   .login-page {
     display: flex;
     align-items: center;
@@ -559,7 +559,7 @@
     display: block;
   }
 
-  /* ─── SETTINGS MODAL ─── */
+  /* â”€â”€â”€ SETTINGS MODAL â”€â”€â”€ */
   .settings-btn {
     position: fixed;
     bottom: 20px;
@@ -658,7 +658,7 @@
     color: var(--gold);
   }
 
-  /* ─── PROGRESS BAR ─── */
+  /* â”€â”€â”€ PROGRESS BAR â”€â”€â”€ */
   .progress-modal {
     display: none;
     position: fixed;
@@ -711,10 +711,10 @@
 </head>
 <body>
 
-<!-- ═══════════════ PROGRESS MODAL ═══════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PROGRESS MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="progress-modal" id="progress-modal">
   <div class="progress-content">
-    <div class="progress-title">📄 Génération du PDF</div>
+    <div class="progress-title">ðŸ“„ GÃ©nÃ©ration du PDF</div>
     <div class="progress-bar">
       <div class="progress-fill" id="progress-fill"></div>
     </div>
@@ -724,10 +724,10 @@
   </div>
 </div>
 
-<!-- ─── LOGIN PAGE ─── -->
+<!-- â”€â”€â”€ LOGIN PAGE â”€â”€â”€ -->
 <div class="login-page" id="login-page">
   <div class="login-card">
-    <div class="login-icon">🥂</div>
+    <div class="login-icon">ðŸ¥‚</div>
     <div class="login-title">The Brunch</div>
     <div class="login-subtitle">Gestion des tickets</div>
     <div class="login-error" id="login-error"></div>
@@ -739,21 +739,21 @@
   </div>
 </div>
 
-<!-- ═══════════════ RESET MODAL ═══════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RESET MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="modal-overlay" id="reset-modal">
   <div class="modal-content">
-    <div class="modal-icon">🔄</div>
-    <div class="modal-title">Réinitialiser tous les scans</div>
+    <div class="modal-icon">ðŸ”„</div>
+    <div class="modal-title">RÃ©initialiser tous les scans</div>
     <div class="modal-detail" style="margin-bottom:20px;">
-      ⚠️ Cette action annulera tous les tickets validés et les ramènera à l'état initial.<br><br>
+      âš ï¸ Cette action annulera tous les tickets validÃ©s et les ramÃ¨nera Ã  l'Ã©tat initial.<br><br>
       <strong>Entrez le mot de passe administrateur pour confirmer :</strong>
     </div>
     <div class="settings-section" style="margin-bottom:20px;">
       <input type="password" id="reset-password" placeholder="Mot de passe admin" autocomplete="off">
     </div>
     <div class="modal-actions">
-      <button class="btn btn-danger" onclick="confirmReset()">✓ Réinitialiser</button>
-      <button class="btn btn-outline" onclick="closeResetModal()">✕ Annuler</button>
+      <button class="btn btn-danger" onclick="confirmReset()">âœ“ RÃ©initialiser</button>
+      <button class="btn btn-outline" onclick="closeResetModal()">âœ• Annuler</button>
     </div>
   </div>
 </div>
@@ -761,26 +761,26 @@
 <header>
   <div class="header-inner">
     <div class="brand">
-      <div class="brand-icon">🥂</div>
+      <div class="brand-icon">ðŸ¥‚</div>
       <div class="brand-name">The <span>Brunch</span></div>
     </div>
     <nav class="nav-tabs">
       <button class="nav-tab active" onclick="showView('dashboard', this)">Dashboard</button>
-      <button class="nav-tab" onclick="showView('generator', this)">Générer</button>
+      <button class="nav-tab" onclick="showView('generator', this)">GÃ©nÃ©rer</button>
       <button class="nav-tab" onclick="showView('scanner', this)">Scanner</button>
       <button class="nav-tab" onclick="showView('export', this)">Export</button>
-      <button class="nav-tab" onclick="checkStateAndLogout()" style="margin-left: auto;">Déconnexion</button>
+      <button class="nav-tab" onclick="checkStateAndLogout()" style="margin-left: auto;">DÃ©connexion</button>
     </nav>
   </div>
   <div style="padding:4px 32px;background:rgba(201,168,76,0.05);font-size:11px;color:#888;display:flex;justify-content:flex-end;gap:16px;border-top:1px solid var(--border);">
-    <span id="sync-status">📡 Synchronisation en attente...</span>
+    <span id="sync-status">ðŸ“¡ Synchronisation en attente...</span>
   </div>
 </header>
 
-<!-- ═══════════════ SETTINGS MODAL ═══════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SETTINGS MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="settings-modal" id="settings-modal">
   <div class="settings-content">
-    <h2 class="settings-title">⚙️ Paramètres</h2>
+    <h2 class="settings-title">âš™ï¸ ParamÃ¨tres</h2>
     <div class="current-user">
       <span>Utilisateur actif:</span>
       <span id="current-username">-</span>
@@ -798,23 +798,23 @@
       <input type="password" id="confirm-password" placeholder="Confirmez le nouveau mot de passe">
     </div>
     <div class="settings-actions">
-      <button class="btn btn-gold" onclick="changePassword()">💾 Sauvegarder</button>
-      <button class="btn btn-outline" onclick="closeSettings()">✕ Fermer</button>
+      <button class="btn btn-gold" onclick="changePassword()">ðŸ’¾ Sauvegarder</button>
+      <button class="btn btn-outline" onclick="closeSettings()">âœ• Fermer</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ SETTINGS BUTTON ═══════════════ -->
-<button class="settings-btn" onclick="openSettings()" title="Paramètres">⚙️</button>
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SETTINGS BUTTON â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<button class="settings-btn" onclick="openSettings()" title="ParamÃ¨tres">âš™ï¸</button>
 
-<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DASHBOARD â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="view active" id="view-dashboard">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
     <div>
       <h2 class="section-title">Vue d'ensemble</h2>
       <p class="section-sub">Ticket du Brunch</p>
     </div>
-    <button class="btn btn-danger" onclick="openResetModal()" style="height:fit-content;" title="Réinitialiser tous les scans">🔄 Réinitialiser</button>
+    <button class="btn btn-danger" onclick="openResetModal()" style="height:fit-content;" title="RÃ©initialiser tous les scans">ðŸ”„ RÃ©initialiser</button>
   </div>
 
   <div class="stats-grid" id="stats-grid"></div>
@@ -823,37 +823,37 @@
   <div class="lots-grid" id="lots-grid"></div>
 </div>
 
-<!-- ═══════════════ GENERATOR ═══════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• GENERATOR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="view" id="view-generator">
-  <h2 class="section-title">Génération des tickets</h2>
-  <p class="section-sub">Sélectionne un lot et un type pour générer les QR codes.</p>
+  <h2 class="section-title">GÃ©nÃ©ration des tickets</h2>
+  <p class="section-sub">SÃ©lectionne un lot et un type pour gÃ©nÃ©rer les QR codes.</p>
 
   <div class="gen-controls">
     <div class="ctrl-group">
       <label>Lot</label>
       <select id="sel-lot" onchange="onLotChange(this.value)">
-        <option value="ALL">Tous les lots (A–U)</option>
-        <option value="A">Lot A — Standard (30)</option>
-        <option value="B">Lot B — Standard (30)</option>
-        <option value="C">Lot C — Standard (30)</option>
-        <option value="D">Lot D — Standard (30)</option>
-        <option value="E">Lot E — Standard (30)</option>
-        <option value="F">Lot F — Standard (30)</option>
-        <option value="G">Lot G — Standard (30)</option>
-        <option value="H">Lot H — Standard (30)</option>
-        <option value="I">Lot I — Standard (30)</option>
-        <option value="J">Lot J — Standard (30)</option>
-        <option value="K">Lot K — Standard (30)</option>
-        <option value="L">Lot L — Standard (30)</option>
-        <option value="M">Lot M — Standard (30)</option>
-        <option value="N">Lot N — Standard (30)</option>
-        <option value="O">Lot O — Standard (30)</option>
-        <option value="P">Lot P — Standard (30)</option>
-        <option value="Q">Lot Q — Standard (30)</option>
-        <option value="R">Lot R — Standard (30)</option>
-        <option value="S">Lot S — Standard (30)</option>
-        <option value="T">Lot T — Standard (30)</option>
-        <option value="U">Lot U — VIP (20)</option>
+        <option value="ALL">Tous les lots (Aâ€“U)</option>
+        <option value="A">Lot A â€” Standard (30)</option>
+        <option value="B">Lot B â€” Standard (30)</option>
+        <option value="C">Lot C â€” Standard (30)</option>
+        <option value="D">Lot D â€” Standard (30)</option>
+        <option value="E">Lot E â€” Standard (30)</option>
+        <option value="F">Lot F â€” Standard (30)</option>
+        <option value="G">Lot G â€” Standard (30)</option>
+        <option value="H">Lot H â€” Standard (30)</option>
+        <option value="I">Lot I â€” Standard (30)</option>
+        <option value="J">Lot J â€” Standard (30)</option>
+        <option value="K">Lot K â€” Standard (30)</option>
+        <option value="L">Lot L â€” Standard (30)</option>
+        <option value="M">Lot M â€” Standard (30)</option>
+        <option value="N">Lot N â€” Standard (30)</option>
+        <option value="O">Lot O â€” Standard (30)</option>
+        <option value="P">Lot P â€” Standard (30)</option>
+        <option value="Q">Lot Q â€” Standard (30)</option>
+        <option value="R">Lot R â€” Standard (30)</option>
+        <option value="S">Lot S â€” Standard (30)</option>
+        <option value="T">Lot T â€” Standard (30)</option>
+        <option value="U">Lot U â€” VIP (20)</option>
       </select>
     </div>
     <div class="ctrl-group">
@@ -866,8 +866,8 @@
     <div class="ctrl-group" style="justify-content:flex-end;">
       <label>&nbsp;</label>
       <div style="display:flex;gap:8px;">
-        <button class="btn btn-gold" onclick="generateTickets()">⚡ Générer</button>
-        <button class="btn btn-outline" onclick="clearDisplay()">✕ Effacer</button>
+        <button class="btn btn-gold" onclick="generateTickets()">âš¡ GÃ©nÃ©rer</button>
+        <button class="btn btn-outline" onclick="clearDisplay()">âœ• Effacer</button>
       </div>
     </div>
   </div>
@@ -875,26 +875,25 @@
   <div id="gen-info" style="margin-bottom:16px;font-size:13px;color:#888;"></div>
   <div class="ticket-grid" id="ticket-grid">
     <div class="empty-state" style="grid-column:1/-1">
-      <div class="icon">🎟️</div>
-      <p>Sélectionne un lot et clique sur Générer</p>
-     
+      <div class="icon">ðŸŽŸï¸</div>
+      <p>SÃ©lectionne un lot et clique sur GÃ©nÃ©rer</p>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ SCANNER ═══════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SCANNER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="view" id="view-scanner">
   <h2 class="section-title">Scanner & Valider</h2>
-  <p class="section-sub">Scanne un QR code ou entre le code manuellement pour valider l'entrée.</p>
+  <p class="section-sub">Scanne un QR code ou entre le code manuellement pour valider l'entrÃ©e.</p>
 
   <div class="scanner-layout">
     <div>
       <div class="scan-box">
-        <div class="scan-box-header">📷 Caméra</div>
+        <div class="scan-box-header">ðŸ“· CamÃ©ra</div>
         <div class="scan-box-body">
           <video id="video-preview" autoplay playsinline></video>
           <div style="margin-top:12px;text-align:center;">
-            <button class="btn btn-gold" id="btn-cam" onclick="toggleCamera()">▶ Activer la caméra</button>
+            <button class="btn btn-gold" id="btn-cam" onclick="toggleCamera()">â–¶ Activer la camÃ©ra</button>
           </div>
           <div id="cam-status" style="margin-top:10px;font-size:12px;text-align:center;min-height:18px;padding:0 4px;"></div>
           <div class="manual-input-row" style="margin-top:20px;">
@@ -912,8 +911,8 @@
     <div>
       <div class="scan-box">
         <div class="scan-box-header" style="display:flex;justify-content:space-between;align-items:center;">
-          <span>📋 Journal des scans</span>
-          <span id="scan-count" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold)">0 validé(s)</span>
+          <span>ðŸ“‹ Journal des scans</span>
+          <span id="scan-count" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold)">0 validÃ©(s)</span>
         </div>
         <div class="scan-box-body">
           <div class="scan-log" id="scan-log">
@@ -925,38 +924,38 @@
   </div>
 </div>
 
-<!-- ═══════════════ EXPORT ═══════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• EXPORT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="view" id="view-export">
   <h2 class="section-title">Export & Sauvegarde</h2>
-  <p class="section-sub">Exporte la liste des codes ou télécharge les données de scan.</p>
+  <p class="section-sub">Exporte la liste des codes ou tÃ©lÃ©charge les donnÃ©es de scan.</p>
 
   <div class="export-options">
     <div class="export-card" onclick="exportQRCodesPDF()">
-      <div class="icon">📄</div>
+      <div class="icon">ðŸ“„</div>
       <h3>QR Codes PDF</h3>
       <p>Tous les QR codes en fichier PDF</p>
     </div>
   </div>
 
-<!-- ═══════════════ MODAL CONFIRMATION ═══════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODAL CONFIRMATION â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="modal-overlay" id="confirmation-modal">
   <div class="modal-content">
-    <div class="modal-icon" id="modal-icon">❓</div>
+    <div class="modal-icon" id="modal-icon">â“</div>
     <div class="modal-title" id="modal-title">Confirmer</div>
     <div class="modal-code" id="modal-code">CODE</div>
-    <div class="modal-detail" id="modal-detail">Détails du ticket</div>
+    <div class="modal-detail" id="modal-detail">DÃ©tails du ticket</div>
     <div class="modal-actions">
-      <button class="btn btn-accept" onclick="confirmTicket()">✓ Accepter</button>
-      <button class="btn btn-refuse" onclick="refuseTicket()">✕ Refuser</button>
+      <button class="btn btn-accept" onclick="confirmTicket()">âœ“ Accepter</button>
+      <button class="btn btn-refuse" onclick="refuseTicket()">âœ• Refuser</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SCRIPTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <script>
-// ─── AUTHENTIFICATION ───
+// â”€â”€â”€ AUTHENTIFICATION â”€â”€â”€
 
-// Hachage simple des mots de passe (pour démo - utiliser bcrypt en production)
+// Hachage simple des mots de passe (pour dÃ©mo - utiliser bcrypt en production)
 function simpleHash(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -967,7 +966,7 @@ function simpleHash(str) {
   return Math.abs(hash).toString(16);
 }
 
-// Comptes prédéfinis
+// Comptes prÃ©dÃ©finis
 const DEFAULT_ACCOUNTS = {
   'user': {
     username: 'user',
@@ -1022,7 +1021,7 @@ function handleLogin(event) {
     return;
   }
 
-  // Connexion réussie
+  // Connexion rÃ©ussie
   isLoggedIn = true;
   currentUser = username;
   localStorage.setItem('brunch_currentUser', username);
@@ -1037,7 +1036,7 @@ function handleLogin(event) {
 }
 
 function logout() {
-  if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+  if (confirm('ÃŠtes-vous sÃ»r de vouloir vous dÃ©connecter ?')) {
     isLoggedIn = false;
     currentUser = null;
     localStorage.removeItem('brunch_currentUser');
@@ -1046,7 +1045,7 @@ function logout() {
     document.getElementById('login-page').style.display = 'flex';
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     
-    // Réinitialiser le formulaire
+    // RÃ©initialiser le formulaire
     document.getElementById('login-username').value = '';
     document.getElementById('login-password').value = '';
     document.getElementById('login-error').classList.remove('show');
@@ -1054,8 +1053,8 @@ function logout() {
 }
 
 function checkStateAndLogout() {
-  // Debug: vérifier state avant de déconnecter
-  console.log('📊 State check avant déconnexion:');
+  // Debug: vÃ©rifier state avant de dÃ©connecter
+  console.log('ðŸ“Š State check avant dÃ©connexion:');
   console.log('   - stateReady:', stateReady);
   console.log('   - state size:', Object.keys(state).length);
   console.log('   - premiers codes:', Object.keys(state).slice(0, 5));
@@ -1098,38 +1097,38 @@ function changePassword() {
   const confirmPass = document.getElementById('confirm-password').value;
 
   if (!oldPass || !newPass || !confirmPass) {
-    alert('⚠️ Tous les champs sont obligatoires');
+    alert('âš ï¸ Tous les champs sont obligatoires');
     return;
   }
 
   if (newPass !== confirmPass) {
-    alert('⚠️ Les nouveaux mots de passe ne correspondent pas');
+    alert('âš ï¸ Les nouveaux mots de passe ne correspondent pas');
     return;
   }
 
   if (newPass.length < 6) {
-    alert('⚠️ Le nouveau mot de passe doit contenir au moins 6 caractères');
+    alert('âš ï¸ Le nouveau mot de passe doit contenir au moins 6 caractÃ¨res');
     return;
   }
 
-  // Vérifier l'ancien mot de passe
+  // VÃ©rifier l'ancien mot de passe
   const accounts = getAccounts();
   const account = accounts[currentUser];
 
   if (account.passwordHash !== simpleHash(oldPass)) {
-    alert('❌ L\'ancien mot de passe est incorrect');
+    alert('âŒ L\'ancien mot de passe est incorrect');
     return;
   }
 
-  // Mettre à jour le mot de passe
+  // Mettre Ã  jour le mot de passe
   account.passwordHash = simpleHash(newPass);
   saveAccounts(accounts);
 
-  alert('✅ Mot de passe modifié avec succès !');
+  alert('âœ… Mot de passe modifiÃ© avec succÃ¨s !');
   closeSettings();
 }
 
-// ─── IMPRESSION QR CODES ───
+// â”€â”€â”€ IMPRESSION QR CODES â”€â”€â”€
 function printAllQRCodes() {
   const printWindow = window.open('', '', 'height=1200,width=900');
   
@@ -1164,9 +1163,9 @@ function printAllQRCodes() {
     </head>
     <body>
       <div class="print-header">
-        <h1>🥂 The Brunch — Tickets</h1>
-        <p>Liste complète des QR codes à imprimer</p>
-        <p style="font-size: 12px; color: #999;">Générés le ${new Date().toLocaleDateString('fr-FR')}</p>
+        <h1>ðŸ¥‚ The Brunch â€” Tickets</h1>
+        <p>Liste complÃ¨te des QR codes Ã  imprimer</p>
+        <p style="font-size: 12px; color: #999;">GÃ©nÃ©rÃ©s le ${new Date().toLocaleDateString('fr-FR')}</p>
       </div>
       <div class="qr-grid" id="qr-container"></div>
       <script>
@@ -1188,7 +1187,7 @@ function printAllQRCodes() {
           div.appendChild(codeDiv);
           container.appendChild(div);
           
-          // Générer le QR code
+          // GÃ©nÃ©rer le QR code
           new QRCode(codeDiv, {
             text: ticket.code + '|' + ticket.type + '|' + ticket.lot,
             width: 120,
@@ -1222,14 +1221,14 @@ async function exportQRCodesPDF() {
     
     modal.classList.add('active');
     
-    // Entête
+    // EntÃªte
     doc.setFontSize(18);
     doc.text('The Brunch - QR Codes', 105, 15, { align: 'center' });
     doc.setFontSize(10);
     doc.text('Date: ' + new Date().toLocaleDateString('fr-FR'), 105, 22, { align: 'center' });
     
     // Grille des QR codes
-    const qrSize = 38; // millimètres
+    const qrSize = 38; // millimÃ¨tres
     const marginLeft = 8;
     const marginTop = 30;
     const perRow = 4;
@@ -1248,20 +1247,20 @@ async function exportQRCodesPDF() {
     progressTotal.textContent = tickets.length;
     
     for (const ticket of tickets) {
-      // Ajouter une nouvelle page si nécessaire
+      // Ajouter une nouvelle page si nÃ©cessaire
       if (count > 0 && count % 12 === 0) {
         doc.addPage();
         x = marginLeft;
         y = marginTop;
       }
       
-      // Générer le QR code
+      // GÃ©nÃ©rer le QR code
       const qrData = ticket.code + '|' + ticket.type + '|' + ticket.lot;
       const qrCanvas = document.createElement('canvas');
       
-      // Utiliser html2canvas si disponible, sinon générer directement
+      // Utiliser html2canvas si disponible, sinon gÃ©nÃ©rer directement
       try {
-        // Créer un div invisible avec le QR code
+        // CrÃ©er un div invisible avec le QR code
         const tempDiv = document.createElement('div');
         tempDiv.style.position = 'fixed';
         tempDiv.style.left = '-9999px';
@@ -1270,7 +1269,7 @@ async function exportQRCodesPDF() {
         tempDiv.style.height = '200px';
         document.body.appendChild(tempDiv);
         
-        // Générer le QR code
+        // GÃ©nÃ©rer le QR code
         new QRCode(tempDiv, {
           text: qrData,
           width: 200,
@@ -1280,7 +1279,7 @@ async function exportQRCodesPDF() {
           correctLevel: QRCode.CorrectLevel.M
         });
         
-        // Attendre que l'image soit bien générée
+        // Attendre que l'image soit bien gÃ©nÃ©rÃ©e
         await new Promise(resolve => {
           const checkInterval = setInterval(() => {
             const img = tempDiv.querySelector('img');
@@ -1320,7 +1319,7 @@ async function exportQRCodesPDF() {
                 y += qrSize + gapY;
               }
               
-              // Mettre à jour la barre de progression
+              // Mettre Ã  jour la barre de progression
               const percentage = Math.round((count / tickets.length) * 100);
               progressFill.style.width = percentage + '%';
               progressCount.textContent = count;
@@ -1331,31 +1330,31 @@ async function exportQRCodesPDF() {
             }
           }, 100);
           
-          // Timeout de sécurité
+          // Timeout de sÃ©curitÃ©
           setTimeout(() => {
             if (tempDiv.parentNode) document.body.removeChild(tempDiv);
             resolve();
           }, 3000);
         });
       } catch(e) {
-        console.error('Erreur génération QR:', e);
+        console.error('Erreur gÃ©nÃ©ration QR:', e);
       }
     }
     
-    // Masquer la modal et télécharger
+    // Masquer la modal et tÃ©lÃ©charger
     modal.classList.remove('active');
     doc.save('QRCodes_TheBrunch_' + new Date().toISOString().slice(0, 10) + '.pdf');
     
   } catch(e) {
     document.getElementById('progress-modal').classList.remove('active');
-    alert('Erreur lors de la génération du PDF: ' + e.message);
+    alert('Erreur lors de la gÃ©nÃ©ration du PDF: ' + e.message);
     console.error(e);
   }
 }
 
-// ─── ÉTAT GLOBAL ───
+// â”€â”€â”€ Ã‰TAT GLOBAL â”€â”€â”€
  
-// Supabase : remplacedz ces valeurs par votre URL et votre clé API
+// Supabase : remplacedz ces valeurs par votre URL et votre clÃ© API
 const SUPABASE_URL = 'https://rpmkyczwtufxldcnesqz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwbWt5Y3p3dHVmeGxkY25lc3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxOTg4ODUsImV4cCI6MjA5Mjc3NDg4NX0.Eu2PHTZ5hvF4Cgk36_00OA-JRpmwfDHYo2DgL2d2PWM';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1406,8 +1405,8 @@ function loadState() {
 
     const saved = JSON.parse(raw);
 
-    // Vérifier que tous les lots de LOT_CONFIG sont présents
-    // Si un lot manque (structure mise à jour), on fusionne
+    // VÃ©rifier que tous les lots de LOT_CONFIG sont prÃ©sents
+    // Si un lot manque (structure mise Ã  jour), on fusionne
     const fresh = buildFreshState();
     let needsMerge = false;
     for (const code of Object.keys(fresh)) {
@@ -1416,16 +1415,16 @@ function loadState() {
 
     if (!needsMerge) return saved;
 
-    // Fusionner : garder les données existantes, ajouter les manquants
+    // Fusionner : garder les donnÃ©es existantes, ajouter les manquants
     const merged = { ...fresh };
     for (const [code, ticket] of Object.entries(saved)) {
-      if (merged[code]) merged[code] = ticket; // préserver l'état (used, etc.)
+      if (merged[code]) merged[code] = ticket; // prÃ©server l'Ã©tat (used, etc.)
     }
     localStorage.setItem('brunch_tickets', JSON.stringify(merged));
     return merged;
 
   } catch(e) {
-    // localStorage corrompu ou indispo (mode privé iOS) → état frais en mémoire
+    // localStorage corrompu ou indispo (mode privÃ© iOS) â†’ Ã©tat frais en mÃ©moire
     return buildFreshState();
   }
 }
@@ -1437,7 +1436,7 @@ function saveState() {
 // Sauvegarder un ticket dans Supabase
 async function updateTicketInSupabase(code, used, usedAt) {
   try {
-    console.log('🔄 Mise à jour ticket Supabase:', { code, used, usedAt });
+    console.log('ðŸ”„ Mise Ã  jour ticket Supabase:', { code, used, usedAt });
     const { data, error } = await supabaseClient
       .from('tickets')
       .update({ used: used, used_at: usedAt })
@@ -1447,40 +1446,40 @@ async function updateTicketInSupabase(code, used, usedAt) {
     if (error) {
       // Ignorer les erreurs de colonne manquante
       if (error.code === 'PGRST204') {
-        console.warn('⚠️ Supabase non configurée - mode localStorage');
+        console.warn('âš ï¸ Supabase non configurÃ©e - mode localStorage');
         return null;
       }
-      console.warn('⚠️ Erreur Supabase update:', error.message);
+      console.warn('âš ï¸ Erreur Supabase update:', error.message);
       return null;
     }
-    console.log('✅ Ticket mis à jour');
+    console.log('âœ… Ticket mis Ã  jour');
     return data;
   } catch(e) {
-    console.warn('⚠️ Erreur mise à jour ticket:', e.message);
-    // Continuer même si Supabase échoue (données locales sont conservées)
+    console.warn('âš ï¸ Erreur mise Ã  jour ticket:', e.message);
+    // Continuer mÃªme si Supabase Ã©choue (donnÃ©es locales sont conservÃ©es)
     return null;
   }
 }
 
-// Charger l'état depuis Supabase
+// Charger l'Ã©tat depuis Supabase
 async function loadStateFromSupabase() {
   try {
-    console.log('📥 Chargement des tickets depuis Supabase...');
+    console.log('ðŸ“¥ Chargement des tickets depuis Supabase...');
     const { data, error } = await supabaseClient
       .from('tickets')
       .select('*');
     
     if (error) {
-      console.warn('⚠️ Erreur chargement Supabase:', error.message);
+      console.warn('âš ï¸ Erreur chargement Supabase:', error.message);
       return null;
     }
     
     if (!data || data.length === 0) {
-      console.log('⚠️ Aucun ticket dans Supabase');
+      console.log('âš ï¸ Aucun ticket dans Supabase');
       return null;
     }
     
-    // Convertir les données Supabase au format local
+    // Convertir les donnÃ©es Supabase au format local
     const tickets = {};
     data.forEach(row => {
       tickets[row.code] = {
@@ -1492,18 +1491,18 @@ async function loadStateFromSupabase() {
         usedAt: row.used_at
       };
     });
-    console.log('✅ Tickets chargés depuis Supabase:', data.length);
+    console.log('âœ… Tickets chargÃ©s depuis Supabase:', data.length);
     return tickets;
   } catch(e) {
-    console.warn('⚠️ Erreur chargement Supabase (fallback localStorage):', e.message);
+    console.warn('âš ï¸ Erreur chargement Supabase (fallback localStorage):', e.message);
     return null;
   }
 }
 
-// Créer les tickets dans Supabase
+// CrÃ©er les tickets dans Supabase
 async function createTicketsInSupabase() {
   try {
-    console.log('🆕 Création des tickets dans Supabase...');
+    console.log('ðŸ†• CrÃ©ation des tickets dans Supabase...');
     const ticketsToInsert = [];
     Object.values(state).forEach(ticket => {
       ticketsToInsert.push({
@@ -1515,7 +1514,7 @@ async function createTicketsInSupabase() {
       });
     });
     
-    // Faire l'insertion par batch (100 à la fois)
+    // Faire l'insertion par batch (100 Ã  la fois)
     for (let i = 0; i < ticketsToInsert.length; i += 100) {
       const batch = ticketsToInsert.slice(i, i + 100);
       const { data, error } = await supabaseClient
@@ -1524,26 +1523,26 @@ async function createTicketsInSupabase() {
         .select();
       
       if (error) {
-        // Si erreur de doublon, c'est OK (les tickets existent déjà)
+        // Si erreur de doublon, c'est OK (les tickets existent dÃ©jÃ )
         if (error.code === '23505') {
-          console.log('✅ Les tickets existent déjà dans Supabase (batch ' + (i/100 + 1) + ')');
+          console.log('âœ… Les tickets existent dÃ©jÃ  dans Supabase (batch ' + (i/100 + 1) + ')');
         } else if (error.code === 'PGRST204') {
-          // Colonne manquante - Supabase pas configurée correctement
-          console.warn('⚠️ Table Supabase mal configurée (colonne manquante)');
+          // Colonne manquante - Supabase pas configurÃ©e correctement
+          console.warn('âš ï¸ Table Supabase mal configurÃ©e (colonne manquante)');
           console.log('   Mode fallback: utilisation de localStorage uniquement');
           return false; // Signal que Supabase n'est pas disponible
         } else {
-          console.warn('⚠️ Erreur Supabase (batch ' + (i/100 + 1) + '):', error.message);
-          // Continuer même si ça échoue
+          console.warn('âš ï¸ Erreur Supabase (batch ' + (i/100 + 1) + '):', error.message);
+          // Continuer mÃªme si Ã§a Ã©choue
         }
       } else {
-        console.log('✅ Batch ' + (i/100 + 1) + ' tickets créés');
+        console.log('âœ… Batch ' + (i/100 + 1) + ' tickets crÃ©Ã©s');
       }
     }
-    console.log('✅ Tous les tickets sont dans Supabase (ou fallback local)');
+    console.log('âœ… Tous les tickets sont dans Supabase (ou fallback local)');
     return true;
   } catch(e) {
-    console.warn('⚠️ Exception création tickets:', e.message);
+    console.warn('âš ï¸ Exception crÃ©ation tickets:', e.message);
     console.log('   Utilisation de localStorage comme fallback');
     return false;
   }
@@ -1560,10 +1559,10 @@ async function loadScanLog() {
     
     if (error) {
       if (error.code === 'PGRST204' || error.message.includes('Could not find')) {
-        console.log('⚠️ Table scans non configurée - mode localStorage');
+        console.log('âš ï¸ Table scans non configurÃ©e - mode localStorage');
         throw new Error('Supabase not configured');
       }
-      console.warn('⚠️ Erreur chargement scans:', error.message);
+      console.warn('âš ï¸ Erreur chargement scans:', error.message);
       throw error;
     }
     
@@ -1576,10 +1575,10 @@ async function loadScanLog() {
       ts: row.scanned_at,
       id: row.id
     }));
-    console.log('✅ Scans chargés:', scans.length);
+    console.log('âœ… Scans chargÃ©s:', scans.length);
     return scans;
   } catch(e) {
-    console.warn('⚠️ Chargement scans Supabase échoué, utilisation localStorage:', e.message);
+    console.warn('âš ï¸ Chargement scans Supabase Ã©chouÃ©, utilisation localStorage:', e.message);
     const raw = localStorage.getItem('brunch_scanlog');
     return raw ? JSON.parse(raw) : [];
   }
@@ -1604,16 +1603,16 @@ async function saveScanToSupabase(code, ok, detail, timeStr, ts) {
     
     if (error) {
       if (error.code === 'PGRST204' || error.message.includes('Could not find')) {
-        console.warn('⚠️ Table scans non configurée - mode localStorage');
+        console.warn('âš ï¸ Table scans non configurÃ©e - mode localStorage');
         return;
       }
-      console.warn('⚠️ Erreur sauvegarde scan Supabase:', error.message);
-      // Continuer même si ça échoue
+      console.warn('âš ï¸ Erreur sauvegarde scan Supabase:', error.message);
+      // Continuer mÃªme si Ã§a Ã©choue
     } else {
-      console.log('✅ Scan enregistré');
+      console.log('âœ… Scan enregistrÃ©');
     }
   } catch(e) {
-    console.warn('⚠️ Exception sauvegarde scan:', e.message);
+    console.warn('âš ï¸ Exception sauvegarde scan:', e.message);
   }
 }
 
@@ -1624,56 +1623,56 @@ let scanInterval = null;
 let pendingConfirmation = null;
 let stateReady = false;
 
-// 🔥 IMMÉDIATEMENT charger les tickets de localStorage (synchrone)
+// ðŸ”¥ IMMÃ‰DIATEMENT charger les tickets de localStorage (synchrone)
 try {
   const raw = localStorage.getItem('brunch_tickets');
   if (raw) {
     state = JSON.parse(raw);
-    console.log('✅ Tickets chargés IMMÉDIATEMENT de localStorage:', Object.keys(state).length);
+    console.log('âœ… Tickets chargÃ©s IMMÃ‰DIATEMENT de localStorage:', Object.keys(state).length);
   }
 } catch(e) {
-  console.warn('⚠️ Erreur chargement localStorage');
+  console.warn('âš ï¸ Erreur chargement localStorage');
 }
 
-// Si state est vide après localStorage, créer les 620 tickets
+// Si state est vide aprÃ¨s localStorage, crÃ©er les 620 tickets
 if (Object.keys(state).length === 0) {
-  console.log('🆕 Création des 620 tickets frais...');
+  console.log('ðŸ†• CrÃ©ation des 620 tickets frais...');
   state = buildFreshState();
   localStorage.setItem('brunch_tickets', JSON.stringify(state));
-  console.log('✅ Tickets créés et sauvegardés');
+  console.log('âœ… Tickets crÃ©Ã©s et sauvegardÃ©s');
 }
 
 stateReady = true;
-console.log('✅ STATE PRÊT:', Object.keys(state).length, 'tickets disponibles');
+console.log('âœ… STATE PRÃŠT:', Object.keys(state).length, 'tickets disponibles');
 
 async function initializeTicketsSync() {
-  console.log('🎫 Initialisation de la synchro des tickets...');
-  updateSyncStatus('🔄 Chargement des données...');
+  console.log('ðŸŽ« Initialisation de la synchro des tickets...');
+  updateSyncStatus('ðŸ”„ Chargement des donnÃ©es...');
   
   try {
     const supabaseTickets = await loadStateFromSupabase();
     
     if (supabaseTickets) {
       state = supabaseTickets;
-      console.log('✅ Tickets chargés depuis Supabase');
+      console.log('âœ… Tickets chargÃ©s depuis Supabase');
     } else {
-      console.log('ℹ️ Chargement depuis localStorage');
+      console.log('â„¹ï¸ Chargement depuis localStorage');
       state = loadState();
-      await createTicketsInSupabase(); // Tentative de création (non-bloquante)
+      await createTicketsInSupabase(); // Tentative de crÃ©ation (non-bloquante)
     }
     
-    // Vérifier que state a bien des données
+    // VÃ©rifier que state a bien des donnÃ©es
     if (Object.keys(state).length === 0) {
-      console.warn('⚠️ State vide! Reconstruction...');
+      console.warn('âš ï¸ State vide! Reconstruction...');
       state = buildFreshState();
     }
     
     stateReady = true;
-    console.log('✅ State prêt avec', Object.keys(state).length, 'tickets');
+    console.log('âœ… State prÃªt avec', Object.keys(state).length, 'tickets');
     
-    updateSyncStatus('✅ Synchronisation active (localStorage)');
+    updateSyncStatus('âœ… Synchronisation active (localStorage)');
     
-    // ─── LISTENERS REAL-TIME SUPABASE (optionnels) ───
+    // â”€â”€â”€ LISTENERS REAL-TIME SUPABASE (optionnels) â”€â”€â”€
     try {
       // Listener tickets
       supabaseClient
@@ -1687,14 +1686,14 @@ async function initializeTicketsSync() {
               if (state[updatedTicket.code]) {
                 state[updatedTicket.code].used = updatedTicket.used;
                 state[updatedTicket.code].usedAt = updatedTicket.used_at;
-                console.log('📡 Ticket mis à jour en temps réel:', updatedTicket.code);
+                console.log('ðŸ“¡ Ticket mis Ã  jour en temps rÃ©el:', updatedTicket.code);
               }
               const view = document.querySelector('.view.active');
               if (view && view.id === 'view-dashboard') {
                 renderDashboard();
               }
             } catch(e) {
-              console.error('❌ Erreur traitement update ticket:', e);
+              console.error('âŒ Erreur traitement update ticket:', e);
             }
           }
         )
@@ -1708,14 +1707,14 @@ async function initializeTicketsSync() {
           { event: 'UPDATE', schema: 'public', table: 'resets' },
           async (payload) => {
             try {
-              console.log('🔄 Signal de réinitialisation reçu');
+              console.log('ðŸ”„ Signal de rÃ©initialisation reÃ§u');
               const fresh = buildFreshState();
               state = fresh;
               saveState();
               renderDashboard();
-              alert('✅ Système réinitialisé par un administrateur');
+              alert('âœ… SystÃ¨me rÃ©initialisÃ© par un administrateur');
             } catch(e) {
-              console.error('❌ Erreur traitement reset:', e);
+              console.error('âŒ Erreur traitement reset:', e);
             }
           }
         )
@@ -1739,7 +1738,7 @@ async function initializeTicketsSync() {
                 id: newScan.id
               };
               scanLog.unshift(entry);
-              console.log('📡 Nouveau scan reçu en temps réel:', newScan.code);
+              console.log('ðŸ“¡ Nouveau scan reÃ§u en temps rÃ©el:', newScan.code);
               displayLogItem(newScan.code, newScan.scanned, newScan.detail, newScan.time);
               updateScanCount();
               const view = document.querySelector('.view.active');
@@ -1747,26 +1746,26 @@ async function initializeTicketsSync() {
                 renderDashboard();
               }
             } catch(e) {
-              console.error('❌ Erreur traitement scan:', e);
+              console.error('âŒ Erreur traitement scan:', e);
             }
           }
         )
         .subscribe();
       
-      console.log('✅ Listeners Supabase en place');
+      console.log('âœ… Listeners Supabase en place');
     } catch(e) {
-      console.warn('⚠️ Erreur configuration listeners Supabase:', e.message);
+      console.warn('âš ï¸ Erreur configuration listeners Supabase:', e.message);
       console.log('   Application continue en mode offline');
     }
     
     scanLog = await loadScanLog();
     
   } catch(e) {
-    console.error('❌ Erreur initialisation:', e);
-    console.log('⚠️ Mode dégradé: utilisation de localStorage uniquement');
+    console.error('âŒ Erreur initialisation:', e);
+    console.log('âš ï¸ Mode dÃ©gradÃ©: utilisation de localStorage uniquement');
     state = loadState();
     scanLog = [];
-    updateSyncStatus('⚠️ Mode offline (localStorage)');
+    updateSyncStatus('âš ï¸ Mode offline (localStorage)');
   }
 }
 
@@ -1775,11 +1774,11 @@ function updateSyncStatus(message) {
   if (el) el.textContent = message;
 }
 
-// ─── RÉINITIALISATION ADMIN ───
+// â”€â”€â”€ RÃ‰INITIALISATION ADMIN â”€â”€â”€
 
 function openResetModal() {
   if (!isLoggedIn) {
-    alert('❌ Vous devez être connecté');
+    alert('âŒ Vous devez Ãªtre connectÃ©');
     return;
   }
   document.getElementById('reset-modal').classList.add('active');
@@ -1796,45 +1795,45 @@ async function confirmReset() {
   const password = document.getElementById('reset-password').value;
   
   if (!password) {
-    alert('⚠️ Veuillez entrer le mot de passe');
+    alert('âš ï¸ Veuillez entrer le mot de passe');
     return;
   }
 
-  // Vérifier le mot de passe admin
+  // VÃ©rifier le mot de passe admin
   const adminPassword = 'admin@brunch2024';
   if (simpleHash(password) !== simpleHash(adminPassword)) {
-    alert('❌ Mot de passe incorrect');
+    alert('âŒ Mot de passe incorrect');
     document.getElementById('reset-password').value = '';
     return;
   }
 
-  if (!confirm('⚠️ ATTENTION !\n\nCette action réinitialisera TOUS les tickets et scans.\nCette action est irréversible !\n\nContinuer ?')) {
+  if (!confirm('âš ï¸ ATTENTION !\n\nCette action rÃ©initialisera TOUS les tickets et scans.\nCette action est irrÃ©versible !\n\nContinuer ?')) {
     return;
   }
 
   try {
-    console.log('🔄 Réinitialisation en cours...');
+    console.log('ðŸ”„ RÃ©initialisation en cours...');
     
-    // 1. Réinitialiser en localStorage
+    // 1. RÃ©initialiser en localStorage
     state = buildFreshState();
     saveState();
     scanLog = [];
     localStorage.removeItem('brunch_scanlog');
     
-    // 2. Réinitialiser dans Supabase
+    // 2. RÃ©initialiser dans Supabase
     try {
       // Supprimer tous les scans
       await supabaseClient.from('scans').delete().neq('id', '-1');
-      console.log('✅ Scans supprimés');
+      console.log('âœ… Scans supprimÃ©s');
       
-      // Réinitialiser tous les tickets
+      // RÃ©initialiser tous les tickets
       const ticketsToUpdate = Object.values(state).map(t => ({
         code: t.code,
         used: false,
         used_at: null
       }));
       
-      // Faire les mises à jour par batch (100 à la fois pour éviter les timeout)
+      // Faire les mises Ã  jour par batch (100 Ã  la fois pour Ã©viter les timeout)
       for (let i = 0; i < ticketsToUpdate.length; i += 100) {
         const batch = ticketsToUpdate.slice(i, i + 100);
         await Promise.all(batch.map(ticket => 
@@ -1844,31 +1843,31 @@ async function confirmReset() {
             .eq('code', ticket.code)
         ));
       }
-      console.log('✅ Tous les tickets réinitialisés');
+      console.log('âœ… Tous les tickets rÃ©initialisÃ©s');
       
-      // Signal de réinitialisation pour les autres clients (inscrire un événement reset)
+      // Signal de rÃ©initialisation pour les autres clients (inscrire un Ã©vÃ©nement reset)
       await supabaseClient.from('resets').insert([{
         reset_by: currentUser,
         reset_at: new Date().toISOString()
       }]).select();
-      console.log('✅ Signal de réinitialisation envoyé');
+      console.log('âœ… Signal de rÃ©initialisation envoyÃ©');
       
     } catch(e) {
-      console.warn('⚠️ Erreur Supabase (mais local OK):', e);
+      console.warn('âš ï¸ Erreur Supabase (mais local OK):', e);
     }
     
-    // 3. Afficher le résultat
+    // 3. Afficher le rÃ©sultat
     renderDashboard();
     closeResetModal();
-    alert('✅ Réinitialisation complète !\n\nTous les tickets et scans ont été annulés.');
+    alert('âœ… RÃ©initialisation complÃ¨te !\n\nTous les tickets et scans ont Ã©tÃ© annulÃ©s.');
     
   } catch(e) {
-    console.error('❌ Erreur réinitialisation:', e);
-    alert('❌ Erreur lors de la réinitialisation: ' + e.message);
+    console.error('âŒ Erreur rÃ©initialisation:', e);
+    alert('âŒ Erreur lors de la rÃ©initialisation: ' + e.message);
   }
 }
 
-// ─── NAVIGATION ───
+// â”€â”€â”€ NAVIGATION â”€â”€â”€
 function showView(name, btn) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -1878,16 +1877,16 @@ function showView(name, btn) {
   if (name !== 'scanner') stopCamera();
 }
 
-// ─── LOT CHANGE ───
+// â”€â”€â”€ LOT CHANGE â”€â”€â”€
 function onLotChange(lot) {
   const typeSelect = document.getElementById('sel-type');
   if (lot !== 'ALL' && LOT_CONFIG[lot]) {
     const cfg = LOT_CONFIG[lot];
     typeSelect.value = cfg.type;
-    // Désactiver le sélecteur si le type est fixe (VIP uniquement pour U)
-    const isLocked = true; // tous les lots sont verrouillés sur leur type
+    // DÃ©sactiver le sÃ©lecteur si le type est fixe (VIP uniquement pour U)
+    const isLocked = true; // tous les lots sont verrouillÃ©s sur leur type
     typeSelect.disabled = isLocked;
-    typeSelect.title = isLocked ? `Ce lot est réservé ${cfg.type} — type non modifiable` : '';
+    typeSelect.title = isLocked ? `Ce lot est rÃ©servÃ© ${cfg.type} â€” type non modifiable` : '';
     typeSelect.style.opacity = isLocked ? '0.5' : '1';
     typeSelect.style.cursor = isLocked ? 'not-allowed' : '';
   } else {
@@ -1898,7 +1897,7 @@ function onLotChange(lot) {
   }
 }
 
-// ─── DASHBOARD ───
+// â”€â”€â”€ DASHBOARD â”€â”€â”€
 function renderDashboard() {
   const all = Object.values(state);
   const total = all.length;
@@ -1910,17 +1909,17 @@ function renderDashboard() {
     <div class="stat-card">
       <div class="stat-label">Total tickets</div>
       <div class="stat-value">${total}</div>
-      <div class="stat-sub">A–T: 30 std · U: 20 VIP</div>
+      <div class="stat-sub">Aâ€“T: 30 std Â· U: 20 VIP</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Validés</div>
+      <div class="stat-label">ValidÃ©s</div>
       <div class="stat-value" style="color:var(--success)">${used}</div>
       <div class="stat-sub">${((used/total)*100).toFixed(1)}% du total</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Disponibles</div>
       <div class="stat-value">${total - used}</div>
-      <div class="stat-sub">non encore scannés</div>
+      <div class="stat-sub">non encore scannÃ©s</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Standard</div>
@@ -1955,15 +1954,15 @@ function renderDashboard() {
     const cfg = LOT_CONFIG[lot];
     div.innerHTML = `
       <div class="lot-letter">Lot ${lot}</div>
-      <div class="lot-title"><span class="ticket-type ${cfg.type.toLowerCase()}" style="font-size:9px;padding:1px 6px">${cfg.type}</span> · ${tickets.length} tickets</div>
+      <div class="lot-title"><span class="ticket-type ${cfg.type.toLowerCase()}" style="font-size:9px;padding:1px 6px">${cfg.type}</span> Â· ${tickets.length} tickets</div>
       <div class="lot-progress-bar"><div class="lot-progress-fill" style="width:${pct}%"></div></div>
-      <div class="lot-counts"><span>${usedCount} validés</span><span>${tickets.length - usedCount} restants</span></div>
+      <div class="lot-counts"><span>${usedCount} validÃ©s</span><span>${tickets.length - usedCount} restants</span></div>
     `;
     lotsGrid.appendChild(div);
   });
 }
 
-// ─── GENERATOR ───
+// â”€â”€â”€ GENERATOR â”€â”€â”€
 function generateTickets() {
   try {
     const lot = document.getElementById('sel-lot').value;
@@ -1982,14 +1981,14 @@ function generateTickets() {
     // Type: for specific lot, override sauf si le lot a un type fixe (ex: U=VIP)
     const isAllLots = (lot === 'ALL');
     if (!isAllLots) {
-      // Type toujours dicté par LOT_CONFIG, le sélecteur est informatif uniquement
+      // Type toujours dictÃ© par LOT_CONFIG, le sÃ©lecteur est informatif uniquement
       const lockedType = LOT_CONFIG[lot].type;
       tickets.forEach(t => { t.type = lockedType; });
       document.getElementById('sel-type').value = lockedType;
     }
     saveState();
 
-    info.textContent = `${tickets.length} ticket(s) — Lot ${isAllLots ? 'A–U' : lot} — ${isAllLots ? 'multi-type' : type}`;
+    info.textContent = `${tickets.length} ticket(s) â€” Lot ${isAllLots ? 'Aâ€“U' : lot} â€” ${isAllLots ? 'multi-type' : type}`;
 
     tickets.forEach(t => {
       const tType = t.type;
@@ -2000,8 +1999,8 @@ function generateTickets() {
         <span class="ticket-code">${t.code}</span>
         <span class="ticket-type ${tType.toLowerCase()}">${tType}</span>
         <div class="qr-container" id="qr-${t.code}"></div>
-        <span class="ticket-status ${t.used ? 'used' : ''}">${t.used ? '✓ Validé' : '● Disponible'}</span>
-        <button class="tick-btn" title="Marquer comme utilisé" onclick="toggleUsed('${t.code}')">✕</button>
+        <span class="ticket-status ${t.used ? 'used' : ''}">${t.used ? 'âœ“ ValidÃ©' : 'â— Disponible'}</span>
+        <button class="tick-btn" title="Marquer comme utilisÃ©" onclick="toggleUsed('${t.code}')">âœ•</button>
       `;
       grid.appendChild(card);
 
@@ -2014,12 +2013,12 @@ function generateTickets() {
           correctLevel: QRCode.CorrectLevel.M
         });
       } catch(e) {
-        console.warn('⚠️ Erreur génération QR:', t.code, e);
+        console.warn('âš ï¸ Erreur gÃ©nÃ©ration QR:', t.code, e);
       }
     });
   } catch(e) {
-    console.error('❌ Erreur generateTickets:', e);
-    alert('❌ Erreur génération tickets: ' + e.message);
+    console.error('âŒ Erreur generateTickets:', e);
+    alert('âŒ Erreur gÃ©nÃ©ration tickets: ' + e.message);
   }
 }
 
@@ -2029,26 +2028,26 @@ function toggleUsed(code) {
     state[code].usedAt = state[code].used ? new Date().toISOString() : null;
     saveState();
     
-    // Mettre à jour dans Supabase (asynchrone)
+    // Mettre Ã  jour dans Supabase (asynchrone)
     updateTicketInSupabase(code, state[code].used, state[code].usedAt);
     
     const card = document.getElementById('tcard-' + code);
     if (card) {
       card.className = 'ticket-card' + (state[code].used ? ' used' : '');
-      card.querySelector('.ticket-status').textContent = state[code].used ? '✓ Validé' : '● Disponible';
+      card.querySelector('.ticket-status').textContent = state[code].used ? 'âœ“ ValidÃ©' : 'â— Disponible';
       card.querySelector('.ticket-status').className = 'ticket-status' + (state[code].used ? ' used' : '');
     }
   } catch(e) {
-    console.error('❌ Erreur toggleUsed:', e);
+    console.error('âŒ Erreur toggleUsed:', e);
   }
 }
 
 function clearDisplay() {
-  document.getElementById('ticket-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">🎟️</div><p>Sélectionne un lot et clique sur Générer</p></div>';
+  document.getElementById('ticket-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">ðŸŽŸï¸</div><p>SÃ©lectionne un lot et clique sur GÃ©nÃ©rer</p></div>';
   document.getElementById('gen-info').textContent = '';
 }
 
-// ─── SCANNER ───
+// â”€â”€â”€ SCANNER â”€â”€â”€
 function toggleCamera() {
   if (cameraStream) { stopCamera(); return; }
   startCamera();
@@ -2062,28 +2061,28 @@ function setCamStatus(msg, color) {
 async function startCamera() {
   const btn = document.getElementById('btn-cam');
   btn.disabled = true;
-  setCamStatus('Demande d\'autorisation caméra…', '#888');
+  setCamStatus('Demande d\'autorisation camÃ©raâ€¦', '#888');
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    setCamStatus('❌ Caméra non supportée. Utilise Safari (iOS) ou Chrome (Android).', 'var(--error)');
+    setCamStatus('âŒ CamÃ©ra non supportÃ©e. Utilise Safari (iOS) ou Chrome (Android).', 'var(--error)');
     btn.disabled = false;
     return;
   }
 
-  // Vérifier jsQR
+  // VÃ©rifier jsQR
   if (typeof window.jsQR !== 'function') {
-    console.error('❌ jsQR n\'est pas chargé!');
-    setCamStatus('⚠️ Librairie de scan en cours de chargement... Essaie dans 2 secondes.', '#e67e22');
+    console.error('âŒ jsQR n\'est pas chargÃ©!');
+    setCamStatus('âš ï¸ Librairie de scan en cours de chargement... Essaie dans 2 secondes.', '#e67e22');
     btn.disabled = false;
     return;
   }
 
-  // Vérifier permissions sur Android
+  // VÃ©rifier permissions sur Android
   if (navigator.permissions && /Android/.test(navigator.userAgent)) {
     try {
       const perm = await navigator.permissions.query({ name: 'camera' });
       if (perm.state === 'denied') {
-        setCamStatus('❌ Permission caméra refusée. Va dans Réglages pour autoriser.', 'var(--error)');
+        setCamStatus('âŒ Permission camÃ©ra refusÃ©e. Va dans RÃ©glages pour autoriser.', 'var(--error)');
         btn.disabled = false;
         return;
       }
@@ -2091,7 +2090,7 @@ async function startCamera() {
   }
 
   try {
-    // Essayer avec des contraintes adaptées au mobile
+    // Essayer avec des contraintes adaptÃ©es au mobile
     const constraints = {
       video: {
         facingMode: { ideal: 'environment' },
@@ -2106,24 +2105,24 @@ async function startCamera() {
     const video = document.getElementById('video-preview');
     video.srcObject = cameraStream;
     
-    // Attendre que la vidéo soit prête
+    // Attendre que la vidÃ©o soit prÃªte
     await new Promise((resolve) => {
       video.onloadedmetadata = () => {
         video.play().catch(() => {});
         resolve();
       };
-      setTimeout(resolve, 2000); // Timeout de sécurité
+      setTimeout(resolve, 2000); // Timeout de sÃ©curitÃ©
     });
     
-    btn.textContent = '⏹ Arrêter la caméra';
+    btn.textContent = 'â¹ ArrÃªter la camÃ©ra';
     btn.disabled = false;
-    setCamStatus('✅ Caméra active — pointez vers un QR code', 'var(--success)');
+    setCamStatus('âœ… CamÃ©ra active â€” pointez vers un QR code', 'var(--success)');
 
-    console.log('📷 Caméra activée');
-    console.log('   Résolution:', video.videoWidth, 'x', video.videoHeight);
+    console.log('ðŸ“· CamÃ©ra activÃ©e');
+    console.log('   RÃ©solution:', video.videoWidth, 'x', video.videoHeight);
     console.log('   jsQR type:', typeof window.jsQR);
 
-    // Démarrer la boucle de scan
+    // DÃ©marrer la boucle de scan
     const canvas = document.createElement('canvas');
     let lastCode = null;
     let lastCodeTime = 0;
@@ -2131,7 +2130,7 @@ async function startCamera() {
     
     scanInterval = setInterval(() => {
       try {
-        // Vérifier que la vidéo est prête et a une résolution valide
+        // VÃ©rifier que la vidÃ©o est prÃªte et a une rÃ©solution valide
         if (video.readyState !== video.HAVE_ENOUGH_DATA || video.videoWidth === 0) {
           return;
         }
@@ -2140,61 +2139,61 @@ async function startCamera() {
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
         
-        // Ajouter un peu de flou pour améliorer la détection
+        // Ajouter un peu de flou pour amÃ©liorer la dÃ©tection
         ctx.filter = 'brightness(1.1) contrast(1.1)';
         ctx.drawImage(video, 0, 0);
         
         const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
         try {
-          // Essayer avec différents modes de scan
+          // Essayer avec diffÃ©rents modes de scan
           let qr = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
           
           if (qr && qr.data) {
             const now = Date.now();
-            // Déduplica: ignorer si le même code dans les 2 dernières secondes
+            // DÃ©duplica: ignorer si le mÃªme code dans les 2 derniÃ¨res secondes
             if (qr.data !== lastCode || now - lastCodeTime > 2000) {
               lastCode = qr.data;
               lastCodeTime = now;
               noQRCount = 0;
-              console.log('🎯 QR détecté:', qr.data);
+              console.log('ðŸŽ¯ QR dÃ©tectÃ©:', qr.data);
               const parts = qr.data.split('|');
               validateCode(parts[0]);
             }
           } else {
             noQRCount++;
-            // Feedback tous les 5 secondes si aucun QR détecté
+            // Feedback tous les 5 secondes si aucun QR dÃ©tectÃ©
             if (noQRCount > 200) { // 200 * 250ms = 50 secondes
-              setCamStatus('💡 Pointez le QR code mieux vers la caméra...', '#e67e22');
+              setCamStatus('ðŸ’¡ Pointez le QR code mieux vers la camÃ©ra...', '#e67e22');
               noQRCount = 0;
             }
           }
         } catch(qrError) {
-          console.warn('⚠️ Erreur jsQR:', qrError.message);
+          console.warn('âš ï¸ Erreur jsQR:', qrError.message);
         }
       } catch(e) {
-        console.error('❌ Erreur boucle scan:', e);
+        console.error('âŒ Erreur boucle scan:', e);
       }
     }, 250);
     
-    console.log('✅ Boucle de scan lancée (250ms interval)');
+    console.log('âœ… Boucle de scan lancÃ©e (250ms interval)');
     
   } catch(e) {
-    console.error('❌ Erreur startCamera:', e);
+    console.error('âŒ Erreur startCamera:', e);
     btn.disabled = false;
-    btn.textContent = '▶ Activer la caméra';
+    btn.textContent = 'â–¶ Activer la camÃ©ra';
     
-    // Messages d'erreur détaillés
+    // Messages d'erreur dÃ©taillÃ©s
     if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-      setCamStatus('❌ Permission caméra refusée. Clique sur l\'icône de caméra refusée en haut et autorise.', 'var(--error)');
+      setCamStatus('âŒ Permission camÃ©ra refusÃ©e. Clique sur l\'icÃ´ne de camÃ©ra refusÃ©e en haut et autorise.', 'var(--error)');
     } else if (e.name === 'NotFoundError' || e.message.includes('no camera')) {
-      setCamStatus('❌ Aucune caméra détectée sur cet appareil.', 'var(--error)');
+      setCamStatus('âŒ Aucune camÃ©ra dÃ©tectÃ©e sur cet appareil.', 'var(--error)');
     } else if (e.name === 'NotReadableError' || e.message.includes('already in use')) {
-      setCamStatus('❌ Caméra déjà utilisée. Ferme les autres apps et réessaie.', 'var(--error)');
+      setCamStatus('âŒ CamÃ©ra dÃ©jÃ  utilisÃ©e. Ferme les autres apps et rÃ©essaie.', 'var(--error)');
     } else if (e.name === 'TypeError') {
-      setCamStatus('❌ Erreur de configuration caméra. Rafraîchis la page.', 'var(--error)');
+      setCamStatus('âŒ Erreur de configuration camÃ©ra. RafraÃ®chis la page.', 'var(--error)');
     } else {
-      setCamStatus('❌ ' + e.message, 'var(--error)');
+      setCamStatus('âŒ ' + e.message, 'var(--error)');
     }
   }
 }
@@ -2203,7 +2202,7 @@ function stopCamera() {
   if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
   if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
   const btn = document.getElementById('btn-cam');
-  if (btn) { btn.textContent = '▶ Activer la caméra'; btn.disabled = false; }
+  if (btn) { btn.textContent = 'â–¶ Activer la camÃ©ra'; btn.disabled = false; }
   setCamStatus('', '#888');
 }
 
@@ -2211,15 +2210,15 @@ function validateCode(rawCode) {
   try {
     if (!rawCode) return;
     
-    // Vérifier que state est bien chargé
+    // VÃ©rifier que state est bien chargÃ©
     if (!stateReady || Object.keys(state).length === 0) {
-      console.warn('⚠️ State pas encore prêt, chargement d\'urgence...');
+      console.warn('âš ï¸ State pas encore prÃªt, chargement d\'urgence...');
       state = loadState();
       if (Object.keys(state).length === 0) {
         state = buildFreshState();
       }
       stateReady = true;
-      console.log('✅ State chargé d\'urgence:', Object.keys(state).length, 'tickets');
+      console.log('âœ… State chargÃ© d\'urgence:', Object.keys(state).length, 'tickets');
     }
     
     const code = rawCode.trim().toUpperCase();
@@ -2228,38 +2227,38 @@ function validateCode(rawCode) {
     const result = document.getElementById('scan-result');
     result.style.display = 'block';
 
-    console.log('🔍 Recherche code:', code, '| State size:', Object.keys(state).length);
+    console.log('ðŸ” Recherche code:', code, '| State size:', Object.keys(state).length);
     const ticket = state[code];
     if (!ticket) {
-      console.error('❌ Code non trouvé:', code);
+      console.error('âŒ Code non trouvÃ©:', code);
       console.log('   Codes disponibles (premiers):', Object.keys(state).slice(0, 5));
       result.className = 'scan-result invalid';
-      result.innerHTML = `<div class="result-icon">❌</div><div class="result-title">Code invalide</div><div class="result-code">${code}</div><div class="result-detail">Ce code n'existe pas dans la base (${Object.keys(state).length} codes).</div>`;
+      result.innerHTML = `<div class="result-icon">âŒ</div><div class="result-title">Code invalide</div><div class="result-code">${code}</div><div class="result-detail">Ce code n'existe pas dans la base (${Object.keys(state).length} codes).</div>`;
       addLog(code, false, 'Code inconnu');
       return;
     }
     
-    console.log('✅ Ticket trouvé:', ticket);
+    console.log('âœ… Ticket trouvÃ©:', ticket);
     if (ticket.used) {
       result.className = 'scan-result already';
-      result.innerHTML = `<div class="result-icon">⚠️</div><div class="result-title">Déjà validé</div><div class="result-code">${code}</div><div class="result-detail">Ce ticket a déjà été utilisé.<br>Type : ${ticket.type} — Lot ${ticket.lot}</div>`;
-      addLog(code, false, 'Déjà utilisé');
+      result.innerHTML = `<div class="result-icon">âš ï¸</div><div class="result-title">DÃ©jÃ  validÃ©</div><div class="result-code">${code}</div><div class="result-detail">Ce ticket a dÃ©jÃ  Ã©tÃ© utilisÃ©.<br>Type : ${ticket.type} â€” Lot ${ticket.lot}</div>`;
+      addLog(code, false, 'DÃ©jÃ  utilisÃ©');
       return;
     }
 
     // Afficher la modal de confirmation
     showConfirmationModal(code, ticket);
   } catch(e) {
-    console.error('❌ Erreur validateCode:', e);
+    console.error('âŒ Erreur validateCode:', e);
   }
 }
 
 function showConfirmationModal(code, ticket) {
   pendingConfirmation = { code, ticket };
-  document.getElementById('modal-icon').textContent = '🎟️';
-  document.getElementById('modal-title').textContent = 'Confirmer l\'entrée ?';
+  document.getElementById('modal-icon').textContent = 'ðŸŽŸï¸';
+  document.getElementById('modal-title').textContent = 'Confirmer l\'entrÃ©e ?';
   document.getElementById('modal-code').textContent = code;
-  document.getElementById('modal-detail').innerHTML = `<strong>${ticket.type}</strong> — Lot <strong>${ticket.lot}</strong><br>Ticket n° ${ticket.num}`;
+  document.getElementById('modal-detail').innerHTML = `<strong>${ticket.type}</strong> â€” Lot <strong>${ticket.lot}</strong><br>Ticket nÂ° ${ticket.num}`;
   document.getElementById('confirmation-modal').classList.add('active');
 }
 
@@ -2269,25 +2268,25 @@ function confirmTicket() {
   const { code, ticket } = pendingConfirmation;
   
   try {
-    // Marquer comme utilisé
+    // Marquer comme utilisÃ©
     ticket.used = true;
     ticket.usedAt = new Date().toISOString();
     saveState();
     
-    // Mettre à jour dans Supabase (asynchrone)
+    // Mettre Ã  jour dans Supabase (asynchrone)
     updateTicketInSupabase(code, true, ticket.usedAt);
     
-    // Mettre à jour l'affichage du résultat
+    // Mettre Ã  jour l'affichage du rÃ©sultat
     const result = document.getElementById('scan-result');
     result.className = 'scan-result valid';
-    result.innerHTML = `<div class="result-icon">✅</div><div class="result-title">Entrée validée !</div><div class="result-code">${code}</div><div class="result-detail">Type : <strong>${ticket.type}</strong> — Lot <strong>${ticket.lot}</strong><br>Ticket n° ${ticket.num}</div>`;
+    result.innerHTML = `<div class="result-icon">âœ…</div><div class="result-title">EntrÃ©e validÃ©e !</div><div class="result-code">${code}</div><div class="result-detail">Type : <strong>${ticket.type}</strong> â€” Lot <strong>${ticket.lot}</strong><br>Ticket nÂ° ${ticket.num}</div>`;
     addLog(code, true, ticket.type);
     
     // Fermer la modal
     closeConfirmationModal();
   } catch(e) {
-    console.error('❌ Erreur confirmation ticket:', e);
-    alert('❌ Erreur lors de la validation: ' + e.message);
+    console.error('âŒ Erreur confirmation ticket:', e);
+    alert('âŒ Erreur lors de la validation: ' + e.message);
   }
 }
 
@@ -2296,11 +2295,11 @@ function refuseTicket() {
   
   const { code, ticket } = pendingConfirmation;
   
-  // Afficher le résultat de refus
+  // Afficher le rÃ©sultat de refus
   const result = document.getElementById('scan-result');
   result.className = 'scan-result invalid';
-  result.innerHTML = `<div class="result-icon">❌</div><div class="result-title">Entrée refusée</div><div class="result-code">${code}</div><div class="result-detail">Cette entrée a été refusée.<br>Type : ${ticket.type} — Lot ${ticket.lot}</div>`;
-  addLog(code, false, 'Refusé');
+  result.innerHTML = `<div class="result-icon">âŒ</div><div class="result-title">EntrÃ©e refusÃ©e</div><div class="result-code">${code}</div><div class="result-detail">Cette entrÃ©e a Ã©tÃ© refusÃ©e.<br>Type : ${ticket.type} â€” Lot ${ticket.lot}</div>`;
+  addLog(code, false, 'RefusÃ©');
   
   // Fermer la modal
   closeConfirmationModal();
@@ -2323,7 +2322,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.target === this) closeResetModal();
   });
   
-  // Fermer les modals à la touche Escape
+  // Fermer les modals Ã  la touche Escape
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       closeConfirmationModal();
@@ -2351,7 +2350,7 @@ function addLog(code, ok, detail) {
     displayLogItem(code, ok, detail, timeStr);
     updateScanCount();
   } catch(e) {
-    console.error('❌ Erreur ajout log:', e);
+    console.error('âŒ Erreur ajout log:', e);
   }
 }
 
@@ -2363,7 +2362,7 @@ function displayLogItem(code, ok, detail, timeStr) {
   item.innerHTML = `
     <span class="log-code">${code}</span>
     <span style="font-size:11px;color:#888">${detail}</span>
-    <span class="log-badge ${ok ? 'ok' : 'fail'}">${ok ? '✓ OK' : '✕ Refus'}</span>
+    <span class="log-badge ${ok ? 'ok' : 'fail'}">${ok ? 'âœ“ OK' : 'âœ• Refus'}</span>
     <span class="log-time">${timeStr}</span>
   `;
   log.prepend(item);
@@ -2372,13 +2371,13 @@ function displayLogItem(code, ok, detail, timeStr) {
 function updateScanCount() {
   const count = document.getElementById('scan-count');
   const validated = scanLog.filter(l => l.ok).length;
-  count.textContent = `${validated} validé(s)`;
+  count.textContent = `${validated} validÃ©(s)`;
 }
 
-// ─── INIT ───
+// â”€â”€â”€ INIT â”€â”€â”€
 (async () => {
   try {
-    console.log('🚀 Démarrage de l\'application The Brunch...');
+    console.log('ðŸš€ DÃ©marrage de l\'application The Brunch...');
     
     // Attendre le chargement de jsQR (max 8 secondes avec retry)
     let waitTime = 0;
@@ -2393,15 +2392,15 @@ function updateScanCount() {
       waitTime += 200;
     }
     
-    // Vérifier les librairies
-    console.log('📦 Vérification des librairies:');
-    console.log('   - QRCode (génération):', typeof QRCode);
-    console.log('   - jsQR (lecture):', typeof window.jsQR, jsQRLoaded ? '✅' : '❌');
+    // VÃ©rifier les librairies
+    console.log('ðŸ“¦ VÃ©rification des librairies:');
+    console.log('   - QRCode (gÃ©nÃ©ration):', typeof QRCode);
+    console.log('   - jsQR (lecture):', typeof window.jsQR, jsQRLoaded ? 'âœ…' : 'âŒ');
     console.log('   - Supabase:', typeof supabase);
     
-    // Si jsQR n'est pas chargé, essayer le fallback
+    // Si jsQR n'est pas chargÃ©, essayer le fallback
     if (!jsQRLoaded || typeof window.jsQR !== 'function') {
-      console.warn('⚠️ jsQR pas chargé du CDN principal, tentative fallback...');
+      console.warn('âš ï¸ jsQR pas chargÃ© du CDN principal, tentative fallback...');
       
       // Essayer le CDN alternatif
       const script = document.createElement('script');
@@ -2409,40 +2408,39 @@ function updateScanCount() {
       script.async = true;
       
       script.onload = async () => {
-        console.log('✅ jsQR chargé depuis fallback CDN');
+        console.log('âœ… jsQR chargÃ© depuis fallback CDN');
         await initializeTicketsSync();
         checkAuthentication();
-        console.log('✅ Application prête (mode fallback) !');
+        console.log('âœ… Application prÃªte (mode fallback) !');
       };
       
       script.onerror = () => {
-        console.error('❌ Impossible de charger jsQR. Scanner QR désactivé.');
-        console.log('ℹ️ Utilise l\'entrée manuelle pour les codes');
-        // Continuer quand même
+        console.error('âŒ Impossible de charger jsQR. Scanner QR dÃ©sactivÃ©.');
+        console.log('â„¹ï¸ Utilise l\'entrÃ©e manuelle pour les codes');
+        // Continuer quand mÃªme
         initializeTicketsSync().then(() => {
           checkAuthentication();
-          console.log('✅ Application prête (sans scanner QR) !');
+          console.log('âœ… Application prÃªte (sans scanner QR) !');
         });
       };
       
       document.head.appendChild(script);
     } else {
-      console.log('✅ jsQR chargé avec succès du CDN principal!');
+      console.log('âœ… jsQR chargÃ© avec succÃ¨s du CDN principal!');
       await initializeTicketsSync();
-      console.log('✅ Synchronisation tickets OK, State prêt:', stateReady);
       checkAuthentication();
-      console.log('✅ Application prête !');
+      console.log('âœ… Application prÃªte !');
     }
     
   } catch(e) {
-    console.error('❌ Erreur initialisation:', e);
-    // Continuer quand même
+    console.error('âŒ Erreur initialisation:', e);
+    // Continuer quand mÃªme
     try {
       await initializeTicketsSync();
       checkAuthentication();
-      console.log('✅ Application prête (mode dégradé) !');
+      console.log('âœ… Application prÃªte (mode dÃ©gradÃ©) !');
     } catch(e2) {
-      console.error('❌ Erreur critique:', e2);
+      console.error('âŒ Erreur critique:', e2);
     }
   }
 })();
