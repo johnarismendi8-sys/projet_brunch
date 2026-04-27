@@ -791,47 +791,68 @@
   }
 
   /* ─── DESKTOP OVERRIDES ─── */
-  @media (min-width: 700px) {
-    .view { padding: 32px; }
-    .header-inner { padding: 12px 32px; }
-    .brand-name { font-size: 22px; }
-    .brand-icon { width: 40px; height: 40px; font-size: 18px; }
-    .nav-tab { padding: 8px 18px; font-size: 13px; }
-    .stats-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
-    .stat-value { font-size: 28px; }
-    .lots-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-    .lot-letter { font-size: 32px; }
-    .gen-controls { flex-direction: row; flex-wrap: wrap; }
-    .ctrl-group { flex-direction: column; }
-    select, input[type=number] { font-size: 14px; }
-    .ticket-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-height: 60vh; overflow-y: auto; }
-    .qr-container canvas, .qr-container img { width: 100px !important; height: 100px !important; }
-    .scanner-layout { flex-direction: row; max-width: 900px; margin: 0 auto; }
+  @media (min-width: 768px) {
+    body { font-size: 16px; }
+    .view { padding: 32px 40px; }
+    .header-inner { padding: 14px 40px; }
+    .brand-name { font-size: 24px; }
+    .brand-icon { width: 44px; height: 44px; font-size: 20px; }
+    .nav-tab { padding: 9px 20px; font-size: 14px; min-height: 40px; }
+    .stats-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px; }
+    .stat-card { padding: 18px; }
+    .stat-value { font-size: 32px; }
+    .lots-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+    .lot-card { padding: 18px; }
+    .lot-letter { font-size: 36px; }
+    .gen-controls { flex-direction: row; flex-wrap: wrap; gap: 16px; }
+    .ctrl-group { flex: 1; min-width: 250px; }
+    .gen-btn-row { width: 100%; }
+    select, input[type=number] { font-size: 15px; padding: 12px 16px; }
+    .ticket-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); max-height: 65vh; overflow-y: auto; gap: 14px; }
+    .ticket-card { padding: 14px; gap: 10px; }
+    .qr-container canvas, .qr-container img { width: 110px !important; height: 110px !important; }
+    .section-title { font-size: 28px; margin-bottom: 8px; }
+    .section-sub { font-size: 15px; margin-bottom: 24px; }
+    .dashboard-header { flex-wrap: nowrap; }
+    /* Scanner Layout */
+    .scanner-layout { flex-direction: row; gap: 24px; max-width: 1200px; margin: 0 auto; }
     .scanner-layout > div { flex: 1; }
-    .manual-input-row { flex-direction: row; }
-    .manual-input-row .btn { width: auto; }
-    .export-options { flex-direction: row; }
-    .export-card { flex: 1; min-width: 200px; text-align: center; flex-direction: column; }
-    .export-card .icon { margin-bottom: 10px; }
+    .scan-box { }
+    .manual-input-row { flex-direction: row; gap: 12px; margin-top: 20px; }
+    .manual-input-row input { flex: 1; }
+    .manual-input-row .btn { width: auto; min-width: 120px; }
+    .scan-log { max-height: 400px; }
+    #video-preview { max-height: 500px; }
+    /* Export */
+    .export-options { flex-direction: row; flex-wrap: wrap; }
+    .export-card { flex: 1; min-width: 300px; flex-direction: row; text-align: left; }
+    .export-card .icon { font-size: 36px; margin-bottom: 0; margin-right: 16px; }
     /* Modals centered on desktop */
     .modal-overlay, .settings-modal, .reset-confirm-modal, .progress-modal { align-items: center; padding: 20px; }
     .modal-content, .settings-content, .reset-confirm-content {
       border-radius: 16px;
-      max-width: 480px;
+      max-width: 520px;
       width: 90%;
-      padding: 32px;
+      padding: 36px;
     }
     .modal-content::before,
     .settings-content::before,
     .reset-confirm-content::before { display: none; }
     .settings-content { text-align: left; }
-    .settings-actions { flex-direction: row; }
+    .settings-section { margin-bottom: 18px; }
+    .settings-actions { flex-direction: row; gap: 12px; margin-top: 24px; }
     .settings-actions .btn { width: auto; flex: 1; }
-    .section-title { font-size: 24px; }
-    .section-sub { font-size: 14px; }
-    .progress-content { border-radius: 16px; max-width: 400px; width: 90%; padding: 32px; }
-    #video-preview { max-height: none; }
-    .scan-log { max-height: 300px; }
+    .progress-content { border-radius: 16px; max-width: 420px; width: 90%; padding: 36px; }
+  }
+
+  /* ─── LARGE DESKTOP ─── */
+  @media (min-width: 1200px) {
+    .view { padding: 40px 60px; }
+    .header-inner { padding: 16px 60px; }
+    .stats-grid { grid-template-columns: repeat(6, 1fr); }
+    .lots-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .ticket-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+    .scanner-layout { gap: 32px; }
   }
 
   /* Misc */
@@ -1277,9 +1298,10 @@ function closeResetConfirm() {
 }
 
 async function executeReset(type) {
+  const ADMIN_PASSWORD = 'admin@brunch2024';
   const password = prompt('🔐 Entrez le mot de passe administrateur pour confirmer :');
   if (password === null) return; // annulé
-  if (simpleHash(password) !== simpleHash('admin@brunch2024')) {
+  if (simpleHash(password) !== simpleHash(ADMIN_PASSWORD)) {
     alert('❌ Mot de passe incorrect. Réinitialisation annulée.');
     return;
   }
@@ -1317,9 +1339,10 @@ function closeResetModal() {
   document.getElementById('reset-password').value = '';
 }
 async function confirmReset() {
+  const ADMIN_PASSWORD = 'admin@brunch2024';
   const password = document.getElementById('reset-password').value;
   if (!password) { alert('⚠️ Entrez le mot de passe'); return; }
-  if (simpleHash(password) !== simpleHash('admin@brunch2024')) {
+  if (simpleHash(password) !== simpleHash(ADMIN_PASSWORD)) {
     alert('❌ Mot de passe incorrect');
     document.getElementById('reset-password').value = '';
     return;
