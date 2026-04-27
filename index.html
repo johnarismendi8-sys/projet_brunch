@@ -1436,13 +1436,18 @@ async function updateTicketInSupabase(code, used, usedAt) {
       .select();
     
     if (error) {
-      console.error('❌ Erreur Supabase:', error);
-      throw error;
+      // Ignorer les erreurs de colonne manquante
+      if (error.code === 'PGRST204') {
+        console.warn('⚠️ Supabase non configurée - mode localStorage');
+        return null;
+      }
+      console.warn('⚠️ Erreur Supabase update:', error.message);
+      return null;
     }
-    console.log('✅ Ticket mis à jour dans Supabase');
+    console.log('✅ Ticket mis à jour');
     return data;
   } catch(e) {
-    console.error('❌ Erreur mise à jour ticket:', e);
+    console.warn('⚠️ Erreur mise à jour ticket:', e.message);
     // Continuer même si Supabase échoue (données locales sont conservées)
     return null;
   }
@@ -1457,12 +1462,12 @@ async function loadStateFromSupabase() {
       .select('*');
     
     if (error) {
-      console.warn('⚠️ Erreur Supabase:', error);
+      console.warn('⚠️ Erreur chargement Supabase:', error.message);
       return null;
     }
     
     if (!data || data.length === 0) {
-      console.log('⚠️ Aucun ticket dans Supabase, création en cours...');
+      console.log('⚠️ Aucun ticket dans Supabase');
       return null;
     }
     
@@ -1478,10 +1483,10 @@ async function loadStateFromSupabase() {
         usedAt: row.used_at
       };
     });
-    console.log('✅ Tickets chargés:', data.length);
+    console.log('✅ Tickets chargés depuis Supabase:', data.length);
     return tickets;
   } catch(e) {
-    console.warn('⚠️ Erreur chargement Supabase:', e);
+    console.warn('⚠️ Erreur chargement Supabase (fallback localStorage):', e.message);
     return null;
   }
 }
@@ -1504,25 +1509,34 @@ async function createTicketsInSupabase() {
     // Faire l'insertion par batch (100 à la fois)
     for (let i = 0; i < ticketsToInsert.length; i += 100) {
       const batch = ticketsToInsert.slice(i, i + 100);
-      const { error } = await supabaseClient
+      const { data, error } = await supabaseClient
         .from('tickets')
         .insert(batch)
         .select();
       
       if (error) {
         // Si erreur de doublon, c'est OK (les tickets existent déjà)
-        if (error.code !== '23505') {
-          console.error('❌ Erreur création:', error);
-          throw error;
+        if (error.code === '23505') {
+          console.log('✅ Les tickets existent déjà dans Supabase (batch ' + (i/100 + 1) + ')');
+        } else if (error.code === 'PGRST204') {
+          // Colonne manquante - Supabase pas configurée correctement
+          console.warn('⚠️ Table Supabase mal configurée (colonne manquante)');
+          console.log('   Mode fallback: utilisation de localStorage uniquement');
+          return false; // Signal que Supabase n'est pas disponible
+        } else {
+          console.warn('⚠️ Erreur Supabase (batch ' + (i/100 + 1) + '):', error.message);
+          // Continuer même si ça échoue
         }
-        console.log('✅ Les tickets existent déjà dans Supabase (batch ' + (i/100 + 1) + ')');
       } else {
         console.log('✅ Batch ' + (i/100 + 1) + ' tickets créés');
       }
     }
-    console.log('✅ Tous les tickets sont maintenant dans Supabase');
+    console.log('✅ Tous les tickets sont dans Supabase (ou fallback local)');
+    return true;
   } catch(e) {
-    console.error('❌ Erreur création tickets:', e);
+    console.warn('⚠️ Exception création tickets:', e.message);
+    console.log('   Utilisation de localStorage comme fallback');
+    return false;
   }
 }
 
@@ -1536,7 +1550,11 @@ async function loadScanLog() {
       .limit(500);
     
     if (error) {
-      console.warn('⚠️ Erreur chargement scans:', error);
+      if (error.code === 'PGRST204' || error.message.includes('Could not find')) {
+        console.log('⚠️ Table scans non configurée - mode localStorage');
+        throw new Error('Supabase not configured');
+      }
+      console.warn('⚠️ Erreur chargement scans:', error.message);
       throw error;
     }
     
@@ -1552,7 +1570,7 @@ async function loadScanLog() {
     console.log('✅ Scans chargés:', scans.length);
     return scans;
   } catch(e) {
-    console.warn('⚠️ Erreur chargement scans Supabase, fallback localStorage:', e);
+    console.warn('⚠️ Chargement scans Supabase échoué, utilisation localStorage:', e.message);
     const raw = localStorage.getItem('brunch_scanlog');
     return raw ? JSON.parse(raw) : [];
   }
@@ -1576,13 +1594,17 @@ async function saveScanToSupabase(code, ok, detail, timeStr, ts) {
       .select();
     
     if (error) {
-      console.warn('⚠️ Erreur sauvegarde scan Supabase:', error);
+      if (error.code === 'PGRST204' || error.message.includes('Could not find')) {
+        console.warn('⚠️ Table scans non configurée - mode localStorage');
+        return;
+      }
+      console.warn('⚠️ Erreur sauvegarde scan Supabase:', error.message);
       // Continuer même si ça échoue
     } else {
-      console.log('✅ Scan enregistré dans Supabase');
+      console.log('✅ Scan enregistré');
     }
   } catch(e) {
-    console.warn('⚠️ Erreur sauvegarde scan:', e);
+    console.warn('⚠️ Exception sauvegarde scan:', e.message);
   }
 }
 
@@ -1595,110 +1617,116 @@ let pendingConfirmation = null;
 async function initializeTicketsSync() {
   console.log('🎫 Initialisation de la synchro des tickets...');
   updateSyncStatus('🔄 Chargement des données...');
-  const supabaseTickets = await loadStateFromSupabase();
   
-  if (supabaseTickets) {
-    state = supabaseTickets;
-    console.log('✅ Tickets chargés depuis Supabase');
-  } else {
+  try {
+    const supabaseTickets = await loadStateFromSupabase();
+    
+    if (supabaseTickets) {
+      state = supabaseTickets;
+      console.log('✅ Tickets chargés depuis Supabase');
+    } else {
+      console.log('ℹ️ Chargement depuis localStorage');
+      state = loadState();
+      await createTicketsInSupabase(); // Tentative de création (non-bloquante)
+    }
+    
+    updateSyncStatus('✅ Synchronisation active (localStorage)');
+    
+    // ─── LISTENERS REAL-TIME SUPABASE (optionnels) ───
+    try {
+      // Listener tickets
+      supabaseClient
+        .channel('tickets-changes-' + Date.now())
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'tickets' },
+          (payload) => {
+            try {
+              const updatedTicket = payload.new;
+              if (state[updatedTicket.code]) {
+                state[updatedTicket.code].used = updatedTicket.used;
+                state[updatedTicket.code].usedAt = updatedTicket.used_at;
+                console.log('📡 Ticket mis à jour en temps réel:', updatedTicket.code);
+              }
+              const view = document.querySelector('.view.active');
+              if (view && view.id === 'view-dashboard') {
+                renderDashboard();
+              }
+            } catch(e) {
+              console.error('❌ Erreur traitement update ticket:', e);
+            }
+          }
+        )
+        .subscribe();
+      
+      // Listener reset
+      supabaseClient
+        .channel('reset-changes-' + Date.now())
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'resets' },
+          async (payload) => {
+            try {
+              console.log('🔄 Signal de réinitialisation reçu');
+              const fresh = buildFreshState();
+              state = fresh;
+              saveState();
+              renderDashboard();
+              alert('✅ Système réinitialisé par un administrateur');
+            } catch(e) {
+              console.error('❌ Erreur traitement reset:', e);
+            }
+          }
+        )
+        .subscribe();
+      
+      // Listener scans
+      supabaseClient
+        .channel('scans-changes-' + Date.now())
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'scans' },
+          (payload) => {
+            try {
+              const newScan = payload.new;
+              const entry = {
+                code: newScan.code,
+                ok: newScan.scanned,
+                detail: newScan.detail || '',
+                time: newScan.time || '',
+                ts: newScan.scanned_at,
+                id: newScan.id
+              };
+              scanLog.unshift(entry);
+              console.log('📡 Nouveau scan reçu en temps réel:', newScan.code);
+              displayLogItem(newScan.code, newScan.scanned, newScan.detail, newScan.time);
+              updateScanCount();
+              const view = document.querySelector('.view.active');
+              if (view && view.id === 'view-dashboard') {
+                renderDashboard();
+              }
+            } catch(e) {
+              console.error('❌ Erreur traitement scan:', e);
+            }
+          }
+        )
+        .subscribe();
+      
+      console.log('✅ Listeners Supabase en place');
+    } catch(e) {
+      console.warn('⚠️ Erreur configuration listeners Supabase:', e.message);
+      console.log('   Application continue en mode offline');
+    }
+    
+    scanLog = await loadScanLog();
+    
+  } catch(e) {
+    console.error('❌ Erreur initialisation:', e);
+    console.log('⚠️ Mode dégradé: utilisation de localStorage uniquement');
     state = loadState();
-    await createTicketsInSupabase();
+    scanLog = [];
+    updateSyncStatus('⚠️ Mode offline (localStorage)');
   }
-  
-  updateSyncStatus('✅ Synchronisation active');
-  
-  // ─── LISTENER REAL-TIME POUR LES TICKETS ───
-  supabaseClient
-    .channel('tickets-changes-' + Date.now())
-    .on(
-      'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'tickets' },
-      (payload) => {
-        try {
-          const updatedTicket = payload.new;
-          if (state[updatedTicket.code]) {
-            state[updatedTicket.code].used = updatedTicket.used;
-            state[updatedTicket.code].usedAt = updatedTicket.used_at;
-            console.log('📡 Ticket mis à jour en temps réel:', updatedTicket.code);
-          }
-          const view = document.querySelector('.view.active');
-          if (view && view.id === 'view-dashboard') {
-            renderDashboard();
-          }
-        } catch(e) {
-          console.error('❌ Erreur traitement update ticket:', e);
-        }
-      }
-    )
-    .subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
-        console.log('✅ Listener tickets en écoute');
-      }
-    });
-  
-  // ─── LISTENER REAL-TIME POUR LES RÉINITIALISATIONS ───
-  supabaseClient
-    .channel('reset-changes-' + Date.now())
-    .on(
-      'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'resets' },
-      async (payload) => {
-        try {
-          console.log('🔄 Signal de réinitialisation reçu');
-          // Recharger l'état depuis la base
-          const fresh = buildFreshState();
-          state = fresh;
-          saveState();
-          renderDashboard();
-          alert('✅ Système réinitialisé par un administrateur');
-        } catch(e) {
-          console.error('❌ Erreur traitement reset:', e);
-        }
-      }
-    )
-    .subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
-        console.log('✅ Listener resets en écoute');
-      }
-    });
-  
-  scanLog = await loadScanLog();
-  
-  // ─── LISTENER REAL-TIME POUR LES SCANS ───
-  supabaseClient
-    .channel('scans-changes-' + Date.now())
-    .on(
-      'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'scans' },
-      (payload) => {
-        try {
-          const newScan = payload.new;
-          const entry = {
-            code: newScan.code,
-            ok: newScan.scanned,
-            detail: newScan.detail || '',
-            time: newScan.time || '',
-            ts: newScan.scanned_at,
-            id: newScan.id
-          };
-          scanLog.unshift(entry);
-          console.log('📡 Nouveau scan reçu en temps réel:', newScan.code);
-          displayLogItem(newScan.code, newScan.scanned, newScan.detail, newScan.time);
-          updateScanCount();
-          const view = document.querySelector('.view.active');
-          if (view && view.id === 'view-dashboard') {
-            renderDashboard();
-          }
-        } catch(e) {
-          console.error('❌ Erreur traitement scan:', e);
-        }
-      }
-    )
-    .subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
-        console.log('✅ Listener scans en écoute');
-      }
-    });
 }
 
 function updateSyncStatus(message) {
