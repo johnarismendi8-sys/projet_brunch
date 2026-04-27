@@ -724,7 +724,7 @@
   </div>
 </div>
 
-<!-- ═══════════════ LOGIN PAGE ═══════════════ -->
+<!-- ─── LOGIN PAGE ─── -->
 <div class="login-page" id="login-page">
   <div class="login-card">
     <div class="login-icon">🥂</div>
@@ -736,6 +736,25 @@
       <input type="password" id="login-password" placeholder="Mot de passe" required>
       <button type="submit" class="login-btn">Se connecter</button>
     </form>
+  </div>
+</div>
+
+<!-- ═══════════════ RESET MODAL ═══════════════ -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal-content">
+    <div class="modal-icon">🔄</div>
+    <div class="modal-title">Réinitialiser tous les scans</div>
+    <div class="modal-detail" style="margin-bottom:20px;">
+      ⚠️ Cette action annulera tous les tickets validés et les ramènera à l'état initial.<br><br>
+      <strong>Entrez le mot de passe administrateur pour confirmer :</strong>
+    </div>
+    <div class="settings-section" style="margin-bottom:20px;">
+      <input type="password" id="reset-password" placeholder="Mot de passe admin" autocomplete="off">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="confirmReset()">✓ Réinitialiser</button>
+      <button class="btn btn-outline" onclick="closeResetModal()">✕ Annuler</button>
+    </div>
   </div>
 </div>
 
@@ -752,6 +771,9 @@
       <button class="nav-tab" onclick="showView('export', this)">Export</button>
       <button class="nav-tab" onclick="logout()" style="margin-left: auto;">Déconnexion</button>
     </nav>
+  </div>
+  <div style="padding:4px 32px;background:rgba(201,168,76,0.05);font-size:11px;color:#888;display:flex;justify-content:flex-end;gap:16px;border-top:1px solid var(--border);">
+    <span id="sync-status">📡 Synchronisation en attente...</span>
   </div>
 </header>
 
@@ -787,8 +809,13 @@
 
 <!-- ═══════════════ DASHBOARD ═══════════════ -->
 <div class="view active" id="view-dashboard">
-  <h2 class="section-title">Vue d'ensemble</h2>
-  <p class="section-sub">Ticket du Brunch </p>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div>
+      <h2 class="section-title">Vue d'ensemble</h2>
+      <p class="section-sub">Ticket du Brunch</p>
+    </div>
+    <button class="btn btn-danger" onclick="openResetModal()" style="height:fit-content;" title="Réinitialiser tous les scans">🔄 Réinitialiser</button>
+  </div>
 
   <div class="stats-grid" id="stats-grid"></div>
 
@@ -1403,14 +1430,22 @@ function saveState() {
 async function updateTicketInSupabase(code, used, usedAt) {
   try {
     console.log('🔄 Mise à jour ticket Supabase:', { code, used, usedAt });
-    const { error } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from('tickets')
       .update({ used: used, used_at: usedAt })
-      .eq('code', code);
-    if (error) throw error;
+      .eq('code', code)
+      .select();
+    
+    if (error) {
+      console.error('❌ Erreur Supabase:', error);
+      throw error;
+    }
     console.log('✅ Ticket mis à jour dans Supabase');
+    return data;
   } catch(e) {
     console.error('❌ Erreur mise à jour ticket:', e);
+    // Continuer même si Supabase échoue (données locales sont conservées)
+    return null;
   }
 }
 
@@ -1422,11 +1457,14 @@ async function loadStateFromSupabase() {
       .from('tickets')
       .select('*');
     
-    if (error) throw error;
+    if (error) {
+      console.warn('⚠️ Erreur Supabase:', error);
+      return null;
+    }
     
     if (!data || data.length === 0) {
       console.log('⚠️ Aucun ticket dans Supabase, création en cours...');
-      return null; // Créer les tickets
+      return null;
     }
     
     // Convertir les données Supabase au format local
@@ -1445,7 +1483,7 @@ async function loadStateFromSupabase() {
     return tickets;
   } catch(e) {
     console.warn('⚠️ Erreur chargement Supabase:', e);
-    return null; // Fallback sur localStorage
+    return null;
   }
 }
 
@@ -1464,17 +1502,26 @@ async function createTicketsInSupabase() {
       });
     });
     
-    const { error } = await supabaseClient
-      .from('tickets')
-      .insert(ticketsToInsert);
-    
-    if (error) {
-      // Si erreur de doublon, c'est OK (les tickets existent déjà)
-      if (error.code !== '23505') throw error;
-      console.log('✅ Les tickets existent déjà dans Supabase');
-    } else {
-      console.log('✅ Tickets créés dans Supabase');
+    // Faire l'insertion par batch (100 à la fois)
+    for (let i = 0; i < ticketsToInsert.length; i += 100) {
+      const batch = ticketsToInsert.slice(i, i + 100);
+      const { error } = await supabaseClient
+        .from('tickets')
+        .insert(batch)
+        .select();
+      
+      if (error) {
+        // Si erreur de doublon, c'est OK (les tickets existent déjà)
+        if (error.code !== '23505') {
+          console.error('❌ Erreur création:', error);
+          throw error;
+        }
+        console.log('✅ Les tickets existent déjà dans Supabase (batch ' + (i/100 + 1) + ')');
+      } else {
+        console.log('✅ Batch ' + (i/100 + 1) + ' tickets créés');
+      }
     }
+    console.log('✅ Tous les tickets sont maintenant dans Supabase');
   } catch(e) {
     console.error('❌ Erreur création tickets:', e);
   }
@@ -1487,12 +1534,15 @@ async function loadScanLog() {
       .from('scans')
       .select('*')
       .order('scanned_at', { ascending: false })
-      .limit(100);
+      .limit(500);
     
-    if (error) throw error;
+    if (error) {
+      console.warn('⚠️ Erreur chargement scans:', error);
+      throw error;
+    }
     
     // Convertir format Supabase vers format local
-    return data.map(row => ({
+    const scans = data.map(row => ({
       code: row.code,
       ok: row.scanned,
       detail: row.detail || '',
@@ -1500,8 +1550,10 @@ async function loadScanLog() {
       ts: row.scanned_at,
       id: row.id
     }));
+    console.log('✅ Scans chargés:', scans.length);
+    return scans;
   } catch(e) {
-    console.warn('Erreur chargement scans Supabase:', e);
+    console.warn('⚠️ Erreur chargement scans Supabase, fallback localStorage:', e);
     const raw = localStorage.getItem('brunch_scanlog');
     return raw ? JSON.parse(raw) : [];
   }
@@ -1510,18 +1562,28 @@ async function loadScanLog() {
 // Sauvegarder un scan dans Supabase
 async function saveScanToSupabase(code, ok, detail, timeStr, ts) {
   try {
-    const { error } = await supabaseClient.from('scans').insert([
-      {
-        code: code,
-        scanned: ok,
-        detail: detail,
-        time: timeStr,
-        scanned_at: ts
-      }
-    ]);
-    if (error) throw error;
+    const { data, error } = await supabaseClient
+      .from('scans')
+      .insert([
+        {
+          code: code,
+          scanned: ok,
+          detail: detail,
+          time: timeStr,
+          scanned_at: ts,
+          scanned_by: currentUser
+        }
+      ])
+      .select();
+    
+    if (error) {
+      console.warn('⚠️ Erreur sauvegarde scan Supabase:', error);
+      // Continuer même si ça échoue
+    } else {
+      console.log('✅ Scan enregistré dans Supabase');
+    }
   } catch(e) {
-    console.error('Erreur sauvegarde Supabase:', e);
+    console.warn('⚠️ Erreur sauvegarde scan:', e);
   }
 }
 
@@ -1533,6 +1595,7 @@ let pendingConfirmation = null;
 
 async function initializeTicketsSync() {
   console.log('🎫 Initialisation de la synchro des tickets...');
+  updateSyncStatus('🔄 Chargement des données...');
   const supabaseTickets = await loadStateFromSupabase();
   
   if (supabaseTickets) {
@@ -1543,31 +1606,198 @@ async function initializeTicketsSync() {
     await createTicketsInSupabase();
   }
   
-  supabaseClient.channel('tickets-changes')
-    .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'tickets'}, (payload) => {
-      const updatedTicket = payload.new;
-      if (state[updatedTicket.code]) {
-        state[updatedTicket.code].used = updatedTicket.used;
-        state[updatedTicket.code].usedAt = updatedTicket.used_at;
+  updateSyncStatus('✅ Synchronisation active');
+  
+  // ─── LISTENER REAL-TIME POUR LES TICKETS ───
+  supabaseClient
+    .channel('tickets-changes-' + Date.now())
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'tickets' },
+      (payload) => {
+        try {
+          const updatedTicket = payload.new;
+          if (state[updatedTicket.code]) {
+            state[updatedTicket.code].used = updatedTicket.used;
+            state[updatedTicket.code].usedAt = updatedTicket.used_at;
+            console.log('📡 Ticket mis à jour en temps réel:', updatedTicket.code);
+          }
+          const view = document.querySelector('.view.active');
+          if (view && view.id === 'view-dashboard') {
+            renderDashboard();
+          }
+        } catch(e) {
+          console.error('❌ Erreur traitement update ticket:', e);
+        }
       }
-      const view = document.querySelector('.view.active');
-      if (view && view.id === 'view-dashboard') renderDashboard();
-    })
-    .subscribe();
+    )
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        console.log('✅ Listener tickets en écoute');
+      }
+    });
+  
+  // ─── LISTENER REAL-TIME POUR LES RÉINITIALISATIONS ───
+  supabaseClient
+    .channel('reset-changes-' + Date.now())
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'resets' },
+      async (payload) => {
+        try {
+          console.log('🔄 Signal de réinitialisation reçu');
+          // Recharger l'état depuis la base
+          const fresh = buildFreshState();
+          state = fresh;
+          saveState();
+          renderDashboard();
+          alert('✅ Système réinitialisé par un administrateur');
+        } catch(e) {
+          console.error('❌ Erreur traitement reset:', e);
+        }
+      }
+    )
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        console.log('✅ Listener resets en écoute');
+      }
+    });
   
   scanLog = await loadScanLog();
   
-  supabaseClient.channel('scans-changes')
-    .on('postgres_changes', {event: 'INSERT', schema: 'public', table: 'scans'}, (payload) => {
-      const newScan = payload.new;
-      const entry = {code: newScan.code, ok: newScan.scanned, detail: newScan.detail || '', time: newScan.time || '', ts: newScan.scanned_at, id: newScan.id};
-      scanLog.unshift(entry);
-      displayLogItem(newScan.code, newScan.scanned, newScan.detail, newScan.time);
-      updateScanCount();
-      const view = document.querySelector('.view.active');
-      if (view && view.id === 'view-dashboard') renderDashboard();
-    })
-    .subscribe();
+  // ─── LISTENER REAL-TIME POUR LES SCANS ───
+  supabaseClient
+    .channel('scans-changes-' + Date.now())
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'scans' },
+      (payload) => {
+        try {
+          const newScan = payload.new;
+          const entry = {
+            code: newScan.code,
+            ok: newScan.scanned,
+            detail: newScan.detail || '',
+            time: newScan.time || '',
+            ts: newScan.scanned_at,
+            id: newScan.id
+          };
+          scanLog.unshift(entry);
+          console.log('📡 Nouveau scan reçu en temps réel:', newScan.code);
+          displayLogItem(newScan.code, newScan.scanned, newScan.detail, newScan.time);
+          updateScanCount();
+          const view = document.querySelector('.view.active');
+          if (view && view.id === 'view-dashboard') {
+            renderDashboard();
+          }
+        } catch(e) {
+          console.error('❌ Erreur traitement scan:', e);
+        }
+      }
+    )
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        console.log('✅ Listener scans en écoute');
+      }
+    });
+}
+
+function updateSyncStatus(message) {
+  const el = document.getElementById('sync-status');
+  if (el) el.textContent = message;
+}
+
+// ─── RÉINITIALISATION ADMIN ───
+
+function openResetModal() {
+  if (!isLoggedIn) {
+    alert('❌ Vous devez être connecté');
+    return;
+  }
+  document.getElementById('reset-modal').classList.add('active');
+  document.getElementById('reset-password').value = '';
+  document.getElementById('reset-password').focus();
+}
+
+function closeResetModal() {
+  document.getElementById('reset-modal').classList.remove('active');
+  document.getElementById('reset-password').value = '';
+}
+
+async function confirmReset() {
+  const password = document.getElementById('reset-password').value;
+  
+  if (!password) {
+    alert('⚠️ Veuillez entrer le mot de passe');
+    return;
+  }
+
+  // Vérifier le mot de passe admin
+  const adminPassword = 'admin@brunch2024';
+  if (simpleHash(password) !== simpleHash(adminPassword)) {
+    alert('❌ Mot de passe incorrect');
+    document.getElementById('reset-password').value = '';
+    return;
+  }
+
+  if (!confirm('⚠️ ATTENTION !\n\nCette action réinitialisera TOUS les tickets et scans.\nCette action est irréversible !\n\nContinuer ?')) {
+    return;
+  }
+
+  try {
+    console.log('🔄 Réinitialisation en cours...');
+    
+    // 1. Réinitialiser en localStorage
+    state = buildFreshState();
+    saveState();
+    scanLog = [];
+    localStorage.removeItem('brunch_scanlog');
+    
+    // 2. Réinitialiser dans Supabase
+    try {
+      // Supprimer tous les scans
+      await supabaseClient.from('scans').delete().neq('id', '-1');
+      console.log('✅ Scans supprimés');
+      
+      // Réinitialiser tous les tickets
+      const ticketsToUpdate = Object.values(state).map(t => ({
+        code: t.code,
+        used: false,
+        used_at: null
+      }));
+      
+      // Faire les mises à jour par batch (100 à la fois pour éviter les timeout)
+      for (let i = 0; i < ticketsToUpdate.length; i += 100) {
+        const batch = ticketsToUpdate.slice(i, i + 100);
+        await Promise.all(batch.map(ticket => 
+          supabaseClient
+            .from('tickets')
+            .update({ used: false, used_at: null })
+            .eq('code', ticket.code)
+        ));
+      }
+      console.log('✅ Tous les tickets réinitialisés');
+      
+      // Signal de réinitialisation pour les autres clients (inscrire un événement reset)
+      await supabaseClient.from('resets').insert([{
+        reset_by: currentUser,
+        reset_at: new Date().toISOString()
+      }]).select();
+      console.log('✅ Signal de réinitialisation envoyé');
+      
+    } catch(e) {
+      console.warn('⚠️ Erreur Supabase (mais local OK):', e);
+    }
+    
+    // 3. Afficher le résultat
+    renderDashboard();
+    closeResetModal();
+    alert('✅ Réinitialisation complète !\n\nTous les tickets et scans ont été annulés.');
+    
+  } catch(e) {
+    console.error('❌ Erreur réinitialisation:', e);
+    alert('❌ Erreur lors de la réinitialisation: ' + e.message);
+  }
 }
 
 // ─── NAVIGATION ───
@@ -1667,64 +1897,81 @@ function renderDashboard() {
 
 // ─── GENERATOR ───
 function generateTickets() {
-  const lot = document.getElementById('sel-lot').value;
-  const type = document.getElementById('sel-type').value;
-  const grid = document.getElementById('ticket-grid');
-  const info = document.getElementById('gen-info');
-  grid.innerHTML = '';
+  try {
+    const lot = document.getElementById('sel-lot').value;
+    const type = document.getElementById('sel-type').value;
+    const grid = document.getElementById('ticket-grid');
+    const info = document.getElementById('gen-info');
+    grid.innerHTML = '';
 
-  let tickets;
-  if (lot === 'ALL') {
-    tickets = Object.values(state);
-  } else {
-    tickets = Object.values(state).filter(t => t.lot === lot);
-  }
+    let tickets;
+    if (lot === 'ALL') {
+      tickets = Object.values(state);
+    } else {
+      tickets = Object.values(state).filter(t => t.lot === lot);
+    }
 
-  // Type: for specific lot, override sauf si le lot a un type fixe (ex: U=VIP)
-  const isAllLots = (lot === 'ALL');
-  if (!isAllLots) {
-    // Type toujours dicté par LOT_CONFIG, le sélecteur est informatif uniquement
-    const lockedType = LOT_CONFIG[lot].type;
-    tickets.forEach(t => { t.type = lockedType; });
-    document.getElementById('sel-type').value = lockedType;
-  }
-  saveState();
+    // Type: for specific lot, override sauf si le lot a un type fixe (ex: U=VIP)
+    const isAllLots = (lot === 'ALL');
+    if (!isAllLots) {
+      // Type toujours dicté par LOT_CONFIG, le sélecteur est informatif uniquement
+      const lockedType = LOT_CONFIG[lot].type;
+      tickets.forEach(t => { t.type = lockedType; });
+      document.getElementById('sel-type').value = lockedType;
+    }
+    saveState();
 
-  info.textContent = `${tickets.length} ticket(s) — Lot ${isAllLots ? 'A–U' : lot} — ${isAllLots ? 'multi-type' : type}`;
+    info.textContent = `${tickets.length} ticket(s) — Lot ${isAllLots ? 'A–U' : lot} — ${isAllLots ? 'multi-type' : type}`;
 
-  tickets.forEach(t => {
-    const tType = t.type;
-    const card = document.createElement('div');
-    card.className = 'ticket-card' + (t.used ? ' used' : '');
-    card.id = 'tcard-' + t.code;
-    card.innerHTML = `
-      <span class="ticket-code">${t.code}</span>
-      <span class="ticket-type ${tType.toLowerCase()}">${tType}</span>
-      <div class="qr-container" id="qr-${t.code}"></div>
-      <span class="ticket-status ${t.used ? 'used' : ''}">${t.used ? '✓ Validé' : '● Disponible'}</span>
-      <button class="tick-btn" title="Marquer comme utilisé" onclick="toggleUsed('${t.code}')">✕</button>
-    `;
-    grid.appendChild(card);
+    tickets.forEach(t => {
+      const tType = t.type;
+      const card = document.createElement('div');
+      card.className = 'ticket-card' + (t.used ? ' used' : '');
+      card.id = 'tcard-' + t.code;
+      card.innerHTML = `
+        <span class="ticket-code">${t.code}</span>
+        <span class="ticket-type ${tType.toLowerCase()}">${tType}</span>
+        <div class="qr-container" id="qr-${t.code}"></div>
+        <span class="ticket-status ${t.used ? 'used' : ''}">${t.used ? '✓ Validé' : '● Disponible'}</span>
+        <button class="tick-btn" title="Marquer comme utilisé" onclick="toggleUsed('${t.code}')">✕</button>
+      `;
+      grid.appendChild(card);
 
-    // QR content = CODE|TYPE|LOT
-    new QRCode(document.getElementById('qr-' + t.code), {
-      text: `${t.code}|${tType}|${t.lot}`,
-      width: 100, height: 100,
-      colorDark: '#1A1208', colorLight: '#FFFFFF',
-      correctLevel: QRCode.CorrectLevel.M
+      try {
+        // QR content = CODE|TYPE|LOT
+        new QRCode(document.getElementById('qr-' + t.code), {
+          text: `${t.code}|${tType}|${t.lot}`,
+          width: 100, height: 100,
+          colorDark: '#1A1208', colorLight: '#FFFFFF',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch(e) {
+        console.warn('⚠️ Erreur génération QR:', t.code, e);
+      }
     });
-  });
+  } catch(e) {
+    console.error('❌ Erreur generateTickets:', e);
+    alert('❌ Erreur génération tickets: ' + e.message);
+  }
 }
 
 function toggleUsed(code) {
-  state[code].used = !state[code].used;
-  state[code].usedAt = state[code].used ? new Date().toISOString() : null;
-  saveState();
-  const card = document.getElementById('tcard-' + code);
-  if (card) {
-    card.className = 'ticket-card' + (state[code].used ? ' used' : '');
-    card.querySelector('.ticket-status').textContent = state[code].used ? '✓ Validé' : '● Disponible';
-    card.querySelector('.ticket-status').className = 'ticket-status' + (state[code].used ? ' used' : '');
+  try {
+    state[code].used = !state[code].used;
+    state[code].usedAt = state[code].used ? new Date().toISOString() : null;
+    saveState();
+    
+    // Mettre à jour dans Supabase (asynchrone)
+    updateTicketInSupabase(code, state[code].used, state[code].usedAt);
+    
+    const card = document.getElementById('tcard-' + code);
+    if (card) {
+      card.className = 'ticket-card' + (state[code].used ? ' used' : '');
+      card.querySelector('.ticket-status').textContent = state[code].used ? '✓ Validé' : '● Disponible';
+      card.querySelector('.ticket-status').className = 'ticket-status' + (state[code].used ? ' used' : '');
+    }
+  } catch(e) {
+    console.error('❌ Erreur toggleUsed:', e);
   }
 }
 
@@ -1824,29 +2071,33 @@ function stopCamera() {
 }
 
 function validateCode(rawCode) {
-  if (!rawCode) return;
-  const code = rawCode.trim().toUpperCase();
-  document.getElementById('manual-code').value = '';
+  try {
+    if (!rawCode) return;
+    const code = rawCode.trim().toUpperCase();
+    document.getElementById('manual-code').value = '';
 
-  const result = document.getElementById('scan-result');
-  result.style.display = 'block';
+    const result = document.getElementById('scan-result');
+    result.style.display = 'block';
 
-  const ticket = state[code];
-  if (!ticket) {
-    result.className = 'scan-result invalid';
-    result.innerHTML = `<div class="result-icon">❌</div><div class="result-title">Code invalide</div><div class="result-code">${code}</div><div class="result-detail">Ce code n'existe pas dans la base.</div>`;
-    addLog(code, false, 'Code inconnu');
-    return;
+    const ticket = state[code];
+    if (!ticket) {
+      result.className = 'scan-result invalid';
+      result.innerHTML = `<div class="result-icon">❌</div><div class="result-title">Code invalide</div><div class="result-code">${code}</div><div class="result-detail">Ce code n'existe pas dans la base.</div>`;
+      addLog(code, false, 'Code inconnu');
+      return;
+    }
+    if (ticket.used) {
+      result.className = 'scan-result already';
+      result.innerHTML = `<div class="result-icon">⚠️</div><div class="result-title">Déjà validé</div><div class="result-code">${code}</div><div class="result-detail">Ce ticket a déjà été utilisé.<br>Type : ${ticket.type} — Lot ${ticket.lot}</div>`;
+      addLog(code, false, 'Déjà utilisé');
+      return;
+    }
+
+    // Afficher la modal de confirmation
+    showConfirmationModal(code, ticket);
+  } catch(e) {
+    console.error('❌ Erreur validateCode:', e);
   }
-  if (ticket.used) {
-    result.className = 'scan-result already';
-    result.innerHTML = `<div class="result-icon">⚠️</div><div class="result-title">Déjà validé</div><div class="result-code">${code}</div><div class="result-detail">Ce ticket a déjà été utilisé.<br>Type : ${ticket.type} — Lot ${ticket.lot}</div>`;
-    addLog(code, false, 'Déjà utilisé');
-    return;
-  }
-
-  // Afficher la modal de confirmation
-  showConfirmationModal(code, ticket);
 }
 
 function showConfirmationModal(code, ticket) {
@@ -1863,20 +2114,27 @@ function confirmTicket() {
   
   const { code, ticket } = pendingConfirmation;
   
-  // Marquer comme utilisé
-  ticket.used = true;
-  ticket.usedAt = new Date().toISOString();
-  saveState();
-  updateTicketInSupabase(code, true, ticket.usedAt);
-  
-  // Mettre à jour l'affichage du résultat
-  const result = document.getElementById('scan-result');
-  result.className = 'scan-result valid';
-  result.innerHTML = `<div class="result-icon">✅</div><div class="result-title">Entrée validée !</div><div class="result-code">${code}</div><div class="result-detail">Type : <strong>${ticket.type}</strong> — Lot <strong>${ticket.lot}</strong><br>Ticket n° ${ticket.num}</div>`;
-  addLog(code, true, ticket.type);
-  
-  // Fermer la modal
-  closeConfirmationModal();
+  try {
+    // Marquer comme utilisé
+    ticket.used = true;
+    ticket.usedAt = new Date().toISOString();
+    saveState();
+    
+    // Mettre à jour dans Supabase (asynchrone)
+    updateTicketInSupabase(code, true, ticket.usedAt);
+    
+    // Mettre à jour l'affichage du résultat
+    const result = document.getElementById('scan-result');
+    result.className = 'scan-result valid';
+    result.innerHTML = `<div class="result-icon">✅</div><div class="result-title">Entrée validée !</div><div class="result-code">${code}</div><div class="result-detail">Type : <strong>${ticket.type}</strong> — Lot <strong>${ticket.lot}</strong><br>Ticket n° ${ticket.num}</div>`;
+    addLog(code, true, ticket.type);
+    
+    // Fermer la modal
+    closeConfirmationModal();
+  } catch(e) {
+    console.error('❌ Erreur confirmation ticket:', e);
+    alert('❌ Erreur lors de la validation: ' + e.message);
+  }
 }
 
 function refuseTicket() {
@@ -1907,28 +2165,40 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('settings-modal').addEventListener('click', function(e) {
     if (e.target === this) closeSettings();
   });
+  document.getElementById('reset-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeResetModal();
+  });
   
   // Fermer les modals à la touche Escape
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       closeConfirmationModal();
       closeSettings();
+      closeResetModal();
     }
   });
 });
 
 function addLog(code, ok, detail) {
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-  const ts = now.toISOString();
-  const entry = { code, ok, detail, time: timeStr, ts: ts };
-  scanLog.unshift(entry);
-  
-  // Sauvegarder dans Supabase
-  saveScanToSupabase(code, ok, detail, timeStr, ts);
+  try {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    const ts = now.toISOString();
+    const entry = { code, ok, detail, time: timeStr, ts: ts };
+    scanLog.unshift(entry);
+    
+    // Sauvegarder dans localStorage aussi (fallback)
+    const allLogs = [entry, ...scanLog.slice(0, 499)]; // Garder 500 derniers
+    localStorage.setItem('brunch_scanlog', JSON.stringify(allLogs));
+    
+    // Sauvegarder dans Supabase (asynchrone)
+    saveScanToSupabase(code, ok, detail, timeStr, ts);
 
-  displayLogItem(code, ok, detail, timeStr);
-  updateScanCount();
+    displayLogItem(code, ok, detail, timeStr);
+    updateScanCount();
+  } catch(e) {
+    console.error('❌ Erreur ajout log:', e);
+  }
 }
 
 function displayLogItem(code, ok, detail, timeStr) {
@@ -1953,8 +2223,15 @@ function updateScanCount() {
 
 // ─── INIT ───
 (async () => {
-  await initializeTicketsSync();
-  checkAuthentication();
+  try {
+    console.log('🚀 Démarrage de l\'application The Brunch...');
+    await initializeTicketsSync();
+    console.log('✅ Synchronisation tickets OK');
+    checkAuthentication();
+    console.log('✅ Application prête !');
+  } catch(e) {
+    console.error('❌ Erreur initialisation:', e);
+  }
 })();
 </script>
 </body>
