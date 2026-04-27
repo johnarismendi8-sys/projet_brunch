@@ -2,8 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Brunch â€” Gestion des Tickets</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The Brunch — Gestion des Tickets</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
@@ -28,16 +28,17 @@
     --vip: #C9A84C;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--cream);
     color: var(--ink);
     min-height: 100vh;
+    -webkit-text-size-adjust: 100%;
   }
 
-  /* â”€â”€â”€ HEADER â”€â”€â”€ */
+  /* ─── HEADER ─── */
   header {
     background: var(--ink);
     padding: 0;
@@ -50,143 +51,201 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 32px;
+    padding: 10px 20px;
+    gap: 10px;
   }
   .brand {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
+    flex-shrink: 0;
   }
   .brand-icon {
-    width: 40px; height: 40px;
+    width: 36px; height: 36px;
     border: 2px solid var(--gold);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
+    font-size: 16px;
+    flex-shrink: 0;
   }
   .brand-name {
     font-family: 'Playfair Display', serif;
-    font-size: 22px;
+    font-size: 18px;
     color: var(--cream);
     letter-spacing: 0.04em;
+    white-space: nowrap;
   }
   .brand-name span { color: var(--gold); }
+
+  /* ─── NAV ─── */
   .nav-tabs {
     display: flex;
-    gap: 4px;
+    gap: 2px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex: 1;
+    justify-content: flex-end;
   }
+  .nav-tabs::-webkit-scrollbar { display: none; }
   .nav-tab {
-    padding: 8px 20px;
+    padding: 7px 12px;
     border-radius: 6px;
     border: none;
     background: transparent;
-    color: #999;
+    color: #aaa;
     font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
   }
   .nav-tab:hover { color: var(--gold-light); background: rgba(201,168,76,0.08); }
   .nav-tab.active { background: var(--gold); color: var(--ink); }
 
-  /* â”€â”€â”€ VIEWS â”€â”€â”€ */
-  .view { display: none; padding: 32px; }
+  /* ─── SYNC BAR ─── */
+  .sync-bar {
+    padding: 3px 16px;
+    background: rgba(201,168,76,0.05);
+    font-size: 10px;
+    color: #888;
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; padding: 16px; }
   .view.active { display: block; }
 
-  /* â”€â”€â”€ DASHBOARD â”€â”€â”€ */
+  /* ─── SECTION TITLES ─── */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    margin-bottom: 4px;
+    color: var(--ink);
+  }
+  .section-sub { font-size: 13px; color: #888; margin-bottom: 20px; }
+
+  /* ─── DASHBOARD HEADER ─── */
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .dashboard-header > div { flex: 1; min-width: 0; }
+
+  /* ─── STATS GRID ─── */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
   }
   .stat-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 20px;
+    padding: 14px;
   }
-  .stat-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
-  .stat-value { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; color: var(--ink); }
-  .stat-sub { font-size: 12px; color: #bbb; margin-top: 4px; }
+  .stat-label { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+  .stat-value { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; color: var(--ink); line-height: 1.1; }
+  .stat-sub { font-size: 11px; color: #bbb; margin-top: 3px; }
 
+  /* ─── LOTS GRID ─── */
   .lots-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   .lot-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 20px;
+    padding: 14px;
     position: relative;
     overflow: hidden;
     cursor: pointer;
     transition: box-shadow 0.2s, transform 0.15s;
+    -webkit-tap-highlight-color: rgba(201,168,76,0.1);
   }
-  .lot-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.1); transform: translateY(-2px); }
+  .lot-card:active { transform: scale(0.98); }
   .lot-card::before {
     content: attr(data-lot);
     position: absolute;
-    right: -8px; top: -8px;
+    right: -6px; top: -6px;
     font-family: 'Playfair Display', serif;
-    font-size: 72px;
+    font-size: 60px;
     font-weight: 900;
     color: rgba(201,168,76,0.07);
     line-height: 1;
+    pointer-events: none;
   }
   .lot-letter {
     font-family: 'Playfair Display', serif;
-    font-size: 32px;
+    font-size: 26px;
     font-weight: 700;
     color: var(--gold);
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
-  .lot-title { font-size: 13px; color: #888; margin-bottom: 12px; }
-  .lot-progress-bar { background: var(--surface-2); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
+  .lot-title { font-size: 11px; color: #888; margin-bottom: 10px; }
+  .lot-progress-bar { background: var(--surface-2); height: 5px; border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
   .lot-progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--gold-dark), var(--gold)); transition: width 0.5s; }
-  .lot-counts { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; }
+  .lot-counts { display: flex; justify-content: space-between; font-size: 11px; color: #aaa; }
   .lot-counts span { font-family: 'DM Mono', monospace; }
 
-  /* â”€â”€â”€ GENERATOR â”€â”€â”€ */
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    margin-bottom: 6px;
-    color: var(--ink);
-  }
-  .section-sub { font-size: 14px; color: #888; margin-bottom: 24px; }
-
+  /* ─── GENERATOR CONTROLS ─── */
   .gen-controls {
     display: flex;
+    flex-direction: column;
     gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 20px;
+    padding: 16px;
   }
   .ctrl-group { display: flex; flex-direction: column; gap: 6px; }
-  .ctrl-group label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.06em; }
-  select, input[type=number] {
-    padding: 9px 14px;
+  .ctrl-group label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  select, input[type=number], input[type=text], input[type=password] {
+    padding: 11px 14px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--cream);
     font-family: 'DM Mono', monospace;
-    font-size: 14px;
+    font-size: 16px; /* Empêche le zoom iOS */
     color: var(--ink);
     outline: none;
     transition: border-color 0.2s;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
   }
   select:focus, input:focus { border-color: var(--gold); }
 
+  .gen-btn-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* ─── BUTTONS ─── */
   .btn {
-    padding: 10px 22px;
+    padding: 11px 18px;
     border: none;
     border-radius: 8px;
     font-family: 'DM Sans', sans-serif;
@@ -195,58 +254,72 @@
     cursor: pointer;
     transition: all 0.2s;
     letter-spacing: 0.02em;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
   .btn-gold { background: var(--gold); color: var(--ink); }
-  .btn-gold:hover { background: var(--gold-light); }
+  .btn-gold:active { background: var(--gold-light); }
   .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--ink-soft); }
-  .btn-outline:hover { border-color: var(--gold); color: var(--gold-dark); }
+  .btn-outline:active { border-color: var(--gold); color: var(--gold-dark); }
   .btn-danger { background: var(--error); color: white; }
-  .btn-success { background: var(--success); color: white; }
-  .btn-sm { padding: 6px 14px; font-size: 12px; }
+  .btn-danger:active { background: #7a1a2a; }
+  .btn-accept { background: var(--success); color: white; }
+  .btn-accept:active { background: #1f5a3a; }
+  .btn-refuse { background: var(--error); color: white; }
+  .btn-refuse:active { background: #7a1a2a; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; min-height: 34px; }
+  .btn-full { width: 100%; }
+
+  /* ─── TICKET GRID ─── */
+  #gen-info { margin-bottom: 12px; font-size: 12px; color: #888; }
 
   .ticket-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-    max-height: 60vh;
-    overflow-y: auto;
-    padding-right: 4px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   .ticket-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 16px;
+    padding: 12px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     position: relative;
   }
-  .ticket-card.used { opacity: 0.5; }
+  .ticket-card.used { opacity: 0.45; }
   .ticket-code {
     font-family: 'DM Mono', monospace;
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 500;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     color: var(--ink);
   }
   .ticket-type {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 500;
-    padding: 2px 8px;
+    padding: 2px 7px;
     border-radius: 20px;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
   }
   .ticket-type.standard { background: #EEF0FC; color: var(--standard); }
   .ticket-type.vip { background: #FBF4E0; color: var(--gold-dark); }
 
-  .qr-container canvas, .qr-container img { border-radius: 4px; }
+  .qr-container canvas, .qr-container img {
+    border-radius: 4px;
+    width: 80px !important;
+    height: 80px !important;
+  }
 
   .ticket-status {
-    font-size: 11px;
-    padding: 3px 10px;
+    font-size: 10px;
+    padding: 2px 8px;
     border-radius: 20px;
     background: #E8F5EC;
     color: var(--success);
@@ -255,437 +328,328 @@
 
   .ticket-card .tick-btn {
     position: absolute;
-    top: 8px; right: 8px;
-    width: 24px; height: 24px;
+    top: 6px; right: 6px;
+    width: 28px; height: 28px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     background: var(--surface-2);
     border: none;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
     transition: background 0.2s;
   }
-  .ticket-card .tick-btn:hover { background: #FFE0E0; }
+  .ticket-card .tick-btn:active { background: #FFE0E0; }
 
-  /* â”€â”€â”€ SCANNER â”€â”€â”€ */
+  /* ─── SCANNER ─── */
   .scanner-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    max-width: 900px;
-    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
   .scan-box {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 14px;
     overflow: hidden;
   }
-  .scan-box-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-weight: 500; font-size: 14px; }
-  .scan-box-body { padding: 20px; }
+  .scan-box-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .scan-box-body { padding: 16px; }
 
   #video-preview {
     width: 100%;
+    max-height: 52vw;
     border-radius: 8px;
     background: #000;
     display: block;
+    object-fit: cover;
   }
 
-  .manual-input-row { display: flex; gap: 8px; margin-top: 12px; }
-  .manual-input-row input { flex: 1; }
+  .cam-btn-row { margin-top: 10px; }
 
+  #btn-cam { width: 100%; }
+
+  #cam-status {
+    margin-top: 8px;
+    font-size: 11px;
+    text-align: center;
+    min-height: 16px;
+    color: #888;
+    line-height: 1.4;
+    padding: 0 4px;
+  }
+
+  .manual-input-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .manual-input-row input { font-size: 16px; }
+  .manual-input-row .btn { width: 100%; }
+
+  /* ─── SCAN RESULT ─── */
   .scan-result {
     border-radius: 12px;
-    padding: 20px;
-    margin-top: 16px;
+    padding: 16px;
+    margin-top: 14px;
     display: none;
   }
   .scan-result.valid { background: #E8F5EC; border: 1px solid #A8D5B5; }
   .scan-result.invalid { background: #FDECEA; border: 1px solid #F1AFAF; }
   .scan-result.already { background: #FFF8E1; border: 1px solid #FFD54F; }
+  .result-icon { font-size: 32px; text-align: center; margin-bottom: 8px; }
+  .result-title { font-family: 'Playfair Display', serif; font-size: 18px; text-align: center; margin-bottom: 6px; }
+  .result-detail { font-size: 12px; color: #555; text-align: center; }
+  .result-code { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; text-align: center; margin: 6px 0; }
 
-  .result-icon { font-size: 40px; text-align: center; margin-bottom: 12px; }
-  .result-title { font-family: 'Playfair Display', serif; font-size: 20px; text-align: center; margin-bottom: 8px; }
-  .result-detail { font-size: 13px; color: #555; text-align: center; }
-  .result-code { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; text-align: center; margin: 8px 0; }
-
-  .scan-log {
-    max-height: 300px;
-    overflow-y: auto;
-  }
+  /* ─── SCAN LOG ─── */
+  .scan-log { max-height: 260px; overflow-y: auto; }
   .log-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-template-rows: auto auto;
+    column-gap: 8px;
+    row-gap: 1px;
+    padding: 8px 0;
     border-bottom: 1px solid var(--border);
-    font-size: 13px;
+    font-size: 12px;
+    align-items: center;
   }
   .log-item:last-child { border-bottom: none; }
-  .log-code { font-family: 'DM Mono', monospace; font-weight: 500; }
-  .log-time { color: #aaa; font-size: 11px; }
-  .log-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .log-code { font-family: 'DM Mono', monospace; font-weight: 600; font-size: 13px; grid-column: 1; grid-row: 1; }
+  .log-detail { font-size: 11px; color: #aaa; grid-column: 1; grid-row: 2; }
+  .log-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; grid-column: 2; grid-row: 1 / 3; align-self: center; white-space: nowrap; }
+  .log-time { color: #bbb; font-size: 10px; grid-column: 3; grid-row: 1 / 3; align-self: center; white-space: nowrap; }
   .log-badge.ok { background: #E8F5EC; color: var(--success); }
   .log-badge.fail { background: #FDECEA; color: var(--error); }
 
-  /* â”€â”€â”€ EXPORT â”€â”€â”€ */
-  .export-options { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+  /* ─── EXPORT ─── */
+  .export-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
   .export-card {
-    flex: 1; min-width: 200px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 20px;
+    padding: 16px;
     cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    text-align: center;
+    transition: border-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
   }
-  .export-card:hover { border-color: var(--gold); box-shadow: 0 4px 16px rgba(201,168,76,0.1); }
-  .export-card .icon { font-size: 32px; margin-bottom: 10px; }
-  .export-card h3 { font-size: 15px; margin-bottom: 4px; }
-  .export-card p { font-size: 12px; color: #aaa; }
+  .export-card:active { border-color: var(--gold); }
+  .export-card .icon { font-size: 28px; flex-shrink: 0; }
+  .export-card h3 { font-size: 14px; margin-bottom: 2px; }
+  .export-card p { font-size: 11px; color: #aaa; }
 
-  /* â”€â”€â”€ MOBILE â”€â”€â”€ */
-  @media (max-width: 700px) {
-    .header-inner { padding: 10px 14px; gap: 8px; flex-wrap: nowrap; }
-    .brand-name { font-size: 16px; }
-    .brand-icon { width: 32px; height: 32px; font-size: 14px; flex-shrink: 0; }
-    .nav-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 2px; flex-shrink: 1; }
-    .nav-tabs::-webkit-scrollbar { display: none; }
-    .nav-tab { padding: 6px 10px; font-size: 11px; white-space: nowrap; min-height: 34px; }
-    .view { padding: 14px; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 18px; }
-    .stat-card { padding: 14px; }
-    .stat-value { font-size: 22px; }
-    .lots-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .lot-card { padding: 14px; }
-    .lot-letter { font-size: 24px; }
-    .gen-controls { flex-direction: column; gap: 12px; padding: 14px; }
-    .ctrl-group { width: 100%; }
-    select, input[type=number], input[type=text] { width: 100%; font-size: 16px; padding: 12px 14px; }
-    .ctrl-group:last-child > div { flex-direction: row; width: 100%; }
-    .ctrl-group:last-child .btn { flex: 1; padding: 12px 8px; font-size: 13px; }
-    .ticket-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; max-height: none; }
-    .ticket-card { padding: 12px 8px; gap: 7px; }
-    .ticket-code { font-size: 14px; }
-    .qr-container canvas, .qr-container img { width: 80px !important; height: 80px !important; }
-    .scanner-layout { grid-template-columns: 1fr; gap: 16px; }
-    .scan-box-body { padding: 14px; }
-    #video-preview { max-height: 55vw; object-fit: cover; border-radius: 8px; }
-    #btn-cam { width: 100%; padding: 13px; font-size: 15px; margin-top: 10px; }
-    .manual-input-row { flex-direction: column; gap: 8px; margin-top: 16px; }
-    .manual-input-row input { width: 100%; }
-    .manual-input-row .btn { width: 100%; padding: 13px; font-size: 15px; }
-    .scan-result { margin-top: 12px; padding: 16px; }
-    .result-icon { font-size: 30px; margin-bottom: 8px; }
-    .result-title { font-size: 17px; }
-    .result-code { font-size: 18px; }
-    .scan-log { max-height: 200px; }
-    .log-item { flex-wrap: wrap; gap: 4px; font-size: 12px; padding: 8px 0; }
-    .log-code { flex: 1 0 auto; }
-    .log-time { width: 100%; }
-    .export-options { flex-direction: column; gap: 10px; }
-    .export-card { min-width: unset; padding: 14px 16px; display: flex; align-items: center; gap: 14px; text-align: left; }
-    .export-card .icon { font-size: 26px; margin-bottom: 0; flex-shrink: 0; }
-    .export-card h3 { font-size: 14px; margin-bottom: 2px; }
-    .export-card p { font-size: 11px; }
-    .section-title { font-size: 20px; }
-    .section-sub { font-size: 12px; }
-    .btn { min-height: 44px; }
-    .tick-btn { width: 32px !important; height: 32px !important; font-size: 14px !important; }
-  }
+  /* ─── EMPTY STATE ─── */
+  .empty-state { text-align: center; padding: 40px 16px; color: #bbb; }
+  .empty-state .icon { font-size: 40px; margin-bottom: 10px; }
+  .empty-state p { font-size: 13px; }
 
-  .badge-lot {
-    display: inline-block;
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    background: var(--gold);
-    color: var(--ink);
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    font-weight: 500;
-    text-align: center;
-    line-height: 26px;
-  }
-
-  .empty-state { text-align: center; padding: 48px 20px; color: #bbb; }
-  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; }
-
-  /* â”€â”€â”€ MODAL CONFIRMATION â”€â”€â”€ */
-  .modal-overlay {
+  /* ─── MODALS ─── */
+  .modal-overlay, .settings-modal, .reset-confirm-modal, .progress-modal {
     display: none;
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.65);
     z-index: 1000;
-    align-items: center;
+    align-items: flex-end; /* slide up from bottom on mobile */
     justify-content: center;
+    padding: 0;
   }
-  .modal-overlay.active {
-    display: flex;
-  }
-  .modal-content {
+  .modal-overlay.active,
+  .settings-modal.active,
+  .reset-confirm-modal.active,
+  .progress-modal.active { display: flex; }
+
+  /* Settings modal scrolls if tall */
+  .settings-modal { align-items: flex-end; }
+
+  .modal-content, .settings-content, .reset-confirm-content {
     background: var(--surface);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 420px;
-    width: 90%;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px calc(env(safe-area-inset-bottom, 0px) + 24px);
+    width: 100%;
+    max-width: 100%;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.25);
     text-align: center;
+    max-height: 92vh;
+    overflow-y: auto;
   }
-  .modal-icon { font-size: 48px; margin-bottom: 16px; }
+
+  /* Pull handle */
+  .modal-content::before,
+  .settings-content::before,
+  .reset-confirm-content::before {
+    content: '';
+    display: block;
+    width: 36px; height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  /* Settings text-align left */
+  .settings-content { text-align: left; }
+
+  .modal-icon { font-size: 40px; margin-bottom: 12px; }
   .modal-title {
     font-family: 'Playfair Display', serif;
-    font-size: 22px;
+    font-size: 20px;
     color: var(--ink);
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
   .modal-code {
     font-family: 'DM Mono', monospace;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 500;
     letter-spacing: 0.1em;
     color: var(--gold);
-    margin: 16px 0;
+    margin: 12px 0;
   }
   .modal-detail {
-    font-size: 14px;
+    font-size: 13px;
     color: #666;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    line-height: 1.5;
   }
   .modal-actions {
     display: flex;
-    gap: 12px;
-    justify-content: center;
+    gap: 10px;
   }
-  .modal-actions .btn {
-    flex: 1;
-  }
-  .btn-accept {
-    background: var(--success);
-    color: white;
-  }
-  .btn-accept:hover {
-    background: #1f5a3a;
-  }
-  .btn-refuse {
-    background: var(--error);
-    color: white;
-  }
-  .btn-refuse:hover {
-    background: #7a1a2a;
-  }
+  .modal-actions .btn { flex: 1; }
 
-  /* â”€â”€â”€ LOGIN PAGE â”€â”€â”€ */
-  .login-page {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
-  }
-  .login-card {
-    background: var(--surface);
-    border-radius: 16px;
-    padding: 48px;
-    max-width: 400px;
-    width: 90%;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-    text-align: center;
-  }
-  .login-icon {
-    font-size: 56px;
-    margin-bottom: 20px;
-  }
-  .login-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 28px;
-    color: var(--ink);
-    margin-bottom: 8px;
-  }
-  .login-subtitle {
-    font-size: 14px;
-    color: #888;
-    margin-bottom: 32px;
-  }
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .login-form input {
-    padding: 12px 16px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--cream);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .login-form input:focus {
-    border-color: var(--gold);
-  }
-  .login-btn {
-    padding: 13px 24px;
-    background: var(--gold);
-    color: var(--ink);
-    border: none;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .login-btn:hover {
-    background: var(--gold-light);
-  }
-  .login-error {
-    display: none;
-    color: var(--error);
-    font-size: 13px;
-    padding: 12px;
-    background: #FDECEA;
-    border-radius: 6px;
-    border: 1px solid #F1AFAF;
-    margin-bottom: 16px;
-    text-align: center;
-  }
-  .login-error.show {
-    display: block;
-  }
-
-  /* â”€â”€â”€ SETTINGS MODAL â”€â”€â”€ */
-  .settings-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: var(--gold);
-    color: var(--ink);
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-    z-index: 50;
-    transition: transform 0.2s;
-  }
-  .settings-btn:hover {
-    transform: scale(1.1);
-  }
-  .settings-modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 1001;
-    align-items: center;
-    justify-content: center;
-  }
-  .settings-modal.active {
-    display: flex;
-  }
-  .settings-content {
-    background: var(--surface);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 500px;
-    width: 90%;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  }
+  /* ─── SETTINGS CONTENT ─── */
   .settings-title {
     font-family: 'Playfair Display', serif;
-    font-size: 24px;
+    font-size: 20px;
     color: var(--ink);
-    margin-bottom: 24px;
+    margin-bottom: 18px;
   }
-  .settings-section {
-    margin-bottom: 24px;
-  }
+  .settings-section { margin-bottom: 16px; }
   .settings-section label {
     display: block;
-    font-size: 12px;
+    font-size: 11px;
     color: #888;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .settings-section input {
+    font-size: 16px;
     width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--border);
+  }
+  .settings-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+  .settings-danger-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: var(--error);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .reset-zone {
+    background: #FFF5F5;
+    border: 1px solid #F1AFAF;
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .reset-zone p {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .reset-options { display: flex; flex-direction: column; gap: 10px; }
+  .reset-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .reset-row-label { font-size: 13px; color: var(--ink-soft); font-weight: 500; }
+  .reset-row-desc { font-size: 11px; color: #aaa; margin-top: 1px; }
+  .btn-reset {
+    background: transparent;
+    border: 1px solid var(--error);
+    color: var(--error);
+    padding: 7px 14px;
     border-radius: 8px;
-    background: var(--cream);
-    font-family: 'DM Mono', monospace;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-height: 36px;
+  }
+  .btn-reset:active { background: var(--error); color: white; }
+  .btn-reset-all {
+    width: 100%;
+    background: var(--error);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
     font-size: 13px;
-    color: var(--ink);
-    outline: none;
-    box-sizing: border-box;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 44px;
+    margin-top: 6px;
   }
-  .settings-section input:focus {
-    border-color: var(--gold);
-  }
+  .btn-reset-all:active { background: #7a1a2a; }
+
   .settings-actions {
     display: flex;
-    gap: 12px;
-    margin-top: 24px;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
   }
-  .settings-actions .btn {
-    flex: 1;
-  }
+  .settings-actions .btn { width: 100%; }
+
   .current-user {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px;
+    gap: 8px;
+    padding: 10px 12px;
     background: var(--surface-2);
     border-radius: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
     font-size: 13px;
   }
-  .current-user span:first-child {
-    color: #888;
-  }
-  .current-user span:last-child {
-    font-weight: 600;
-    color: var(--gold);
-  }
+  .current-user span:first-child { color: #888; }
+  .current-user span:last-child { font-weight: 600; color: var(--gold); }
 
-  /* â”€â”€â”€ PROGRESS BAR â”€â”€â”€ */
-  .progress-modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 2000;
-    align-items: center;
-    justify-content: center;
-  }
-  .progress-modal.active {
-    display: flex;
-  }
+  /* ─── PROGRESS MODAL ─── */
+  .progress-modal { align-items: flex-end; }
   .progress-content {
     background: var(--surface);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 400px;
-    width: 90%;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border-radius: 20px 20px 0 0;
+    padding: 28px 24px calc(env(safe-area-inset-bottom, 0px) + 28px);
+    width: 100%;
     text-align: center;
   }
   .progress-title {
     font-family: 'Playfair Display', serif;
-    font-size: 20px;
+    font-size: 18px;
     color: var(--ink);
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
   .progress-bar {
     width: 100%;
@@ -693,7 +657,7 @@
     background: var(--surface-2);
     border-radius: 10px;
     overflow: hidden;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
   .progress-fill {
     height: 100%;
@@ -703,18 +667,188 @@
     border-radius: 10px;
   }
   .progress-text {
-    font-size: 13px;
+    font-size: 12px;
     color: #888;
     font-family: 'DM Mono', monospace;
+  }
+
+  /* ─── RESET CONFIRM MODAL ─── */
+  .reset-confirm-content { text-align: center; }
+  .reset-confirm-icon { font-size: 40px; margin-bottom: 12px; }
+  .reset-confirm-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .reset-confirm-detail {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .reset-confirm-actions { display: flex; gap: 10px; }
+  .reset-confirm-actions .btn { flex: 1; }
+
+  /* ─── LOGIN ─── */
+  .login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    background: linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    padding: 20px;
+  }
+  .login-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 36px 24px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    text-align: center;
+  }
+  .login-icon { font-size: 48px; margin-bottom: 16px; }
+  .login-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .login-subtitle { font-size: 13px; color: #888; margin-bottom: 28px; }
+  .login-form { display: flex; flex-direction: column; gap: 14px; }
+  .login-form input {
+    padding: 13px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    -webkit-appearance: none;
+  }
+  .login-form input:focus { border-color: var(--gold); }
+  .login-btn {
+    padding: 14px 24px;
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    min-height: 50px;
+    width: 100%;
+  }
+  .login-btn:active { background: var(--gold-light); }
+  .login-error {
+    display: none;
+    color: var(--error);
+    font-size: 12px;
+    padding: 10px;
+    background: #FDECEA;
+    border-radius: 8px;
+    border: 1px solid #F1AFAF;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .login-error.show { display: block; }
+
+  /* ─── SETTINGS FAB ─── */
+  .settings-btn {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    right: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+  }
+  .settings-btn:active { transform: scale(0.93); }
+
+  /* ─── RESET MODAL LEGACY (dans dashboard) ─── */
+  .modal-overlay#reset-modal .modal-content {
+    text-align: left;
+  }
+  .modal-overlay#reset-modal .modal-content .settings-section input {
+    font-size: 16px;
+  }
+
+  /* ─── DESKTOP OVERRIDES ─── */
+  @media (min-width: 700px) {
+    .view { padding: 32px; }
+    .header-inner { padding: 12px 32px; }
+    .brand-name { font-size: 22px; }
+    .brand-icon { width: 40px; height: 40px; font-size: 18px; }
+    .nav-tab { padding: 8px 18px; font-size: 13px; }
+    .stats-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .stat-value { font-size: 28px; }
+    .lots-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .lot-letter { font-size: 32px; }
+    .gen-controls { flex-direction: row; flex-wrap: wrap; }
+    .ctrl-group { flex-direction: column; }
+    select, input[type=number] { font-size: 14px; }
+    .ticket-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-height: 60vh; overflow-y: auto; }
+    .qr-container canvas, .qr-container img { width: 100px !important; height: 100px !important; }
+    .scanner-layout { flex-direction: row; max-width: 900px; margin: 0 auto; }
+    .scanner-layout > div { flex: 1; }
+    .manual-input-row { flex-direction: row; }
+    .manual-input-row .btn { width: auto; }
+    .export-options { flex-direction: row; }
+    .export-card { flex: 1; min-width: 200px; text-align: center; flex-direction: column; }
+    .export-card .icon { margin-bottom: 10px; }
+    /* Modals centered on desktop */
+    .modal-overlay, .settings-modal, .reset-confirm-modal, .progress-modal { align-items: center; padding: 20px; }
+    .modal-content, .settings-content, .reset-confirm-content {
+      border-radius: 16px;
+      max-width: 480px;
+      width: 90%;
+      padding: 32px;
+    }
+    .modal-content::before,
+    .settings-content::before,
+    .reset-confirm-content::before { display: none; }
+    .settings-content { text-align: left; }
+    .settings-actions { flex-direction: row; }
+    .settings-actions .btn { width: auto; flex: 1; }
+    .section-title { font-size: 24px; }
+    .section-sub { font-size: 14px; }
+    .progress-content { border-radius: 16px; max-width: 400px; width: 90%; padding: 32px; }
+    #video-preview { max-height: none; }
+    .scan-log { max-height: 300px; }
+  }
+
+  /* Misc */
+  .badge-lot {
+    display: inline-block; width: 26px; height: 26px;
+    border-radius: 50%; background: var(--gold); color: var(--ink);
+    font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500;
+    text-align: center; line-height: 26px;
   }
 </style>
 </head>
 <body>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PROGRESS MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ═══════════════ PROGRESS MODAL ═══════════════ -->
 <div class="progress-modal" id="progress-modal">
   <div class="progress-content">
-    <div class="progress-title">ðŸ“„ GÃ©nÃ©ration du PDF</div>
+    <div class="progress-title">📄 Génération du PDF</div>
     <div class="progress-bar">
       <div class="progress-fill" id="progress-fill"></div>
     </div>
@@ -724,136 +858,155 @@
   </div>
 </div>
 
-<!-- â”€â”€â”€ LOGIN PAGE â”€â”€â”€ -->
+<!-- ═══════════════ RESET CONFIRM MODAL ═══════════════ -->
+<div class="reset-confirm-modal" id="reset-confirm-modal">
+  <div class="reset-confirm-content">
+    <div class="reset-confirm-icon" id="reset-confirm-icon">⚠️</div>
+    <div class="reset-confirm-title" id="reset-confirm-title">Confirmer la réinitialisation</div>
+    <div class="reset-confirm-detail" id="reset-confirm-detail">Cette action est irréversible.</div>
+    <div class="reset-confirm-actions">
+      <button class="btn btn-danger" id="reset-confirm-ok">🗑️ Confirmer</button>
+      <button class="btn btn-outline" onclick="closeResetConfirm()">✕ Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ LOGIN PAGE ═══════════════ -->
 <div class="login-page" id="login-page">
   <div class="login-card">
-    <div class="login-icon">ðŸ¥‚</div>
+    <div class="login-icon">🥂</div>
     <div class="login-title">The Brunch</div>
     <div class="login-subtitle">Gestion des tickets</div>
     <div class="login-error" id="login-error"></div>
     <form class="login-form" onsubmit="handleLogin(event)">
-      <input type="text" id="login-username" placeholder="Nom d'utilisateur" required>
-      <input type="password" id="login-password" placeholder="Mot de passe" required>
+      <input type="text" id="login-username" placeholder="Nom d'utilisateur" required autocomplete="username">
+      <input type="password" id="login-password" placeholder="Mot de passe" required autocomplete="current-password">
       <button type="submit" class="login-btn">Se connecter</button>
     </form>
   </div>
 </div>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RESET MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-<div class="modal-overlay" id="reset-modal">
-  <div class="modal-content">
-    <div class="modal-icon">ðŸ”„</div>
-    <div class="modal-title">RÃ©initialiser tous les scans</div>
-    <div class="modal-detail" style="margin-bottom:20px;">
-      âš ï¸ Cette action annulera tous les tickets validÃ©s et les ramÃ¨nera Ã  l'Ã©tat initial.<br><br>
-      <strong>Entrez le mot de passe administrateur pour confirmer :</strong>
-    </div>
-    <div class="settings-section" style="margin-bottom:20px;">
-      <input type="password" id="reset-password" placeholder="Mot de passe admin" autocomplete="off">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-danger" onclick="confirmReset()">âœ“ RÃ©initialiser</button>
-      <button class="btn btn-outline" onclick="closeResetModal()">âœ• Annuler</button>
-    </div>
-  </div>
-</div>
-
+<!-- ═══════════════ HEADER ═══════════════ -->
 <header>
   <div class="header-inner">
     <div class="brand">
-      <div class="brand-icon">ðŸ¥‚</div>
+      <div class="brand-icon">🥂</div>
       <div class="brand-name">The <span>Brunch</span></div>
     </div>
     <nav class="nav-tabs">
       <button class="nav-tab active" onclick="showView('dashboard', this)">Dashboard</button>
-      <button class="nav-tab" onclick="showView('generator', this)">GÃ©nÃ©rer</button>
+      <button class="nav-tab" onclick="showView('generator', this)">Générer</button>
       <button class="nav-tab" onclick="showView('scanner', this)">Scanner</button>
       <button class="nav-tab" onclick="showView('export', this)">Export</button>
-      <button class="nav-tab" onclick="checkStateAndLogout()" style="margin-left: auto;">DÃ©connexion</button>
+      <button class="nav-tab" onclick="checkStateAndLogout()">Déco.</button>
     </nav>
   </div>
-  <div style="padding:4px 32px;background:rgba(201,168,76,0.05);font-size:11px;color:#888;display:flex;justify-content:flex-end;gap:16px;border-top:1px solid var(--border);">
-    <span id="sync-status">ðŸ“¡ Synchronisation en attente...</span>
+  <div class="sync-bar">
+    <span id="sync-status">🔡 Synchronisation en attente...</span>
   </div>
 </header>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SETTINGS MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ═══════════════ SETTINGS MODAL ═══════════════ -->
 <div class="settings-modal" id="settings-modal">
   <div class="settings-content">
-    <h2 class="settings-title">âš™ï¸ ParamÃ¨tres</h2>
+    <h2 class="settings-title">⚙️ Paramètres</h2>
     <div class="current-user">
-      <span>Utilisateur actif:</span>
+      <span>Utilisateur :</span>
       <span id="current-username">-</span>
     </div>
+
     <div class="settings-section">
       <label>Ancien mot de passe</label>
-      <input type="password" id="old-password" placeholder="Entrez votre mot de passe actuel">
+      <input type="password" id="old-password" placeholder="Mot de passe actuel" autocomplete="current-password">
     </div>
     <div class="settings-section">
       <label>Nouveau mot de passe</label>
-      <input type="password" id="new-password" placeholder="Entrez le nouveau mot de passe">
+      <input type="password" id="new-password" placeholder="Nouveau mot de passe" autocomplete="new-password">
     </div>
     <div class="settings-section">
-      <label>Confirmer le nouveau mot de passe</label>
-      <input type="password" id="confirm-password" placeholder="Confirmez le nouveau mot de passe">
+      <label>Confirmer</label>
+      <input type="password" id="confirm-password" placeholder="Confirmer le mot de passe" autocomplete="new-password">
     </div>
+    <button class="btn btn-gold btn-full" onclick="changePassword()">💾 Changer le mot de passe</button>
+
+    <hr class="settings-divider">
+
+    <div class="settings-danger-title">🗑️ Réinitialisation</div>
+    <div class="reset-zone">
+      <p>Actions <strong>irréversibles</strong>. Les données effacées ne peuvent pas être récupérées.</p>
+      <div class="reset-options">
+        <div class="reset-row">
+          <div>
+            <div class="reset-row-label">Journal des scans</div>
+            <div class="reset-row-desc">Efface l'historique des scans</div>
+          </div>
+          <button class="btn-reset" onclick="askReset('scans')">Réinitialiser</button>
+        </div>
+        <div class="reset-row">
+          <div>
+            <div class="reset-row-label">Tickets validés</div>
+            <div class="reset-row-desc">Remet tous les tickets à Disponible</div>
+          </div>
+          <button class="btn-reset" onclick="askReset('tickets')">Réinitialiser</button>
+        </div>
+        <button class="btn-reset-all" onclick="askReset('all')">⚠️ Tout réinitialiser</button>
+      </div>
+    </div>
+
     <div class="settings-actions">
-      <button class="btn btn-gold" onclick="changePassword()">ðŸ’¾ Sauvegarder</button>
-      <button class="btn btn-outline" onclick="closeSettings()">âœ• Fermer</button>
+      <button class="btn btn-outline" onclick="closeSettings()">✕ Fermer</button>
     </div>
   </div>
 </div>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SETTINGS BUTTON â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-<button class="settings-btn" onclick="openSettings()" title="ParamÃ¨tres">âš™ï¸</button>
+<!-- ═══════════════ SETTINGS FAB ═══════════════ -->
+<button class="settings-btn" onclick="openSettings()" title="Paramètres">⚙️</button>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DASHBOARD â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
 <div class="view active" id="view-dashboard">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+  <div class="dashboard-header">
     <div>
       <h2 class="section-title">Vue d'ensemble</h2>
       <p class="section-sub">Ticket du Brunch</p>
     </div>
-    <button class="btn btn-danger" onclick="openResetModal()" style="height:fit-content;" title="RÃ©initialiser tous les scans">ðŸ”„ RÃ©initialiser</button>
+    <button class="btn btn-danger btn-sm" onclick="askReset('all')" style="flex-shrink:0;align-self:flex-start;">🔄 Réinit.</button>
   </div>
-
   <div class="stats-grid" id="stats-grid"></div>
-
-  <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:16px;color:var(--ink-soft)">Lots de tickets</h3>
+  <h3 style="font-family:'Playfair Display',serif;font-size:16px;margin-bottom:12px;color:var(--ink-soft)">Lots de tickets</h3>
   <div class="lots-grid" id="lots-grid"></div>
 </div>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• GENERATOR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ═══════════════ GENERATOR ═══════════════ -->
 <div class="view" id="view-generator">
-  <h2 class="section-title">GÃ©nÃ©ration des tickets</h2>
-  <p class="section-sub">SÃ©lectionne un lot et un type pour gÃ©nÃ©rer les QR codes.</p>
+  <h2 class="section-title">Génération</h2>
+  <p class="section-sub">Sélectionne un lot pour générer les QR codes.</p>
 
   <div class="gen-controls">
     <div class="ctrl-group">
       <label>Lot</label>
       <select id="sel-lot" onchange="onLotChange(this.value)">
-        <option value="ALL">Tous les lots (Aâ€“U)</option>
-        <option value="A">Lot A â€” Standard (30)</option>
-        <option value="B">Lot B â€” Standard (30)</option>
-        <option value="C">Lot C â€” Standard (30)</option>
-        <option value="D">Lot D â€” Standard (30)</option>
-        <option value="E">Lot E â€” Standard (30)</option>
-        <option value="F">Lot F â€” Standard (30)</option>
-        <option value="G">Lot G â€” Standard (30)</option>
-        <option value="H">Lot H â€” Standard (30)</option>
-        <option value="I">Lot I â€” Standard (30)</option>
-        <option value="J">Lot J â€” Standard (30)</option>
-        <option value="K">Lot K â€” Standard (30)</option>
-        <option value="L">Lot L â€” Standard (30)</option>
-        <option value="M">Lot M â€” Standard (30)</option>
-        <option value="N">Lot N â€” Standard (30)</option>
-        <option value="O">Lot O â€” Standard (30)</option>
-        <option value="P">Lot P â€” Standard (30)</option>
-        <option value="Q">Lot Q â€” Standard (30)</option>
-        <option value="R">Lot R â€” Standard (30)</option>
-        <option value="S">Lot S â€” Standard (30)</option>
-        <option value="T">Lot T â€” Standard (30)</option>
-        <option value="U">Lot U â€” VIP (20)</option>
+        <option value="ALL">Tous les lots (A–U)</option>
+        <option value="A">Lot A — Standard (30)</option>
+        <option value="B">Lot B — Standard (30)</option>
+        <option value="C">Lot C — Standard (30)</option>
+        <option value="D">Lot D — Standard (30)</option>
+        <option value="E">Lot E — Standard (30)</option>
+        <option value="F">Lot F — Standard (30)</option>
+        <option value="G">Lot G — Standard (30)</option>
+        <option value="H">Lot H — Standard (30)</option>
+        <option value="I">Lot I — Standard (30)</option>
+        <option value="J">Lot J — Standard (30)</option>
+        <option value="K">Lot K — Standard (30)</option>
+        <option value="L">Lot L — Standard (30)</option>
+        <option value="M">Lot M — Standard (30)</option>
+        <option value="N">Lot N — Standard (30)</option>
+        <option value="O">Lot O — Standard (30)</option>
+        <option value="P">Lot P — Standard (30)</option>
+        <option value="Q">Lot Q — Standard (30)</option>
+        <option value="R">Lot R — Standard (30)</option>
+        <option value="S">Lot S — Standard (30)</option>
+        <option value="T">Lot T — Standard (30)</option>
+        <option value="U">Lot U — VIP (20)</option>
       </select>
     </div>
     <div class="ctrl-group">
@@ -863,60 +1016,58 @@
         <option value="VIP">VIP</option>
       </select>
     </div>
-    <div class="ctrl-group" style="justify-content:flex-end;">
-      <label>&nbsp;</label>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-gold" onclick="generateTickets()">âš¡ GÃ©nÃ©rer</button>
-        <button class="btn btn-outline" onclick="clearDisplay()">âœ• Effacer</button>
-      </div>
+    <div class="gen-btn-row">
+      <button class="btn btn-gold" style="flex:1" onclick="generateTickets()">⚡ Générer</button>
+      <button class="btn btn-outline" style="flex:1" onclick="clearDisplay()">✕ Effacer</button>
     </div>
   </div>
 
-  <div id="gen-info" style="margin-bottom:16px;font-size:13px;color:#888;"></div>
+  <div id="gen-info"></div>
   <div class="ticket-grid" id="ticket-grid">
     <div class="empty-state" style="grid-column:1/-1">
-      <div class="icon">ðŸŽŸï¸</div>
-      <p>SÃ©lectionne un lot et clique sur GÃ©nÃ©rer</p>
+      <div class="icon">🎟️</div>
+      <p>Sélectionne un lot et clique sur Générer</p>
     </div>
   </div>
 </div>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SCANNER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ═══════════════ SCANNER ═══════════════ -->
 <div class="view" id="view-scanner">
-  <h2 class="section-title">Scanner & Valider</h2>
-  <p class="section-sub">Scanne un QR code ou entre le code manuellement pour valider l'entrÃ©e.</p>
+  <h2 class="section-title">Scanner</h2>
+  <p class="section-sub">Scanne un QR code ou entre le code manuellement.</p>
 
   <div class="scanner-layout">
     <div>
       <div class="scan-box">
-        <div class="scan-box-header">ðŸ“· CamÃ©ra</div>
+        <div class="scan-box-header">📷 Caméra</div>
         <div class="scan-box-body">
-          <video id="video-preview" autoplay playsinline></video>
-          <div style="margin-top:12px;text-align:center;">
-            <button class="btn btn-gold" id="btn-cam" onclick="toggleCamera()">â–¶ Activer la camÃ©ra</button>
+          <video id="video-preview" autoplay playsinline muted></video>
+          <div class="cam-btn-row">
+            <button class="btn btn-gold" id="btn-cam" onclick="toggleCamera()">▶ Activer la caméra</button>
           </div>
-          <div id="cam-status" style="margin-top:10px;font-size:12px;text-align:center;min-height:18px;padding:0 4px;"></div>
-          <div class="manual-input-row" style="margin-top:20px;">
-            <input type="text" id="manual-code" placeholder="Ex: A001 ou U020" style="text-transform:uppercase" maxlength="4"
+          <div id="cam-status"></div>
+          <div class="manual-input-row">
+            <input type="text" id="manual-code" placeholder="Ex: A001 ou U020"
+              style="text-transform:uppercase" maxlength="4"
               oninput="this.value=this.value.toUpperCase().replace(/[^A-U0-9]/g, '')"
-              onkeydown="if(event.key==='Enter')validateCode(document.getElementById('manual-code').value)">
+              onkeydown="if(event.key==='Enter')validateCode(document.getElementById('manual-code').value)"
+              autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
             <button class="btn btn-gold" onclick="validateCode(document.getElementById('manual-code').value)">Valider</button>
           </div>
         </div>
       </div>
-
       <div class="scan-result" id="scan-result"></div>
     </div>
 
     <div>
       <div class="scan-box">
-        <div class="scan-box-header" style="display:flex;justify-content:space-between;align-items:center;">
-          <span>ðŸ“‹ Journal des scans</span>
-          <span id="scan-count" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold)">0 validÃ©(s)</span>
+        <div class="scan-box-header">
+          <span>📋 Journal</span>
+          <span id="scan-count" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">0 validé(s)</span>
         </div>
         <div class="scan-box-body">
           <div class="scan-log" id="scan-log">
-            <div class="empty-state"><p>Aucun scan pour l'instant</p></div>
+            <div class="empty-state" style="padding:24px 16px"><p>Aucun scan pour l'instant</p></div>
           </div>
         </div>
       </div>
@@ -924,77 +1075,83 @@
   </div>
 </div>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• EXPORT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ═══════════════ EXPORT ═══════════════ -->
 <div class="view" id="view-export">
-  <h2 class="section-title">Export & Sauvegarde</h2>
-  <p class="section-sub">Exporte la liste des codes ou tÃ©lÃ©charge les donnÃ©es de scan.</p>
-
+  <h2 class="section-title">Export</h2>
+  <p class="section-sub">Télécharge les QR codes en PDF.</p>
   <div class="export-options">
     <div class="export-card" onclick="exportQRCodesPDF()">
-      <div class="icon">ðŸ“„</div>
-      <h3>QR Codes PDF</h3>
-      <p>Tous les QR codes en fichier PDF</p>
-    </div>
-  </div>
-
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODAL CONFIRMATION â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-<div class="modal-overlay" id="confirmation-modal">
-  <div class="modal-content">
-    <div class="modal-icon" id="modal-icon">â“</div>
-    <div class="modal-title" id="modal-title">Confirmer</div>
-    <div class="modal-code" id="modal-code">CODE</div>
-    <div class="modal-detail" id="modal-detail">DÃ©tails du ticket</div>
-    <div class="modal-actions">
-      <button class="btn btn-accept" onclick="confirmTicket()">âœ“ Accepter</button>
-      <button class="btn btn-refuse" onclick="refuseTicket()">âœ• Refuser</button>
+      <div class="icon">📄</div>
+      <div>
+        <h3>QR Codes PDF</h3>
+        <p>Tous les QR codes en fichier PDF</p>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SCRIPTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-<script>
-// â”€â”€â”€ AUTHENTIFICATION â”€â”€â”€
+<!-- ═══════════════ MODAL CONFIRMATION ═══════════════ -->
+<div class="modal-overlay" id="confirmation-modal">
+  <div class="modal-content">
+    <div class="modal-icon" id="modal-icon">❓</div>
+    <div class="modal-title" id="modal-title">Confirmer</div>
+    <div class="modal-code" id="modal-code">CODE</div>
+    <div class="modal-detail" id="modal-detail">Détails du ticket</div>
+    <div class="modal-actions">
+      <button class="btn btn-accept" onclick="confirmTicket()">✓ Accepter</button>
+      <button class="btn btn-refuse" onclick="refuseTicket()">✕ Refuser</button>
+    </div>
+  </div>
+</div>
 
-// Hachage simple des mots de passe (pour dÃ©mo - utiliser bcrypt en production)
+<!-- ═══════════════ RESET MODAL (legacy dashboard) ═══════════════ -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal-content" style="text-align:left">
+    <div style="font-size:32px;text-align:center;margin-bottom:12px">🔄</div>
+    <div class="modal-title" style="text-align:center">Réinitialiser tous les scans</div>
+    <div style="font-size:13px;color:#666;margin-bottom:16px;line-height:1.6;text-align:center">
+      ⚠️ Cette action annulera tous les tickets validés.<br>
+      <strong>Entrez le mot de passe administrateur :</strong>
+    </div>
+    <div style="margin-bottom:16px;">
+      <input type="password" id="reset-password" placeholder="Mot de passe admin" autocomplete="off" style="font-size:16px;width:100%;">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="confirmReset()">✓ Réinitialiser</button>
+      <button class="btn btn-outline" onclick="closeResetModal()">✕ Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script>
+// ─── AUTH ───
 function simpleHash(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Conversion en 32-bit integer
+    hash = hash & hash;
   }
   return Math.abs(hash).toString(16);
 }
 
-// Comptes prÃ©dÃ©finis
 const DEFAULT_ACCOUNTS = {
-  'user': {
-    username: 'user',
-    passwordHash: simpleHash('user123'),
-    displayName: 'Utilisateur'
-  },
-  'admin': {
-    username: 'admin',
-    passwordHash: simpleHash('admin@brunch2024'),
-    displayName: 'Administrateur'
-  }
+  'user': { username: 'user', passwordHash: simpleHash('user123'), displayName: 'Utilisateur' },
+  'admin': { username: 'admin', passwordHash: simpleHash('admin@brunch2024'), displayName: 'Administrateur' }
 };
 
-// Variables globales d'authentification
 let currentUser = null;
 let isLoggedIn = false;
 
 function initializeAccounts() {
-  const accounts = localStorage.getItem('brunch_accounts');
-  if (!accounts) {
+  if (!localStorage.getItem('brunch_accounts')) {
     localStorage.setItem('brunch_accounts', JSON.stringify(DEFAULT_ACCOUNTS));
   }
 }
-
 function getAccounts() {
   return JSON.parse(localStorage.getItem('brunch_accounts') || JSON.stringify(DEFAULT_ACCOUNTS));
 }
-
 function saveAccounts(accounts) {
   localStorage.setItem('brunch_accounts', JSON.stringify(accounts));
 }
@@ -1002,9 +1159,9 @@ function saveAccounts(accounts) {
 function handleLogin(event) {
   event.preventDefault();
   const username = document.getElementById('login-username').value.trim();
-  const password = document.getElementById('login-password').value.trim();
+  const password = document.getElementById('login-password').value;
   const errorDiv = document.getElementById('login-error');
-  
+
   if (!username || !password) {
     errorDiv.textContent = 'Veuillez remplir tous les champs';
     errorDiv.classList.add('show');
@@ -1013,66 +1170,56 @@ function handleLogin(event) {
 
   const accounts = getAccounts();
   const account = accounts[username];
-
   if (!account || account.passwordHash !== simpleHash(password)) {
-    errorDiv.textContent = 'Nom d\'utilisateur ou mot de passe incorrect';
+    errorDiv.textContent = 'Identifiants incorrects';
     errorDiv.classList.add('show');
     document.getElementById('login-password').value = '';
     return;
   }
 
-  // Connexion rÃ©ussie
   isLoggedIn = true;
   currentUser = username;
   localStorage.setItem('brunch_currentUser', username);
-  
-  // Masquer la page de login
   document.getElementById('login-page').style.display = 'none';
   document.body.style.overflow = 'auto';
-  
-  // Afficher le dashboard
   renderDashboard();
   document.getElementById('current-username').textContent = account.displayName;
 }
 
 function logout() {
-  if (confirm('ÃŠtes-vous sÃ»r de vouloir vous dÃ©connecter ?')) {
+  if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
     isLoggedIn = false;
     currentUser = null;
     localStorage.removeItem('brunch_currentUser');
-    
-    // Masquer le contenu principal
+    stopCamera();
     document.getElementById('login-page').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    
-    // RÃ©initialiser le formulaire
     document.getElementById('login-username').value = '';
     document.getElementById('login-password').value = '';
     document.getElementById('login-error').classList.remove('show');
   }
 }
 
-function checkStateAndLogout() {
-  // Debug: vÃ©rifier state avant de dÃ©connecter
-  console.log('ðŸ“Š State check avant dÃ©connexion:');
-  console.log('   - stateReady:', stateReady);
-  console.log('   - state size:', Object.keys(state).length);
-  console.log('   - premiers codes:', Object.keys(state).slice(0, 5));
-  logout();
-}
+function checkStateAndLogout() { logout(); }
 
 function checkAuthentication() {
   initializeAccounts();
   const savedUser = localStorage.getItem('brunch_currentUser');
-  
   if (savedUser) {
-    currentUser = savedUser;
-    isLoggedIn = true;
     const accounts = getAccounts();
     const account = accounts[savedUser];
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('current-username').textContent = account.displayName;
-    renderDashboard();
+    if (account) {
+      currentUser = savedUser;
+      isLoggedIn = true;
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('current-username').textContent = account.displayName;
+      renderDashboard();
+    } else {
+      localStorage.removeItem('brunch_currentUser');
+      document.getElementById('login-page').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
   } else {
     document.getElementById('login-page').style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -1086,306 +1233,202 @@ function openSettings() {
   document.getElementById('new-password').value = '';
   document.getElementById('confirm-password').value = '';
 }
-
 function closeSettings() {
   document.getElementById('settings-modal').classList.remove('active');
 }
-
 function changePassword() {
   const oldPass = document.getElementById('old-password').value;
   const newPass = document.getElementById('new-password').value;
   const confirmPass = document.getElementById('confirm-password').value;
-
-  if (!oldPass || !newPass || !confirmPass) {
-    alert('âš ï¸ Tous les champs sont obligatoires');
-    return;
-  }
-
-  if (newPass !== confirmPass) {
-    alert('âš ï¸ Les nouveaux mots de passe ne correspondent pas');
-    return;
-  }
-
-  if (newPass.length < 6) {
-    alert('âš ï¸ Le nouveau mot de passe doit contenir au moins 6 caractÃ¨res');
-    return;
-  }
-
-  // VÃ©rifier l'ancien mot de passe
+  if (!oldPass || !newPass || !confirmPass) { alert('⚠️ Tous les champs sont obligatoires'); return; }
+  if (newPass !== confirmPass) { alert('⚠️ Les nouveaux mots de passe ne correspondent pas'); return; }
+  if (newPass.length < 6) { alert('⚠️ Minimum 6 caractères'); return; }
   const accounts = getAccounts();
   const account = accounts[currentUser];
-
-  if (account.passwordHash !== simpleHash(oldPass)) {
-    alert('âŒ L\'ancien mot de passe est incorrect');
-    return;
-  }
-
-  // Mettre Ã  jour le mot de passe
+  if (account.passwordHash !== simpleHash(oldPass)) { alert('❌ Ancien mot de passe incorrect'); return; }
   account.passwordHash = simpleHash(newPass);
   saveAccounts(accounts);
-
-  alert('âœ… Mot de passe modifiÃ© avec succÃ¨s !');
-  closeSettings();
+  alert('✅ Mot de passe modifié !');
+  document.getElementById('old-password').value = '';
+  document.getElementById('new-password').value = '';
+  document.getElementById('confirm-password').value = '';
 }
 
-// â”€â”€â”€ IMPRESSION QR CODES â”€â”€â”€
-function printAllQRCodes() {
-  const printWindow = window.open('', '', 'height=1200,width=900');
-  
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>Impression - QR Codes The Brunch</title>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: white; }
-        .print-header { text-align: center; margin-bottom: 30px; }
-        .print-header h1 { margin: 0; font-size: 28px; }
-        .print-header p { margin: 5px 0; color: #666; }
-        .qr-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .qr-item {
-          border: 2px solid #ccc;
-          padding: 10px;
-          text-align: center;
-          page-break-inside: avoid;
-          break-inside: avoid;
-        }
-        .qr-code { margin: 10px 0; display: inline-block; }
-        .qr-label { font-weight: bold; font-size: 16px; margin: 10px 0; }
-        .qr-type { font-size: 11px; color: #666; }
-        @media print {
-          body { margin: 10px; }
-          .qr-item { page-break-inside: avoid; }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="print-header">
-        <h1>ðŸ¥‚ The Brunch â€” Tickets</h1>
-        <p>Liste complÃ¨te des QR codes Ã  imprimer</p>
-        <p style="font-size: 12px; color: #999;">GÃ©nÃ©rÃ©s le ${new Date().toLocaleDateString('fr-FR')}</p>
-      </div>
-      <div class="qr-grid" id="qr-container"></div>
-      <script>
-        const state = ${JSON.stringify(state)};
-        const container = document.getElementById('qr-container');
-        
-        Object.values(state).sort((a, b) => {
-          if (a.lot !== b.lot) return a.lot.localeCompare(b.lot);
-          return a.num - b.num;
-        }).forEach(ticket => {
-          const div = document.createElement('div');
-          div.className = 'qr-item';
-          const codeDiv = document.createElement('div');
-          codeDiv.id = 'qr-' + ticket.code;
-          codeDiv.className = 'qr-code';
-          
-          div.innerHTML = '<div class="qr-label">' + ticket.code + '</div>' +
-                         '<div class="qr-type">' + ticket.type + ' - Lot ' + ticket.lot + ' (#' + ticket.num + ')</div>';
-          div.appendChild(codeDiv);
-          container.appendChild(div);
-          
-          // GÃ©nÃ©rer le QR code
-          new QRCode(codeDiv, {
-            text: ticket.code + '|' + ticket.type + '|' + ticket.lot,
-            width: 120,
-            height: 120,
-            colorDark: '#1A1208',
-            colorLight: '#FFFFFF',
-            correctLevel: QRCode.CorrectLevel.M
-          });
-        });
-        
-        setTimeout(() => { window.print(); }, 500);
-      <\/script>
-    </body>
-    </html>
-  `;
-  
-  printWindow.document.write(html);
-  printWindow.document.close();
+// ─── RESET ───
+let pendingReset = null;
+
+function askReset(type) {
+  const configs = {
+    scans: { icon: '📋', title: 'Réinitialiser le journal ?', detail: 'Tous les scans enregistrés seront supprimés définitivement.' },
+    tickets: { icon: '🎟️', title: 'Réinitialiser les tickets ?', detail: 'Tous les tickets seront remis à l\'état <strong>Disponible</strong>.' },
+    all: { icon: '⚠️', title: 'Tout réinitialiser ?', detail: 'Le journal des scans <strong>et</strong> l\'état de tous les tickets seront effacés.' }
+  };
+  const cfg = configs[type];
+  pendingReset = type;
+  document.getElementById('reset-confirm-icon').textContent = cfg.icon;
+  document.getElementById('reset-confirm-title').textContent = cfg.title;
+  document.getElementById('reset-confirm-detail').innerHTML = cfg.detail;
+  document.getElementById('reset-confirm-modal').classList.add('active');
 }
 
+function closeResetConfirm() {
+  document.getElementById('reset-confirm-modal').classList.remove('active');
+  pendingReset = null;
+}
+
+async function executeReset(type) {
+  if (type === 'scans' || type === 'all') {
+    scanLog = [];
+    localStorage.removeItem('brunch_scanlog');
+    try { await supabaseClient.from('scans').delete().neq('id', 0); } catch(e) {}
+    const logEl = document.getElementById('scan-log');
+    if (logEl) logEl.innerHTML = '<div class="empty-state" style="padding:24px 16px"><p>Aucun scan pour l\'instant</p></div>';
+    updateScanCount();
+    const resultEl = document.getElementById('scan-result');
+    if (resultEl) resultEl.style.display = 'none';
+  }
+  if (type === 'tickets' || type === 'all') {
+    Object.values(state).forEach(t => { t.used = false; t.usedAt = null; });
+    saveState();
+    try { await supabaseClient.from('tickets').update({ used: false, used_at: null }).neq('code', ''); } catch(e) {}
+    const gridEl = document.getElementById('ticket-grid');
+    if (gridEl && gridEl.querySelector('.ticket-card')) generateTickets();
+  }
+  renderDashboard();
+  alert('✅ Réinitialisation effectuée !');
+}
+
+// ─── LEGACY RESET MODAL ───
+function openResetModal() {
+  if (!isLoggedIn) { alert('❌ Connectez-vous d\'abord'); return; }
+  document.getElementById('reset-modal').classList.add('active');
+  document.getElementById('reset-password').value = '';
+}
+function closeResetModal() {
+  document.getElementById('reset-modal').classList.remove('active');
+  document.getElementById('reset-password').value = '';
+}
+async function confirmReset() {
+  const password = document.getElementById('reset-password').value;
+  if (!password) { alert('⚠️ Entrez le mot de passe'); return; }
+  if (simpleHash(password) !== simpleHash('admin@brunch2024')) {
+    alert('❌ Mot de passe incorrect');
+    document.getElementById('reset-password').value = '';
+    return;
+  }
+  if (!confirm('⚠️ ATTENTION !\n\nRéinitialisation de TOUS les tickets et scans.\nCette action est irréversible !\n\nContinuer ?')) return;
+  try {
+    state = buildFreshState();
+    saveState();
+    scanLog = [];
+    localStorage.removeItem('brunch_scanlog');
+    try {
+      await supabaseClient.from('scans').delete().neq('id', '-1');
+      for (let i = 0; i < Object.values(state).length; i += 100) {
+        const batch = Object.values(state).slice(i, i + 100);
+        await Promise.all(batch.map(ticket =>
+          supabaseClient.from('tickets').update({ used: false, used_at: null }).eq('code', ticket.code)
+        ));
+      }
+    } catch(e) { console.warn('Supabase reset error:', e); }
+    renderDashboard();
+    closeResetModal();
+    alert('✅ Réinitialisation complète !');
+  } catch(e) {
+    console.error('Erreur reset:', e);
+    alert('❌ Erreur: ' + e.message);
+  }
+}
+
+// ─── PDF ───
 async function exportQRCodesPDF() {
   try {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'mm', 'a4');
-    
-    // Afficher la modal de progression
     const modal = document.getElementById('progress-modal');
     const progressFill = document.getElementById('progress-fill');
     const progressCount = document.getElementById('progress-count');
     const progressTotal = document.getElementById('progress-total');
-    
     modal.classList.add('active');
-    
-    // EntÃªte
+
     doc.setFontSize(18);
     doc.text('The Brunch - QR Codes', 105, 15, { align: 'center' });
     doc.setFontSize(10);
     doc.text('Date: ' + new Date().toLocaleDateString('fr-FR'), 105, 22, { align: 'center' });
-    
-    // Grille des QR codes
-    const qrSize = 38; // millimÃ¨tres
-    const marginLeft = 8;
-    const marginTop = 30;
-    const perRow = 4;
-    const gapX = 3;
-    const gapY = 12;
-    
-    let x = marginLeft;
-    let y = marginTop;
-    let count = 0;
-    
+
+    const qrSize = 38, marginLeft = 8, marginTop = 30, perRow = 4, gapX = 3, gapY = 12;
+    let x = marginLeft, y = marginTop, count = 0;
+
     const tickets = Object.values(state).sort((a, b) => {
       if (a.lot !== b.lot) return a.lot.localeCompare(b.lot);
       return a.num - b.num;
     });
-    
     progressTotal.textContent = tickets.length;
-    
+
     for (const ticket of tickets) {
-      // Ajouter une nouvelle page si nÃ©cessaire
-      if (count > 0 && count % 12 === 0) {
-        doc.addPage();
-        x = marginLeft;
-        y = marginTop;
-      }
-      
-      // GÃ©nÃ©rer le QR code
+      if (count > 0 && count % 12 === 0) { doc.addPage(); x = marginLeft; y = marginTop; }
       const qrData = ticket.code + '|' + ticket.type + '|' + ticket.lot;
-      const qrCanvas = document.createElement('canvas');
-      
-      // Utiliser html2canvas si disponible, sinon gÃ©nÃ©rer directement
       try {
-        // CrÃ©er un div invisible avec le QR code
         const tempDiv = document.createElement('div');
-        tempDiv.style.position = 'fixed';
-        tempDiv.style.left = '-9999px';
-        tempDiv.style.top = '-9999px';
-        tempDiv.style.width = '200px';
-        tempDiv.style.height = '200px';
+        tempDiv.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:200px;height:200px;';
         document.body.appendChild(tempDiv);
-        
-        // GÃ©nÃ©rer le QR code
-        new QRCode(tempDiv, {
-          text: qrData,
-          width: 200,
-          height: 200,
-          colorDark: '#1A1208',
-          colorLight: '#FFFFFF',
-          correctLevel: QRCode.CorrectLevel.M
-        });
-        
-        // Attendre que l'image soit bien gÃ©nÃ©rÃ©e
+        new QRCode(tempDiv, { text: qrData, width: 200, height: 200, colorDark: '#1A1208', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
         await new Promise(resolve => {
-          const checkInterval = setInterval(() => {
+          let attempts = 0;
+          const check = setInterval(() => {
+            attempts++;
             const img = tempDiv.querySelector('img');
             if (img && img.complete && img.naturalWidth > 0) {
-              clearInterval(checkInterval);
-              
-              // Convertir l'image en dataURL
+              clearInterval(check);
               const canvas = document.createElement('canvas');
-              canvas.width = 200;
-              canvas.height = 200;
-              const ctx = canvas.getContext('2d');
-              
-              // Dessiner l'image sur le canvas
-              ctx.drawImage(img, 0, 0, 200, 200);
-              const imgData = canvas.toDataURL('image/png');
-              
-              // Ajouter l'image au PDF
+              canvas.width = 200; canvas.height = 200;
+              canvas.getContext('2d').drawImage(img, 0, 0, 200, 200);
               try {
-                doc.addImage(imgData, 'PNG', x, y, qrSize, qrSize);
-                
-                // Ajouter le texte
+                doc.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, qrSize, qrSize);
                 doc.setFontSize(8);
                 doc.text(ticket.code, x + qrSize / 2, y + qrSize + 3, { align: 'center' });
-                
                 doc.setFontSize(6);
                 doc.text(ticket.type + ' - Lot ' + ticket.lot, x + qrSize / 2, y + qrSize + 6, { align: 'center' });
-              } catch(e) {
-                console.error('Erreur ajout image:', e);
-              }
-              
-              // Position suivante
-              x += qrSize + gapX;
-              count++;
-              
-              if (count % perRow === 0) {
-                x = marginLeft;
-                y += qrSize + gapY;
-              }
-              
-              // Mettre Ã  jour la barre de progression
-              const percentage = Math.round((count / tickets.length) * 100);
-              progressFill.style.width = percentage + '%';
+              } catch(e) {}
+              x += qrSize + gapX; count++;
+              if (count % perRow === 0) { x = marginLeft; y += qrSize + gapY; }
+              progressFill.style.width = Math.round((count / tickets.length) * 100) + '%';
               progressCount.textContent = count;
-              
-              // Nettoyer
-              document.body.removeChild(tempDiv);
+              if (tempDiv.parentNode) document.body.removeChild(tempDiv);
+              resolve();
+            } else if (attempts > 30) {
+              clearInterval(check);
+              if (tempDiv.parentNode) document.body.removeChild(tempDiv);
               resolve();
             }
           }, 100);
-          
-          // Timeout de sÃ©curitÃ©
-          setTimeout(() => {
-            if (tempDiv.parentNode) document.body.removeChild(tempDiv);
-            resolve();
-          }, 3000);
         });
-      } catch(e) {
-        console.error('Erreur gÃ©nÃ©ration QR:', e);
-      }
+      } catch(e) { console.error('QR gen error:', e); }
     }
-    
-    // Masquer la modal et tÃ©lÃ©charger
     modal.classList.remove('active');
     doc.save('QRCodes_TheBrunch_' + new Date().toISOString().slice(0, 10) + '.pdf');
-    
   } catch(e) {
     document.getElementById('progress-modal').classList.remove('active');
-    alert('Erreur lors de la gÃ©nÃ©ration du PDF: ' + e.message);
-    console.error(e);
+    alert('Erreur PDF: ' + e.message);
   }
 }
 
-// â”€â”€â”€ Ã‰TAT GLOBAL â”€â”€â”€
- 
-// Supabase : remplacedz ces valeurs par votre URL et votre clÃ© API
+// ─── SUPABASE ───
 const SUPABASE_URL = 'https://rpmkyczwtufxldcnesqz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwbWt5Y3p3dHVmeGxkY25lc3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxOTg4ODUsImV4cCI6MjA5Mjc3NDg4NX0.Eu2PHTZ5hvF4Cgk36_00OA-JRpmwfDHYo2DgL2d2PWM';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Lots A-T : 30 Standard chacun | Lot U : 20 VIP
 const LOT_CONFIG = {
-  A: { count: 30, type: 'STANDARD' },
-  B: { count: 30, type: 'STANDARD' },
-  C: { count: 30, type: 'STANDARD' },
-  D: { count: 30, type: 'STANDARD' },
-  E: { count: 30, type: 'STANDARD' },
-  F: { count: 30, type: 'STANDARD' },
-  G: { count: 30, type: 'STANDARD' },
-  H: { count: 30, type: 'STANDARD' },
-  I: { count: 30, type: 'STANDARD' },
-  J: { count: 30, type: 'STANDARD' },
-  K: { count: 30, type: 'STANDARD' },
-  L: { count: 30, type: 'STANDARD' },
-  M: { count: 30, type: 'STANDARD' },
-  N: { count: 30, type: 'STANDARD' },
-  O: { count: 30, type: 'STANDARD' },
-  P: { count: 30, type: 'STANDARD' },
-  Q: { count: 30, type: 'STANDARD' },
-  R: { count: 30, type: 'STANDARD' },
-  S: { count: 30, type: 'STANDARD' },
-  T: { count: 30, type: 'STANDARD' },
-  U: { count: 20, type: 'VIP'      },
+  A:{count:30,type:'STANDARD'},B:{count:30,type:'STANDARD'},C:{count:30,type:'STANDARD'},
+  D:{count:30,type:'STANDARD'},E:{count:30,type:'STANDARD'},F:{count:30,type:'STANDARD'},
+  G:{count:30,type:'STANDARD'},H:{count:30,type:'STANDARD'},I:{count:30,type:'STANDARD'},
+  J:{count:30,type:'STANDARD'},K:{count:30,type:'STANDARD'},L:{count:30,type:'STANDARD'},
+  M:{count:30,type:'STANDARD'},N:{count:30,type:'STANDARD'},O:{count:30,type:'STANDARD'},
+  P:{count:30,type:'STANDARD'},Q:{count:30,type:'STANDARD'},R:{count:30,type:'STANDARD'},
+  S:{count:30,type:'STANDARD'},T:{count:30,type:'STANDARD'},U:{count:20,type:'VIP'},
 };
 const LOTS = Object.keys(LOT_CONFIG);
 
-// Load from localStorage
 function buildFreshState() {
   const tickets = {};
   LOTS.forEach(lot => {
@@ -1402,218 +1445,67 @@ function loadState() {
   try {
     const raw = localStorage.getItem('brunch_tickets');
     if (!raw) return buildFreshState();
-
     const saved = JSON.parse(raw);
-
-    // VÃ©rifier que tous les lots de LOT_CONFIG sont prÃ©sents
-    // Si un lot manque (structure mise Ã  jour), on fusionne
     const fresh = buildFreshState();
     let needsMerge = false;
-    for (const code of Object.keys(fresh)) {
-      if (!saved[code]) { needsMerge = true; break; }
-    }
-
+    for (const code of Object.keys(fresh)) { if (!saved[code]) { needsMerge = true; break; } }
     if (!needsMerge) return saved;
-
-    // Fusionner : garder les donnÃ©es existantes, ajouter les manquants
     const merged = { ...fresh };
-    for (const [code, ticket] of Object.entries(saved)) {
-      if (merged[code]) merged[code] = ticket; // prÃ©server l'Ã©tat (used, etc.)
-    }
+    for (const [code, ticket] of Object.entries(saved)) { if (merged[code]) merged[code] = ticket; }
     localStorage.setItem('brunch_tickets', JSON.stringify(merged));
     return merged;
-
-  } catch(e) {
-    // localStorage corrompu ou indispo (mode privÃ© iOS) â†’ Ã©tat frais en mÃ©moire
-    return buildFreshState();
-  }
+  } catch(e) { return buildFreshState(); }
 }
 
 function saveState() {
-  localStorage.setItem('brunch_tickets', JSON.stringify(state));
+  try { localStorage.setItem('brunch_tickets', JSON.stringify(state)); } catch(e) {}
 }
 
-// Sauvegarder un ticket dans Supabase
 async function updateTicketInSupabase(code, used, usedAt) {
   try {
-    console.log('ðŸ”„ Mise Ã  jour ticket Supabase:', { code, used, usedAt });
-    const { data, error } = await supabaseClient
-      .from('tickets')
-      .update({ used: used, used_at: usedAt })
-      .eq('code', code)
-      .select();
-    
-    if (error) {
-      // Ignorer les erreurs de colonne manquante
-      if (error.code === 'PGRST204') {
-        console.warn('âš ï¸ Supabase non configurÃ©e - mode localStorage');
-        return null;
-      }
-      console.warn('âš ï¸ Erreur Supabase update:', error.message);
-      return null;
-    }
-    console.log('âœ… Ticket mis Ã  jour');
-    return data;
-  } catch(e) {
-    console.warn('âš ï¸ Erreur mise Ã  jour ticket:', e.message);
-    // Continuer mÃªme si Supabase Ã©choue (donnÃ©es locales sont conservÃ©es)
-    return null;
-  }
+    const { error } = await supabaseClient.from('tickets').update({ used, used_at: usedAt }).eq('code', code);
+    if (error && error.code !== 'PGRST204') console.warn('Supabase update error:', error.message);
+  } catch(e) {}
 }
 
-// Charger l'Ã©tat depuis Supabase
 async function loadStateFromSupabase() {
   try {
-    console.log('ðŸ“¥ Chargement des tickets depuis Supabase...');
-    const { data, error } = await supabaseClient
-      .from('tickets')
-      .select('*');
-    
-    if (error) {
-      console.warn('âš ï¸ Erreur chargement Supabase:', error.message);
-      return null;
-    }
-    
-    if (!data || data.length === 0) {
-      console.log('âš ï¸ Aucun ticket dans Supabase');
-      return null;
-    }
-    
-    // Convertir les donnÃ©es Supabase au format local
+    const { data, error } = await supabaseClient.from('tickets').select('*');
+    if (error || !data || data.length === 0) return null;
     const tickets = {};
     data.forEach(row => {
-      tickets[row.code] = {
-        code: row.code,
-        lot: row.lot,
-        num: parseInt(row.code.substring(1)),
-        type: row.type,
-        used: row.used,
-        usedAt: row.used_at
-      };
+      tickets[row.code] = { code: row.code, lot: row.lot, num: parseInt(row.code.substring(1)), type: row.type, used: row.used, usedAt: row.used_at };
     });
-    console.log('âœ… Tickets chargÃ©s depuis Supabase:', data.length);
     return tickets;
-  } catch(e) {
-    console.warn('âš ï¸ Erreur chargement Supabase (fallback localStorage):', e.message);
-    return null;
-  }
+  } catch(e) { return null; }
 }
 
-// CrÃ©er les tickets dans Supabase
 async function createTicketsInSupabase() {
   try {
-    console.log('ðŸ†• CrÃ©ation des tickets dans Supabase...');
-    const ticketsToInsert = [];
-    Object.values(state).forEach(ticket => {
-      ticketsToInsert.push({
-        code: ticket.code,
-        lot: ticket.lot,
-        type: ticket.type,
-        used: ticket.used,
-        used_at: ticket.usedAt
-      });
-    });
-    
-    // Faire l'insertion par batch (100 Ã  la fois)
+    const ticketsToInsert = Object.values(state).map(t => ({ code: t.code, lot: t.lot, type: t.type, used: t.used, used_at: t.usedAt }));
     for (let i = 0; i < ticketsToInsert.length; i += 100) {
-      const batch = ticketsToInsert.slice(i, i + 100);
-      const { data, error } = await supabaseClient
-        .from('tickets')
-        .insert(batch)
-        .select();
-      
-      if (error) {
-        // Si erreur de doublon, c'est OK (les tickets existent dÃ©jÃ )
-        if (error.code === '23505') {
-          console.log('âœ… Les tickets existent dÃ©jÃ  dans Supabase (batch ' + (i/100 + 1) + ')');
-        } else if (error.code === 'PGRST204') {
-          // Colonne manquante - Supabase pas configurÃ©e correctement
-          console.warn('âš ï¸ Table Supabase mal configurÃ©e (colonne manquante)');
-          console.log('   Mode fallback: utilisation de localStorage uniquement');
-          return false; // Signal que Supabase n'est pas disponible
-        } else {
-          console.warn('âš ï¸ Erreur Supabase (batch ' + (i/100 + 1) + '):', error.message);
-          // Continuer mÃªme si Ã§a Ã©choue
-        }
-      } else {
-        console.log('âœ… Batch ' + (i/100 + 1) + ' tickets crÃ©Ã©s');
-      }
+      const { error } = await supabaseClient.from('tickets').insert(ticketsToInsert.slice(i, i + 100));
+      if (error && error.code !== '23505') console.warn('Insert batch error:', error.message);
     }
-    console.log('âœ… Tous les tickets sont dans Supabase (ou fallback local)');
-    return true;
-  } catch(e) {
-    console.warn('âš ï¸ Exception crÃ©ation tickets:', e.message);
-    console.log('   Utilisation de localStorage comme fallback');
-    return false;
-  }
+  } catch(e) {}
 }
 
-// Charger les scans depuis Supabase ou localStorage (fallback)
 async function loadScanLog() {
   try {
-    const { data, error } = await supabaseClient
-      .from('scans')
-      .select('*')
-      .order('scanned_at', { ascending: false })
-      .limit(500);
-    
-    if (error) {
-      if (error.code === 'PGRST204' || error.message.includes('Could not find')) {
-        console.log('âš ï¸ Table scans non configurÃ©e - mode localStorage');
-        throw new Error('Supabase not configured');
-      }
-      console.warn('âš ï¸ Erreur chargement scans:', error.message);
-      throw error;
-    }
-    
-    // Convertir format Supabase vers format local
-    const scans = data.map(row => ({
-      code: row.code,
-      ok: row.scanned,
-      detail: row.detail || '',
-      time: row.time || '',
-      ts: row.scanned_at,
-      id: row.id
-    }));
-    console.log('âœ… Scans chargÃ©s:', scans.length);
-    return scans;
+    const { data, error } = await supabaseClient.from('scans').select('*').order('scanned_at', { ascending: false }).limit(500);
+    if (error) throw error;
+    return data.map(row => ({ code: row.code, ok: row.scanned, detail: row.detail || '', time: row.time || '', ts: row.scanned_at, id: row.id }));
   } catch(e) {
-    console.warn('âš ï¸ Chargement scans Supabase Ã©chouÃ©, utilisation localStorage:', e.message);
     const raw = localStorage.getItem('brunch_scanlog');
     return raw ? JSON.parse(raw) : [];
   }
 }
 
-// Sauvegarder un scan dans Supabase
 async function saveScanToSupabase(code, ok, detail, timeStr, ts) {
   try {
-    const { data, error } = await supabaseClient
-      .from('scans')
-      .insert([
-        {
-          code: code,
-          scanned: ok,
-          detail: detail,
-          time: timeStr,
-          scanned_at: ts,
-          scanned_by: currentUser
-        }
-      ])
-      .select();
-    
-    if (error) {
-      if (error.code === 'PGRST204' || error.message.includes('Could not find')) {
-        console.warn('âš ï¸ Table scans non configurÃ©e - mode localStorage');
-        return;
-      }
-      console.warn('âš ï¸ Erreur sauvegarde scan Supabase:', error.message);
-      // Continuer mÃªme si Ã§a Ã©choue
-    } else {
-      console.log('âœ… Scan enregistrÃ©');
-    }
-  } catch(e) {
-    console.warn('âš ï¸ Exception sauvegarde scan:', e.message);
-  }
+    const { error } = await supabaseClient.from('scans').insert([{ code, scanned: ok, detail, time: timeStr, scanned_at: ts, scanned_by: currentUser }]);
+    if (error && error.code !== 'PGRST204') console.warn('Scan insert error:', error.message);
+  } catch(e) {}
 }
 
 let state = {};
@@ -1623,251 +1515,65 @@ let scanInterval = null;
 let pendingConfirmation = null;
 let stateReady = false;
 
-// ðŸ”¥ IMMÃ‰DIATEMENT charger les tickets de localStorage (synchrone)
+// Chargement immédiat localStorage
 try {
   const raw = localStorage.getItem('brunch_tickets');
-  if (raw) {
-    state = JSON.parse(raw);
-    console.log('âœ… Tickets chargÃ©s IMMÃ‰DIATEMENT de localStorage:', Object.keys(state).length);
-  }
-} catch(e) {
-  console.warn('âš ï¸ Erreur chargement localStorage');
-}
-
-// Si state est vide aprÃ¨s localStorage, crÃ©er les 620 tickets
+  if (raw) { state = JSON.parse(raw); }
+} catch(e) {}
 if (Object.keys(state).length === 0) {
-  console.log('ðŸ†• CrÃ©ation des 620 tickets frais...');
   state = buildFreshState();
   localStorage.setItem('brunch_tickets', JSON.stringify(state));
-  console.log('âœ… Tickets crÃ©Ã©s et sauvegardÃ©s');
 }
-
 stateReady = true;
-console.log('âœ… STATE PRÃŠT:', Object.keys(state).length, 'tickets disponibles');
-
-async function initializeTicketsSync() {
-  console.log('ðŸŽ« Initialisation de la synchro des tickets...');
-  updateSyncStatus('ðŸ”„ Chargement des donnÃ©es...');
-  
-  try {
-    const supabaseTickets = await loadStateFromSupabase();
-    
-    if (supabaseTickets) {
-      state = supabaseTickets;
-      console.log('âœ… Tickets chargÃ©s depuis Supabase');
-    } else {
-      console.log('â„¹ï¸ Chargement depuis localStorage');
-      state = loadState();
-      await createTicketsInSupabase(); // Tentative de crÃ©ation (non-bloquante)
-    }
-    
-    // VÃ©rifier que state a bien des donnÃ©es
-    if (Object.keys(state).length === 0) {
-      console.warn('âš ï¸ State vide! Reconstruction...');
-      state = buildFreshState();
-    }
-    
-    stateReady = true;
-    console.log('âœ… State prÃªt avec', Object.keys(state).length, 'tickets');
-    
-    updateSyncStatus('âœ… Synchronisation active (localStorage)');
-    
-    // â”€â”€â”€ LISTENERS REAL-TIME SUPABASE (optionnels) â”€â”€â”€
-    try {
-      // Listener tickets
-      supabaseClient
-        .channel('tickets-changes-' + Date.now())
-        .on(
-          'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'tickets' },
-          (payload) => {
-            try {
-              const updatedTicket = payload.new;
-              if (state[updatedTicket.code]) {
-                state[updatedTicket.code].used = updatedTicket.used;
-                state[updatedTicket.code].usedAt = updatedTicket.used_at;
-                console.log('ðŸ“¡ Ticket mis Ã  jour en temps rÃ©el:', updatedTicket.code);
-              }
-              const view = document.querySelector('.view.active');
-              if (view && view.id === 'view-dashboard') {
-                renderDashboard();
-              }
-            } catch(e) {
-              console.error('âŒ Erreur traitement update ticket:', e);
-            }
-          }
-        )
-        .subscribe();
-      
-      // Listener reset
-      supabaseClient
-        .channel('reset-changes-' + Date.now())
-        .on(
-          'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'resets' },
-          async (payload) => {
-            try {
-              console.log('ðŸ”„ Signal de rÃ©initialisation reÃ§u');
-              const fresh = buildFreshState();
-              state = fresh;
-              saveState();
-              renderDashboard();
-              alert('âœ… SystÃ¨me rÃ©initialisÃ© par un administrateur');
-            } catch(e) {
-              console.error('âŒ Erreur traitement reset:', e);
-            }
-          }
-        )
-        .subscribe();
-      
-      // Listener scans
-      supabaseClient
-        .channel('scans-changes-' + Date.now())
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'scans' },
-          (payload) => {
-            try {
-              const newScan = payload.new;
-              const entry = {
-                code: newScan.code,
-                ok: newScan.scanned,
-                detail: newScan.detail || '',
-                time: newScan.time || '',
-                ts: newScan.scanned_at,
-                id: newScan.id
-              };
-              scanLog.unshift(entry);
-              console.log('ðŸ“¡ Nouveau scan reÃ§u en temps rÃ©el:', newScan.code);
-              displayLogItem(newScan.code, newScan.scanned, newScan.detail, newScan.time);
-              updateScanCount();
-              const view = document.querySelector('.view.active');
-              if (view && view.id === 'view-dashboard') {
-                renderDashboard();
-              }
-            } catch(e) {
-              console.error('âŒ Erreur traitement scan:', e);
-            }
-          }
-        )
-        .subscribe();
-      
-      console.log('âœ… Listeners Supabase en place');
-    } catch(e) {
-      console.warn('âš ï¸ Erreur configuration listeners Supabase:', e.message);
-      console.log('   Application continue en mode offline');
-    }
-    
-    scanLog = await loadScanLog();
-    
-  } catch(e) {
-    console.error('âŒ Erreur initialisation:', e);
-    console.log('âš ï¸ Mode dÃ©gradÃ©: utilisation de localStorage uniquement');
-    state = loadState();
-    scanLog = [];
-    updateSyncStatus('âš ï¸ Mode offline (localStorage)');
-  }
-}
 
 function updateSyncStatus(message) {
   const el = document.getElementById('sync-status');
   if (el) el.textContent = message;
 }
 
-// â”€â”€â”€ RÃ‰INITIALISATION ADMIN â”€â”€â”€
-
-function openResetModal() {
-  if (!isLoggedIn) {
-    alert('âŒ Vous devez Ãªtre connectÃ©');
-    return;
-  }
-  document.getElementById('reset-modal').classList.add('active');
-  document.getElementById('reset-password').value = '';
-  document.getElementById('reset-password').focus();
-}
-
-function closeResetModal() {
-  document.getElementById('reset-modal').classList.remove('active');
-  document.getElementById('reset-password').value = '';
-}
-
-async function confirmReset() {
-  const password = document.getElementById('reset-password').value;
-  
-  if (!password) {
-    alert('âš ï¸ Veuillez entrer le mot de passe');
-    return;
-  }
-
-  // VÃ©rifier le mot de passe admin
-  const adminPassword = 'admin@brunch2024';
-  if (simpleHash(password) !== simpleHash(adminPassword)) {
-    alert('âŒ Mot de passe incorrect');
-    document.getElementById('reset-password').value = '';
-    return;
-  }
-
-  if (!confirm('âš ï¸ ATTENTION !\n\nCette action rÃ©initialisera TOUS les tickets et scans.\nCette action est irrÃ©versible !\n\nContinuer ?')) {
-    return;
-  }
-
+async function initializeTicketsSync() {
+  updateSyncStatus('🔄 Chargement...');
   try {
-    console.log('ðŸ”„ RÃ©initialisation en cours...');
-    
-    // 1. RÃ©initialiser en localStorage
-    state = buildFreshState();
-    saveState();
-    scanLog = [];
-    localStorage.removeItem('brunch_scanlog');
-    
-    // 2. RÃ©initialiser dans Supabase
-    try {
-      // Supprimer tous les scans
-      await supabaseClient.from('scans').delete().neq('id', '-1');
-      console.log('âœ… Scans supprimÃ©s');
-      
-      // RÃ©initialiser tous les tickets
-      const ticketsToUpdate = Object.values(state).map(t => ({
-        code: t.code,
-        used: false,
-        used_at: null
-      }));
-      
-      // Faire les mises Ã  jour par batch (100 Ã  la fois pour Ã©viter les timeout)
-      for (let i = 0; i < ticketsToUpdate.length; i += 100) {
-        const batch = ticketsToUpdate.slice(i, i + 100);
-        await Promise.all(batch.map(ticket => 
-          supabaseClient
-            .from('tickets')
-            .update({ used: false, used_at: null })
-            .eq('code', ticket.code)
-        ));
-      }
-      console.log('âœ… Tous les tickets rÃ©initialisÃ©s');
-      
-      // Signal de rÃ©initialisation pour les autres clients (inscrire un Ã©vÃ©nement reset)
-      await supabaseClient.from('resets').insert([{
-        reset_by: currentUser,
-        reset_at: new Date().toISOString()
-      }]).select();
-      console.log('âœ… Signal de rÃ©initialisation envoyÃ©');
-      
-    } catch(e) {
-      console.warn('âš ï¸ Erreur Supabase (mais local OK):', e);
+    const supabaseTickets = await loadStateFromSupabase();
+    if (supabaseTickets) {
+      state = supabaseTickets;
+    } else {
+      state = loadState();
+      await createTicketsInSupabase();
     }
-    
-    // 3. Afficher le rÃ©sultat
-    renderDashboard();
-    closeResetModal();
-    alert('âœ… RÃ©initialisation complÃ¨te !\n\nTous les tickets et scans ont Ã©tÃ© annulÃ©s.');
-    
+    if (Object.keys(state).length === 0) state = buildFreshState();
+    stateReady = true;
+    updateSyncStatus('✅ Synchronisé');
+
+    try {
+      supabaseClient.channel('tickets-ch-' + Date.now())
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets' }, (payload) => {
+          const t = payload.new;
+          if (state[t.code]) { state[t.code].used = t.used; state[t.code].usedAt = t.used_at; }
+          const view = document.querySelector('.view.active');
+          if (view && view.id === 'view-dashboard') renderDashboard();
+        }).subscribe();
+
+      supabaseClient.channel('scans-ch-' + Date.now())
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'scans' }, (payload) => {
+          const s = payload.new;
+          const entry = { code: s.code, ok: s.scanned, detail: s.detail || '', time: s.time || '', ts: s.scanned_at, id: s.id };
+          scanLog.unshift(entry);
+          displayLogItem(s.code, s.scanned, s.detail, s.time);
+          updateScanCount();
+          const view = document.querySelector('.view.active');
+          if (view && view.id === 'view-dashboard') renderDashboard();
+        }).subscribe();
+    } catch(e) {}
+
+    scanLog = await loadScanLog();
   } catch(e) {
-    console.error('âŒ Erreur rÃ©initialisation:', e);
-    alert('âŒ Erreur lors de la rÃ©initialisation: ' + e.message);
+    state = loadState();
+    updateSyncStatus('⚠️ Mode offline');
   }
 }
 
-// â”€â”€â”€ NAVIGATION â”€â”€â”€
+// ─── NAVIGATION ───
 function showView(name, btn) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -1877,27 +1583,21 @@ function showView(name, btn) {
   if (name !== 'scanner') stopCamera();
 }
 
-// â”€â”€â”€ LOT CHANGE â”€â”€â”€
 function onLotChange(lot) {
   const typeSelect = document.getElementById('sel-type');
   if (lot !== 'ALL' && LOT_CONFIG[lot]) {
-    const cfg = LOT_CONFIG[lot];
-    typeSelect.value = cfg.type;
-    // DÃ©sactiver le sÃ©lecteur si le type est fixe (VIP uniquement pour U)
-    const isLocked = true; // tous les lots sont verrouillÃ©s sur leur type
-    typeSelect.disabled = isLocked;
-    typeSelect.title = isLocked ? `Ce lot est rÃ©servÃ© ${cfg.type} â€” type non modifiable` : '';
-    typeSelect.style.opacity = isLocked ? '0.5' : '1';
-    typeSelect.style.cursor = isLocked ? 'not-allowed' : '';
+    typeSelect.value = LOT_CONFIG[lot].type;
+    typeSelect.disabled = true;
+    typeSelect.style.opacity = '0.5';
+    typeSelect.style.cursor = 'not-allowed';
   } else {
     typeSelect.disabled = false;
     typeSelect.style.opacity = '1';
     typeSelect.style.cursor = '';
-    typeSelect.title = '';
   }
 }
 
-// â”€â”€â”€ DASHBOARD â”€â”€â”€
+// ─── DASHBOARD ───
 function renderDashboard() {
   const all = Object.values(state);
   const total = all.length;
@@ -1907,19 +1607,19 @@ function renderDashboard() {
 
   document.getElementById('stats-grid').innerHTML = `
     <div class="stat-card">
-      <div class="stat-label">Total tickets</div>
+      <div class="stat-label">Total</div>
       <div class="stat-value">${total}</div>
-      <div class="stat-sub">Aâ€“T: 30 std Â· U: 20 VIP</div>
+      <div class="stat-sub">A–T std · U VIP</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">ValidÃ©s</div>
+      <div class="stat-label">Validés</div>
       <div class="stat-value" style="color:var(--success)">${used}</div>
-      <div class="stat-sub">${((used/total)*100).toFixed(1)}% du total</div>
+      <div class="stat-sub">${total > 0 ? ((used/total)*100).toFixed(1) : 0}% du total</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Disponibles</div>
       <div class="stat-value">${total - used}</div>
-      <div class="stat-sub">non encore scannÃ©s</div>
+      <div class="stat-sub">non scannés</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Standard</div>
@@ -1930,8 +1630,9 @@ function renderDashboard() {
       <div class="stat-value" style="color:var(--gold)">${vip}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Scans aujourd'hui</div>
+      <div class="stat-label">Scans</div>
       <div class="stat-value">${scanLog.length}</div>
+      <div class="stat-sub">${scanLog.filter(l => l.ok).length} validé(s)</div>
     </div>
   `;
 
@@ -1940,7 +1641,8 @@ function renderDashboard() {
   LOTS.forEach(lot => {
     const tickets = all.filter(t => t.lot === lot);
     const usedCount = tickets.filter(t => t.used).length;
-    const pct = (usedCount / tickets.length) * 100;
+    const pct = tickets.length > 0 ? (usedCount / tickets.length) * 100 : 0;
+    const cfg = LOT_CONFIG[lot];
     const div = document.createElement('div');
     div.className = 'lot-card';
     div.setAttribute('data-lot', lot);
@@ -1948,106 +1650,84 @@ function renderDashboard() {
       const btn = document.querySelector('.nav-tab[onclick*=generator]');
       showView('generator', btn);
       document.getElementById('sel-lot').value = lot;
-      document.getElementById('sel-type').value = LOT_CONFIG[lot].type;
+      onLotChange(lot);
       generateTickets();
     };
-    const cfg = LOT_CONFIG[lot];
     div.innerHTML = `
       <div class="lot-letter">Lot ${lot}</div>
-      <div class="lot-title"><span class="ticket-type ${cfg.type.toLowerCase()}" style="font-size:9px;padding:1px 6px">${cfg.type}</span> Â· ${tickets.length} tickets</div>
+      <div class="lot-title"><span class="ticket-type ${cfg.type.toLowerCase()}" style="font-size:9px;padding:1px 5px">${cfg.type}</span> · ${tickets.length}</div>
       <div class="lot-progress-bar"><div class="lot-progress-fill" style="width:${pct}%"></div></div>
-      <div class="lot-counts"><span>${usedCount} validÃ©s</span><span>${tickets.length - usedCount} restants</span></div>
+      <div class="lot-counts"><span>${usedCount} val.</span><span>${tickets.length - usedCount} rest.</span></div>
     `;
     lotsGrid.appendChild(div);
   });
 }
 
-// â”€â”€â”€ GENERATOR â”€â”€â”€
+// ─── GENERATOR ───
 function generateTickets() {
   try {
     const lot = document.getElementById('sel-lot').value;
-    const type = document.getElementById('sel-type').value;
     const grid = document.getElementById('ticket-grid');
     const info = document.getElementById('gen-info');
     grid.innerHTML = '';
 
-    let tickets;
-    if (lot === 'ALL') {
-      tickets = Object.values(state);
-    } else {
-      tickets = Object.values(state).filter(t => t.lot === lot);
-    }
+    let tickets = lot === 'ALL'
+      ? Object.values(state).sort((a, b) => a.lot.localeCompare(b.lot) || a.num - b.num)
+      : Object.values(state).filter(t => t.lot === lot).sort((a, b) => a.num - b.num);
 
-    // Type: for specific lot, override sauf si le lot a un type fixe (ex: U=VIP)
-    const isAllLots = (lot === 'ALL');
-    if (!isAllLots) {
-      // Type toujours dictÃ© par LOT_CONFIG, le sÃ©lecteur est informatif uniquement
-      const lockedType = LOT_CONFIG[lot].type;
-      tickets.forEach(t => { t.type = lockedType; });
-      document.getElementById('sel-type').value = lockedType;
+    if (lot !== 'ALL') {
+      document.getElementById('sel-type').value = LOT_CONFIG[lot].type;
     }
     saveState();
-
-    info.textContent = `${tickets.length} ticket(s) â€” Lot ${isAllLots ? 'Aâ€“U' : lot} â€” ${isAllLots ? 'multi-type' : type}`;
+    info.textContent = `${tickets.length} ticket(s) — Lot ${lot === 'ALL' ? 'A–U' : lot}`;
 
     tickets.forEach(t => {
-      const tType = t.type;
       const card = document.createElement('div');
       card.className = 'ticket-card' + (t.used ? ' used' : '');
       card.id = 'tcard-' + t.code;
       card.innerHTML = `
         <span class="ticket-code">${t.code}</span>
-        <span class="ticket-type ${tType.toLowerCase()}">${tType}</span>
+        <span class="ticket-type ${t.type.toLowerCase()}">${t.type}</span>
         <div class="qr-container" id="qr-${t.code}"></div>
-        <span class="ticket-status ${t.used ? 'used' : ''}">${t.used ? 'âœ“ ValidÃ©' : 'â— Disponible'}</span>
-        <button class="tick-btn" title="Marquer comme utilisÃ©" onclick="toggleUsed('${t.code}')">âœ•</button>
+        <span class="ticket-status ${t.used ? 'used' : ''}">${t.used ? '✓ Validé' : '● Disponible'}</span>
+        <button class="tick-btn" onclick="toggleUsed('${t.code}')">✕</button>
       `;
       grid.appendChild(card);
-
       try {
-        // QR content = CODE|TYPE|LOT
         new QRCode(document.getElementById('qr-' + t.code), {
-          text: `${t.code}|${tType}|${t.lot}`,
+          text: `${t.code}|${t.type}|${t.lot}`,
           width: 100, height: 100,
           colorDark: '#1A1208', colorLight: '#FFFFFF',
           correctLevel: QRCode.CorrectLevel.M
         });
-      } catch(e) {
-        console.warn('âš ï¸ Erreur gÃ©nÃ©ration QR:', t.code, e);
-      }
+      } catch(e) {}
     });
   } catch(e) {
-    console.error('âŒ Erreur generateTickets:', e);
-    alert('âŒ Erreur gÃ©nÃ©ration tickets: ' + e.message);
+    alert('Erreur génération: ' + e.message);
   }
 }
 
 function toggleUsed(code) {
-  try {
-    state[code].used = !state[code].used;
-    state[code].usedAt = state[code].used ? new Date().toISOString() : null;
-    saveState();
-    
-    // Mettre Ã  jour dans Supabase (asynchrone)
-    updateTicketInSupabase(code, state[code].used, state[code].usedAt);
-    
-    const card = document.getElementById('tcard-' + code);
-    if (card) {
-      card.className = 'ticket-card' + (state[code].used ? ' used' : '');
-      card.querySelector('.ticket-status').textContent = state[code].used ? 'âœ“ ValidÃ©' : 'â— Disponible';
-      card.querySelector('.ticket-status').className = 'ticket-status' + (state[code].used ? ' used' : '');
-    }
-  } catch(e) {
-    console.error('âŒ Erreur toggleUsed:', e);
+  if (!state[code]) return;
+  state[code].used = !state[code].used;
+  state[code].usedAt = state[code].used ? new Date().toISOString() : null;
+  saveState();
+  updateTicketInSupabase(code, state[code].used, state[code].usedAt);
+  const card = document.getElementById('tcard-' + code);
+  if (card) {
+    card.className = 'ticket-card' + (state[code].used ? ' used' : '');
+    const s = card.querySelector('.ticket-status');
+    s.textContent = state[code].used ? '✓ Validé' : '● Disponible';
+    s.className = 'ticket-status' + (state[code].used ? ' used' : '');
   }
 }
 
 function clearDisplay() {
-  document.getElementById('ticket-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">ðŸŽŸï¸</div><p>SÃ©lectionne un lot et clique sur GÃ©nÃ©rer</p></div>';
+  document.getElementById('ticket-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">🎟️</div><p>Sélectionne un lot et clique sur Générer</p></div>';
   document.getElementById('gen-info').textContent = '';
 }
 
-// â”€â”€â”€ SCANNER â”€â”€â”€
+// ─── CAMERA ───
 function toggleCamera() {
   if (cameraStream) { stopCamera(); return; }
   startCamera();
@@ -2061,140 +1741,61 @@ function setCamStatus(msg, color) {
 async function startCamera() {
   const btn = document.getElementById('btn-cam');
   btn.disabled = true;
-  setCamStatus('Demande d\'autorisation camÃ©raâ€¦', '#888');
+  setCamStatus('Demande d\'autorisation caméra…', '#888');
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    setCamStatus('âŒ CamÃ©ra non supportÃ©e. Utilise Safari (iOS) ou Chrome (Android).', 'var(--error)');
+    setCamStatus('❌ Caméra non supportée. Utilise Safari (iOS) ou Chrome (Android).', 'var(--error)');
     btn.disabled = false;
     return;
   }
 
-  // VÃ©rifier jsQR
   if (typeof window.jsQR !== 'function') {
-    console.error('âŒ jsQR n\'est pas chargÃ©!');
-    setCamStatus('âš ï¸ Librairie de scan en cours de chargement... Essaie dans 2 secondes.', '#e67e22');
+    setCamStatus('⚠️ Librairie de scan non chargée. Réessaie dans 2s.', '#e67e22');
     btn.disabled = false;
     return;
-  }
-
-  // VÃ©rifier permissions sur Android
-  if (navigator.permissions && /Android/.test(navigator.userAgent)) {
-    try {
-      const perm = await navigator.permissions.query({ name: 'camera' });
-      if (perm.state === 'denied') {
-        setCamStatus('âŒ Permission camÃ©ra refusÃ©e. Va dans RÃ©glages pour autoriser.', 'var(--error)');
-        btn.disabled = false;
-        return;
-      }
-    } catch(e) { /* permissions API non dispo */ }
   }
 
   try {
-    // Essayer avec des contraintes adaptÃ©es au mobile
-    const constraints = {
-      video: {
-        facingMode: { ideal: 'environment' },
-        width: { min: 320, ideal: 640, max: 1280 },
-        height: { min: 240, ideal: 480, max: 720 },
-        focusMode: { ideal: 'continuous' }
-      },
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { min: 320, ideal: 640, max: 1280 }, height: { min: 240, ideal: 480, max: 720 } },
       audio: false
-    };
-    
-    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    });
     const video = document.getElementById('video-preview');
     video.srcObject = cameraStream;
-    
-    // Attendre que la vidÃ©o soit prÃªte
-    await new Promise((resolve) => {
-      video.onloadedmetadata = () => {
-        video.play().catch(() => {});
-        resolve();
-      };
-      setTimeout(resolve, 2000); // Timeout de sÃ©curitÃ©
+    await new Promise(resolve => {
+      video.onloadedmetadata = () => { video.play().catch(() => {}); resolve(); };
+      setTimeout(resolve, 2000);
     });
-    
-    btn.textContent = 'â¹ ArrÃªter la camÃ©ra';
+    btn.textContent = '⏹ Arrêter';
     btn.disabled = false;
-    setCamStatus('âœ… CamÃ©ra active â€” pointez vers un QR code', 'var(--success)');
+    setCamStatus('✅ Caméra active — pointez vers un QR code', 'var(--success)');
 
-    console.log('ðŸ“· CamÃ©ra activÃ©e');
-    console.log('   RÃ©solution:', video.videoWidth, 'x', video.videoHeight);
-    console.log('   jsQR type:', typeof window.jsQR);
-
-    // DÃ©marrer la boucle de scan
     const canvas = document.createElement('canvas');
-    let lastCode = null;
-    let lastCodeTime = 0;
-    let noQRCount = 0;
-    
+    let lastCode = null, lastCodeTime = 0;
     scanInterval = setInterval(() => {
+      if (!video.videoWidth || video.readyState !== video.HAVE_ENOUGH_DATA) return;
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.filter = 'brightness(1.1) contrast(1.1)';
+      ctx.drawImage(video, 0, 0);
       try {
-        // VÃ©rifier que la vidÃ©o est prÃªte et a une rÃ©solution valide
-        if (video.readyState !== video.HAVE_ENOUGH_DATA || video.videoWidth === 0) {
-          return;
-        }
-        
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        
-        // Ajouter un peu de flou pour amÃ©liorer la dÃ©tection
-        ctx.filter = 'brightness(1.1) contrast(1.1)';
-        ctx.drawImage(video, 0, 0);
-        
         const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        
-        try {
-          // Essayer avec diffÃ©rents modes de scan
-          let qr = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
-          
-          if (qr && qr.data) {
-            const now = Date.now();
-            // DÃ©duplica: ignorer si le mÃªme code dans les 2 derniÃ¨res secondes
-            if (qr.data !== lastCode || now - lastCodeTime > 2000) {
-              lastCode = qr.data;
-              lastCodeTime = now;
-              noQRCount = 0;
-              console.log('ðŸŽ¯ QR dÃ©tectÃ©:', qr.data);
-              const parts = qr.data.split('|');
-              validateCode(parts[0]);
-            }
-          } else {
-            noQRCount++;
-            // Feedback tous les 5 secondes si aucun QR dÃ©tectÃ©
-            if (noQRCount > 200) { // 200 * 250ms = 50 secondes
-              setCamStatus('ðŸ’¡ Pointez le QR code mieux vers la camÃ©ra...', '#e67e22');
-              noQRCount = 0;
-            }
+        const qr = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
+        if (qr && qr.data) {
+          const now = Date.now();
+          if (qr.data !== lastCode || now - lastCodeTime > 2000) {
+            lastCode = qr.data; lastCodeTime = now;
+            validateCode(qr.data.split('|')[0]);
           }
-        } catch(qrError) {
-          console.warn('âš ï¸ Erreur jsQR:', qrError.message);
         }
-      } catch(e) {
-        console.error('âŒ Erreur boucle scan:', e);
-      }
+      } catch(e) {}
     }, 250);
-    
-    console.log('âœ… Boucle de scan lancÃ©e (250ms interval)');
-    
   } catch(e) {
-    console.error('âŒ Erreur startCamera:', e);
     btn.disabled = false;
-    btn.textContent = 'â–¶ Activer la camÃ©ra';
-    
-    // Messages d'erreur dÃ©taillÃ©s
-    if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-      setCamStatus('âŒ Permission camÃ©ra refusÃ©e. Clique sur l\'icÃ´ne de camÃ©ra refusÃ©e en haut et autorise.', 'var(--error)');
-    } else if (e.name === 'NotFoundError' || e.message.includes('no camera')) {
-      setCamStatus('âŒ Aucune camÃ©ra dÃ©tectÃ©e sur cet appareil.', 'var(--error)');
-    } else if (e.name === 'NotReadableError' || e.message.includes('already in use')) {
-      setCamStatus('âŒ CamÃ©ra dÃ©jÃ  utilisÃ©e. Ferme les autres apps et rÃ©essaie.', 'var(--error)');
-    } else if (e.name === 'TypeError') {
-      setCamStatus('âŒ Erreur de configuration camÃ©ra. RafraÃ®chis la page.', 'var(--error)');
-    } else {
-      setCamStatus('âŒ ' + e.message, 'var(--error)');
-    }
+    if (e.name === 'NotAllowedError') setCamStatus('❌ Permission refusée. Autorise la caméra dans les réglages.', 'var(--error)');
+    else if (e.name === 'NotFoundError') setCamStatus('❌ Aucune caméra détectée.', 'var(--error)');
+    else if (e.name === 'NotReadableError') setCamStatus('❌ Caméra déjà utilisée. Ferme les autres apps.', 'var(--error)');
+    else setCamStatus('❌ ' + e.message, 'var(--error)');
   }
 }
 
@@ -2202,106 +1803,70 @@ function stopCamera() {
   if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
   if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
   const btn = document.getElementById('btn-cam');
-  if (btn) { btn.textContent = 'â–¶ Activer la camÃ©ra'; btn.disabled = false; }
+  if (btn) { btn.textContent = '▶ Activer la caméra'; btn.disabled = false; }
   setCamStatus('', '#888');
 }
 
+// ─── VALIDATION ───
 function validateCode(rawCode) {
-  try {
-    if (!rawCode) return;
-    
-    // VÃ©rifier que state est bien chargÃ©
-    if (!stateReady || Object.keys(state).length === 0) {
-      console.warn('âš ï¸ State pas encore prÃªt, chargement d\'urgence...');
-      state = loadState();
-      if (Object.keys(state).length === 0) {
-        state = buildFreshState();
-      }
-      stateReady = true;
-      console.log('âœ… State chargÃ© d\'urgence:', Object.keys(state).length, 'tickets');
-    }
-    
-    const code = rawCode.trim().toUpperCase();
-    document.getElementById('manual-code').value = '';
+  if (!rawCode || !rawCode.trim()) return;
+  const code = rawCode.trim().toUpperCase();
+  document.getElementById('manual-code').value = '';
 
-    const result = document.getElementById('scan-result');
-    result.style.display = 'block';
-
-    console.log('ðŸ” Recherche code:', code, '| State size:', Object.keys(state).length);
-    const ticket = state[code];
-    if (!ticket) {
-      console.error('âŒ Code non trouvÃ©:', code);
-      console.log('   Codes disponibles (premiers):', Object.keys(state).slice(0, 5));
-      result.className = 'scan-result invalid';
-      result.innerHTML = `<div class="result-icon">âŒ</div><div class="result-title">Code invalide</div><div class="result-code">${code}</div><div class="result-detail">Ce code n'existe pas dans la base (${Object.keys(state).length} codes).</div>`;
-      addLog(code, false, 'Code inconnu');
-      return;
-    }
-    
-    console.log('âœ… Ticket trouvÃ©:', ticket);
-    if (ticket.used) {
-      result.className = 'scan-result already';
-      result.innerHTML = `<div class="result-icon">âš ï¸</div><div class="result-title">DÃ©jÃ  validÃ©</div><div class="result-code">${code}</div><div class="result-detail">Ce ticket a dÃ©jÃ  Ã©tÃ© utilisÃ©.<br>Type : ${ticket.type} â€” Lot ${ticket.lot}</div>`;
-      addLog(code, false, 'DÃ©jÃ  utilisÃ©');
-      return;
-    }
-
-    // Afficher la modal de confirmation
-    showConfirmationModal(code, ticket);
-  } catch(e) {
-    console.error('âŒ Erreur validateCode:', e);
+  if (!stateReady || Object.keys(state).length === 0) {
+    state = loadState();
+    stateReady = true;
   }
+
+  const result = document.getElementById('scan-result');
+  result.style.display = 'block';
+
+  const ticket = state[code];
+  if (!ticket) {
+    result.className = 'scan-result invalid';
+    result.innerHTML = `<div class="result-icon">❌</div><div class="result-title">Code invalide</div><div class="result-code">${code}</div><div class="result-detail">Ce code n'existe pas dans la base.</div>`;
+    addLog(code, false, 'Code inconnu');
+    return;
+  }
+  if (ticket.used) {
+    result.className = 'scan-result already';
+    result.innerHTML = `<div class="result-icon">⚠️</div><div class="result-title">Déjà validé</div><div class="result-code">${code}</div><div class="result-detail">Ce ticket a déjà été utilisé.<br>Type : ${ticket.type} — Lot ${ticket.lot}</div>`;
+    addLog(code, false, 'Déjà utilisé');
+    return;
+  }
+  showConfirmationModal(code, ticket);
 }
 
 function showConfirmationModal(code, ticket) {
   pendingConfirmation = { code, ticket };
-  document.getElementById('modal-icon').textContent = 'ðŸŽŸï¸';
-  document.getElementById('modal-title').textContent = 'Confirmer l\'entrÃ©e ?';
+  document.getElementById('modal-icon').textContent = '🎟️';
+  document.getElementById('modal-title').textContent = 'Confirmer l\'entrée ?';
   document.getElementById('modal-code').textContent = code;
-  document.getElementById('modal-detail').innerHTML = `<strong>${ticket.type}</strong> â€” Lot <strong>${ticket.lot}</strong><br>Ticket nÂ° ${ticket.num}`;
+  document.getElementById('modal-detail').innerHTML = `<strong>${ticket.type}</strong> — Lot <strong>${ticket.lot}</strong><br>Ticket n° ${ticket.num}`;
   document.getElementById('confirmation-modal').classList.add('active');
 }
 
 function confirmTicket() {
   if (!pendingConfirmation) return;
-  
   const { code, ticket } = pendingConfirmation;
-  
-  try {
-    // Marquer comme utilisÃ©
-    ticket.used = true;
-    ticket.usedAt = new Date().toISOString();
-    saveState();
-    
-    // Mettre Ã  jour dans Supabase (asynchrone)
-    updateTicketInSupabase(code, true, ticket.usedAt);
-    
-    // Mettre Ã  jour l'affichage du rÃ©sultat
-    const result = document.getElementById('scan-result');
-    result.className = 'scan-result valid';
-    result.innerHTML = `<div class="result-icon">âœ…</div><div class="result-title">EntrÃ©e validÃ©e !</div><div class="result-code">${code}</div><div class="result-detail">Type : <strong>${ticket.type}</strong> â€” Lot <strong>${ticket.lot}</strong><br>Ticket nÂ° ${ticket.num}</div>`;
-    addLog(code, true, ticket.type);
-    
-    // Fermer la modal
-    closeConfirmationModal();
-  } catch(e) {
-    console.error('âŒ Erreur confirmation ticket:', e);
-    alert('âŒ Erreur lors de la validation: ' + e.message);
-  }
+  ticket.used = true;
+  ticket.usedAt = new Date().toISOString();
+  saveState();
+  updateTicketInSupabase(code, true, ticket.usedAt);
+  const result = document.getElementById('scan-result');
+  result.className = 'scan-result valid';
+  result.innerHTML = `<div class="result-icon">✅</div><div class="result-title">Entrée validée !</div><div class="result-code">${code}</div><div class="result-detail">Type : <strong>${ticket.type}</strong> — Lot <strong>${ticket.lot}</strong><br>Ticket n° ${ticket.num}</div>`;
+  addLog(code, true, ticket.type);
+  closeConfirmationModal();
 }
 
 function refuseTicket() {
   if (!pendingConfirmation) return;
-  
   const { code, ticket } = pendingConfirmation;
-  
-  // Afficher le rÃ©sultat de refus
   const result = document.getElementById('scan-result');
   result.className = 'scan-result invalid';
-  result.innerHTML = `<div class="result-icon">âŒ</div><div class="result-title">EntrÃ©e refusÃ©e</div><div class="result-code">${code}</div><div class="result-detail">Cette entrÃ©e a Ã©tÃ© refusÃ©e.<br>Type : ${ticket.type} â€” Lot ${ticket.lot}</div>`;
-  addLog(code, false, 'RefusÃ©');
-  
-  // Fermer la modal
+  result.innerHTML = `<div class="result-icon">❌</div><div class="result-title">Entrée refusée</div><div class="result-code">${code}</div><div class="result-detail">Entrée refusée manuellement.<br>Type : ${ticket.type} — Lot ${ticket.lot}</div>`;
+  addLog(code, false, 'Refusé');
   closeConfirmationModal();
 }
 
@@ -2310,48 +1875,15 @@ function closeConfirmationModal() {
   pendingConfirmation = null;
 }
 
-// Fermer la modal de confirmation au clic en dehors
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('confirmation-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeConfirmationModal();
-  });
-  document.getElementById('settings-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeSettings();
-  });
-  document.getElementById('reset-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeResetModal();
-  });
-  
-  // Fermer les modals Ã  la touche Escape
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      closeConfirmationModal();
-      closeSettings();
-      closeResetModal();
-    }
-  });
-});
-
 function addLog(code, ok, detail) {
-  try {
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-    const ts = now.toISOString();
-    const entry = { code, ok, detail, time: timeStr, ts: ts };
-    scanLog.unshift(entry);
-    
-    // Sauvegarder dans localStorage aussi (fallback)
-    const allLogs = [entry, ...scanLog.slice(0, 499)]; // Garder 500 derniers
-    localStorage.setItem('brunch_scanlog', JSON.stringify(allLogs));
-    
-    // Sauvegarder dans Supabase (asynchrone)
-    saveScanToSupabase(code, ok, detail, timeStr, ts);
-
-    displayLogItem(code, ok, detail, timeStr);
-    updateScanCount();
-  } catch(e) {
-    console.error('âŒ Erreur ajout log:', e);
-  }
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const ts = now.toISOString();
+  scanLog.unshift({ code, ok, detail, time: timeStr, ts });
+  try { localStorage.setItem('brunch_scanlog', JSON.stringify(scanLog.slice(0, 500))); } catch(e) {}
+  saveScanToSupabase(code, ok, detail, timeStr, ts);
+  displayLogItem(code, ok, detail, timeStr);
+  updateScanCount();
 }
 
 function displayLogItem(code, ok, detail, timeStr) {
@@ -2361,87 +1893,67 @@ function displayLogItem(code, ok, detail, timeStr) {
   item.className = 'log-item';
   item.innerHTML = `
     <span class="log-code">${code}</span>
-    <span style="font-size:11px;color:#888">${detail}</span>
-    <span class="log-badge ${ok ? 'ok' : 'fail'}">${ok ? 'âœ“ OK' : 'âœ• Refus'}</span>
+    <span class="log-detail">${detail}</span>
+    <span class="log-badge ${ok ? 'ok' : 'fail'}">${ok ? '✓ OK' : '✕'}</span>
     <span class="log-time">${timeStr}</span>
   `;
   log.prepend(item);
 }
 
 function updateScanCount() {
-  const count = document.getElementById('scan-count');
-  const validated = scanLog.filter(l => l.ok).length;
-  count.textContent = `${validated} validÃ©(s)`;
+  const el = document.getElementById('scan-count');
+  if (el) el.textContent = `${scanLog.filter(l => l.ok).length} validé(s)`;
 }
 
-// â”€â”€â”€ INIT â”€â”€â”€
+// ─── LISTENERS ───
+document.addEventListener('DOMContentLoaded', function() {
+  ['confirmation-modal', 'settings-modal', 'reset-confirm-modal', 'reset-modal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', function(e) {
+      if (e.target === this) {
+        if (id === 'confirmation-modal') closeConfirmationModal();
+        else if (id === 'settings-modal') closeSettings();
+        else if (id === 'reset-confirm-modal') closeResetConfirm();
+        else if (id === 'reset-modal') closeResetModal();
+      }
+    });
+  });
+
+  document.getElementById('reset-confirm-ok').addEventListener('click', async function() {
+    if (!pendingReset) return;
+    const type = pendingReset;
+    closeResetConfirm();
+    await executeReset(type);
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeConfirmationModal();
+      closeSettings();
+      closeResetConfirm();
+      closeResetModal();
+    }
+  });
+});
+
+// ─── INIT ───
 (async () => {
   try {
-    console.log('ðŸš€ DÃ©marrage de l\'application The Brunch...');
-    
-    // Attendre le chargement de jsQR (max 8 secondes avec retry)
-    let waitTime = 0;
-    let jsQRLoaded = false;
-    
-    while (!jsQRLoaded && waitTime < 8000) {
-      if (typeof window.jsQR === 'function') {
-        jsQRLoaded = true;
-        break;
-      }
+    let waited = 0;
+    while (typeof window.jsQR !== 'function' && waited < 6000) {
       await new Promise(r => setTimeout(r, 200));
-      waitTime += 200;
+      waited += 200;
     }
-    
-    // VÃ©rifier les librairies
-    console.log('ðŸ“¦ VÃ©rification des librairies:');
-    console.log('   - QRCode (gÃ©nÃ©ration):', typeof QRCode);
-    console.log('   - jsQR (lecture):', typeof window.jsQR, jsQRLoaded ? 'âœ…' : 'âŒ');
-    console.log('   - Supabase:', typeof supabase);
-    
-    // Si jsQR n'est pas chargÃ©, essayer le fallback
-    if (!jsQRLoaded || typeof window.jsQR !== 'function') {
-      console.warn('âš ï¸ jsQR pas chargÃ© du CDN principal, tentative fallback...');
-      
-      // Essayer le CDN alternatif
+    if (typeof window.jsQR !== 'function') {
       const script = document.createElement('script');
       script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
       script.async = true;
-      
-      script.onload = async () => {
-        console.log('âœ… jsQR chargÃ© depuis fallback CDN');
-        await initializeTicketsSync();
-        checkAuthentication();
-        console.log('âœ… Application prÃªte (mode fallback) !');
-      };
-      
-      script.onerror = () => {
-        console.error('âŒ Impossible de charger jsQR. Scanner QR dÃ©sactivÃ©.');
-        console.log('â„¹ï¸ Utilise l\'entrÃ©e manuelle pour les codes');
-        // Continuer quand mÃªme
-        initializeTicketsSync().then(() => {
-          checkAuthentication();
-          console.log('âœ… Application prÃªte (sans scanner QR) !');
-        });
-      };
-      
       document.head.appendChild(script);
-    } else {
-      console.log('âœ… jsQR chargÃ© avec succÃ¨s du CDN principal!');
-      await initializeTicketsSync();
-      checkAuthentication();
-      console.log('âœ… Application prÃªte !');
     }
-    
+    await initializeTicketsSync();
+    checkAuthentication();
   } catch(e) {
-    console.error('âŒ Erreur initialisation:', e);
-    // Continuer quand mÃªme
-    try {
-      await initializeTicketsSync();
-      checkAuthentication();
-      console.log('âœ… Application prÃªte (mode dÃ©gradÃ©) !');
-    } catch(e2) {
-      console.error('âŒ Erreur critique:', e2);
-    }
+    try { await initializeTicketsSync(); checkAuthentication(); } catch(e2) {}
   }
 })();
 </script>
