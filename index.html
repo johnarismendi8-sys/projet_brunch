@@ -769,7 +769,7 @@
       <button class="nav-tab" onclick="showView('generator', this)">Générer</button>
       <button class="nav-tab" onclick="showView('scanner', this)">Scanner</button>
       <button class="nav-tab" onclick="showView('export', this)">Export</button>
-      <button class="nav-tab" onclick="logout()" style="margin-left: auto;">Déconnexion</button>
+      <button class="nav-tab" onclick="checkStateAndLogout()" style="margin-left: auto;">Déconnexion</button>
     </nav>
   </div>
   <div style="padding:4px 32px;background:rgba(201,168,76,0.05);font-size:11px;color:#888;display:flex;justify-content:flex-end;gap:16px;border-top:1px solid var(--border);">
@@ -1051,6 +1051,15 @@ function logout() {
     document.getElementById('login-password').value = '';
     document.getElementById('login-error').classList.remove('show');
   }
+}
+
+function checkStateAndLogout() {
+  // Debug: vérifier state avant de déconnecter
+  console.log('📊 State check avant déconnexion:');
+  console.log('   - stateReady:', stateReady);
+  console.log('   - state size:', Object.keys(state).length);
+  console.log('   - premiers codes:', Object.keys(state).slice(0, 5));
+  logout();
 }
 
 function checkAuthentication() {
@@ -1613,6 +1622,7 @@ let scanLog = [];
 let cameraStream = null;
 let scanInterval = null;
 let pendingConfirmation = null;
+let stateReady = false;
 
 async function initializeTicketsSync() {
   console.log('🎫 Initialisation de la synchro des tickets...');
@@ -1629,6 +1639,15 @@ async function initializeTicketsSync() {
       state = loadState();
       await createTicketsInSupabase(); // Tentative de création (non-bloquante)
     }
+    
+    // Vérifier que state a bien des données
+    if (Object.keys(state).length === 0) {
+      console.warn('⚠️ State vide! Reconstruction...');
+      state = buildFreshState();
+    }
+    
+    stateReady = true;
+    console.log('✅ State prêt avec', Object.keys(state).length, 'tickets');
     
     updateSyncStatus('✅ Synchronisation active (localStorage)');
     
@@ -2169,19 +2188,36 @@ function stopCamera() {
 function validateCode(rawCode) {
   try {
     if (!rawCode) return;
+    
+    // Vérifier que state est bien chargé
+    if (!stateReady || Object.keys(state).length === 0) {
+      console.warn('⚠️ State pas encore prêt, chargement d\'urgence...');
+      state = loadState();
+      if (Object.keys(state).length === 0) {
+        state = buildFreshState();
+      }
+      stateReady = true;
+      console.log('✅ State chargé d\'urgence:', Object.keys(state).length, 'tickets');
+    }
+    
     const code = rawCode.trim().toUpperCase();
     document.getElementById('manual-code').value = '';
 
     const result = document.getElementById('scan-result');
     result.style.display = 'block';
 
+    console.log('🔍 Recherche code:', code, '| State size:', Object.keys(state).length);
     const ticket = state[code];
     if (!ticket) {
+      console.error('❌ Code non trouvé:', code);
+      console.log('   Codes disponibles (premiers):', Object.keys(state).slice(0, 5));
       result.className = 'scan-result invalid';
-      result.innerHTML = `<div class="result-icon">❌</div><div class="result-title">Code invalide</div><div class="result-code">${code}</div><div class="result-detail">Ce code n'existe pas dans la base.</div>`;
+      result.innerHTML = `<div class="result-icon">❌</div><div class="result-title">Code invalide</div><div class="result-code">${code}</div><div class="result-detail">Ce code n'existe pas dans la base (${Object.keys(state).length} codes).</div>`;
       addLog(code, false, 'Code inconnu');
       return;
     }
+    
+    console.log('✅ Ticket trouvé:', ticket);
     if (ticket.used) {
       result.className = 'scan-result already';
       result.innerHTML = `<div class="result-icon">⚠️</div><div class="result-title">Déjà validé</div><div class="result-code">${code}</div><div class="result-detail">Ce ticket a déjà été utilisé.<br>Type : ${ticket.type} — Lot ${ticket.lot}</div>`;
@@ -2371,7 +2407,7 @@ function updateScanCount() {
     } else {
       console.log('✅ jsQR chargé avec succès du CDN principal!');
       await initializeTicketsSync();
-      console.log('✅ Synchronisation tickets OK');
+      console.log('✅ Synchronisation tickets OK, State prêt:', stateReady);
       checkAuthentication();
       console.log('✅ Application prête !');
     }
