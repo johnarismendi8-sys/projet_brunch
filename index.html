@@ -751,14 +751,25 @@
     display: none;
     color: var(--error);
     font-size: 12px;
-    padding: 10px;
+    padding: 12px;
     background: #FDECEA;
     border-radius: 8px;
     border: 1px solid #F1AFAF;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     text-align: center;
+    animation: slideDown 0.3s ease;
   }
   .login-error.show { display: block; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  .login-card code {
+    background: var(--surface-2);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+  }
 
   /* ─── SETTINGS FAB ─── */
   .settings-btn {
@@ -900,10 +911,17 @@
     <div class="login-subtitle">Gestion des tickets</div>
     <div class="login-error" id="login-error"></div>
     <form class="login-form" onsubmit="handleLogin(event)">
-      <input type="text" id="login-username" placeholder="Nom d'utilisateur" required autocomplete="username">
-      <input type="password" id="login-password" placeholder="Mot de passe" required autocomplete="current-password">
+      <input type="text" id="login-username" placeholder="Utilisateur : user ou admin" required autocomplete="off">
+      <input type="password" id="login-password" placeholder="Mot de passe" required autocomplete="off">
       <button type="submit" class="login-btn">Se connecter</button>
     </form>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:11px;color:#888;text-align:center;line-height:1.6;">
+      <strong>Identifiants par défaut :</strong><br>
+      👤 Utilisateur : <code style="background:#f5f0e8;padding:2px 6px;border-radius:3px;font-size:10px;">user</code><br>
+      🔑 Mot de passe : <code style="background:#f5f0e8;padding:2px 6px;border-radius:3px;font-size:10px;">user123</code><br><br>
+      👨‍💼 Admin : <code style="background:#f5f0e8;padding:2px 6px;border-radius:3px;font-size:10px;">admin</code><br>
+      🔑 Mot de passe : <code style="background:#f5f0e8;padding:2px 6px;border-radius:3px;font-size:10px;">admin@brunch2024</code>
+    </div>
   </div>
 </div>
 
@@ -1179,32 +1197,50 @@ function saveAccounts(accounts) {
 
 function handleLogin(event) {
   event.preventDefault();
-  const username = document.getElementById('login-username').value.trim();
+  const username = document.getElementById('login-username').value.trim().toLowerCase();
   const password = document.getElementById('login-password').value;
   const errorDiv = document.getElementById('login-error');
 
+  // Effacer l'erreur précédente
+  errorDiv.classList.remove('show');
+  errorDiv.textContent = '';
+
   if (!username || !password) {
-    errorDiv.textContent = 'Veuillez remplir tous les champs';
+    errorDiv.textContent = '⚠️ Veuillez remplir tous les champs';
     errorDiv.classList.add('show');
     return;
   }
 
+  // Forcer l'initialisation si nécessaire
+  initializeAccounts();
   const accounts = getAccounts();
   const account = accounts[username];
-  if (!account || account.passwordHash !== simpleHash(password)) {
-    errorDiv.textContent = 'Identifiants incorrects';
+  
+  if (!account) {
+    errorDiv.textContent = '❌ Utilisateur "' + username + '" non trouvé. Essayez "user" ou "admin"';
     errorDiv.classList.add('show');
-    document.getElementById('login-password').value = '';
+    console.warn('Compte non trouvé:', username);
     return;
   }
 
+  const passwordHash = simpleHash(password);
+  if (account.passwordHash !== passwordHash) {
+    errorDiv.textContent = '❌ Mot de passe incorrect';
+    errorDiv.classList.add('show');
+    document.getElementById('login-password').value = '';
+    console.warn('Hash entré:', passwordHash, 'Hash attendu:', account.passwordHash);
+    return;
+  }
+
+  // Connexion réussie
   isLoggedIn = true;
   currentUser = username;
   localStorage.setItem('brunch_currentUser', username);
   document.getElementById('login-page').style.display = 'none';
   document.body.style.overflow = 'auto';
-  renderDashboard();
   document.getElementById('current-username').textContent = account.displayName;
+  renderDashboard();
+  showView('dashboard', document.querySelector('.nav-tab.active'));
 }
 
 function logout() {
@@ -1309,7 +1345,7 @@ async function executeReset(type) {
   if (type === 'scans' || type === 'all') {
     scanLog = [];
     localStorage.removeItem('brunch_scanlog');
-    try { await supabaseClient.from('scans').delete().neq('id', 0); } catch(e) {}
+    try { await supabaseClient.from('scans').delete().neq('id', '-1'); } catch(e) {}
     const logEl = document.getElementById('scan-log');
     if (logEl) logEl.innerHTML = '<div class="empty-state" style="padding:24px 16px"><p>Aucun scan pour l\'instant</p></div>';
     updateScanCount();
@@ -1326,14 +1362,8 @@ async function executeReset(type) {
   renderDashboard();
   alert('✅ Réinitialisation effectuée !');
 }
-}
 
 // ─── LEGACY RESET MODAL ───
-function openResetModal() {
-  if (!isLoggedIn) { alert('❌ Connectez-vous d\'abord'); return; }
-  document.getElementById('reset-modal').classList.add('active');
-  document.getElementById('reset-password').value = '';
-}
 function closeResetModal() {
   document.getElementById('reset-modal').classList.remove('active');
   document.getElementById('reset-password').value = '';
@@ -1525,7 +1555,7 @@ async function loadScanLog() {
   try {
     const { data, error } = await supabaseClient.from('scans').select('*').order('scanned_at', { ascending: false }).limit(500);
     if (error) throw error;
-    return data.map(row => ({ code: row.code, ok: row.scanned, detail: row.detail || '', time: row.time || '', ts: row.scanned_at, id: row.id }));
+    return data.map(row => ({ code: row.code, ok: row.scanned, detail: row.detail || '', timeStr: row.time || '', ts: row.scanned_at, id: row.id }));
   } catch(e) {
     const raw = localStorage.getItem('brunch_scanlog');
     return raw ? JSON.parse(raw) : [];
@@ -1539,6 +1569,7 @@ async function saveScanToSupabase(code, ok, detail, timeStr, ts) {
   } catch(e) {}
 }
 
+// ─── GLOBAL STATE ───
 let state = {};
 let scanLog = [];
 let cameraStream = null;
@@ -1919,7 +1950,8 @@ function addLog(code, ok, detail) {
 
 function displayLogItem(code, ok, detail, timeStr) {
   const log = document.getElementById('scan-log');
-  if (log.querySelector('.empty-state')) log.innerHTML = '';
+  if (log && log.querySelector('.empty-state')) log.innerHTML = '';
+  if (!log) return;
   const item = document.createElement('div');
   item.className = 'log-item';
   item.innerHTML = `
