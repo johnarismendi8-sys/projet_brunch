@@ -951,30 +951,6 @@
     </div>
     <button class="btn btn-gold btn-full" onclick="changePassword()">💾 Changer le mot de passe</button>
 
-    <hr class="settings-divider">
-
-    <div class="settings-danger-title">🗑️ Réinitialisation</div>
-    <div class="reset-zone">
-      <p>Actions <strong>irréversibles</strong>. Les données effacées ne peuvent pas être récupérées.</p>
-      <div class="reset-options">
-        <div class="reset-row">
-          <div>
-            <div class="reset-row-label">Journal des scans</div>
-            <div class="reset-row-desc">Efface l'historique des scans</div>
-          </div>
-          <button class="btn-reset" onclick="askReset('scans')">Réinitialiser</button>
-        </div>
-        <div class="reset-row">
-          <div>
-            <div class="reset-row-label">Tickets validés</div>
-            <div class="reset-row-desc">Remet tous les tickets à Disponible</div>
-          </div>
-          <button class="btn-reset" onclick="askReset('tickets')">Réinitialiser</button>
-        </div>
-        <button class="btn-reset-all" onclick="askReset('all')">⚠️ Tout réinitialiser</button>
-      </div>
-    </div>
-
     <div class="settings-actions">
       <button class="btn btn-outline" onclick="closeSettings()">✕ Fermer</button>
     </div>
@@ -991,7 +967,7 @@
       <h2 class="section-title">Vue d'ensemble</h2>
       <p class="section-sub">Ticket du Brunch</p>
     </div>
-    <button class="btn btn-danger btn-sm" onclick="askReset('all')" style="flex-shrink:0;align-self:flex-start;">🔄 Réinit.</button>
+    <button class="btn btn-danger btn-sm" onclick="askResetWithPassword()" style="flex-shrink:0;align-self:flex-start;">🔄 Réinit.</button>
   </div>
   <div class="stats-grid" id="stats-grid"></div>
   <h3 style="font-family:'Playfair Display',serif;font-size:16px;margin-bottom:12px;color:var(--ink-soft)">Lots de tickets</h3>
@@ -1316,15 +1292,19 @@ function closeResetConfirm() {
   pendingReset = null;
 }
 
-async function executeReset(type) {
+function askResetWithPassword() {
   const ADMIN_PASSWORD = 'admin@brunch2024';
-  const password = prompt('🔐 Entrez le mot de passe administrateur pour confirmer :');
+  const password = prompt('🔐 Entrez le mot de passe administrateur pour confirmer la réinitialisation complète :');
   if (password === null) return; // annulé
   if (simpleHash(password) !== simpleHash(ADMIN_PASSWORD)) {
     alert('❌ Mot de passe incorrect. Réinitialisation annulée.');
     return;
   }
+  if (!confirm('⚠️ ATTENTION !\n\nRéinitialisation de TOUS les tickets et scans.\nCette action est irréversible !\n\nContinuer ?')) return;
+  executeReset('all');
+}
 
+async function executeReset(type) {
   if (type === 'scans' || type === 'all') {
     scanLog = [];
     localStorage.removeItem('brunch_scanlog');
