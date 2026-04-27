@@ -850,6 +850,7 @@
     <div class="empty-state" style="grid-column:1/-1">
       <div class="icon">🎟️</div>
       <p>Sélectionne un lot et clique sur Générer</p>
+     
     </div>
   </div>
 </div>
@@ -1398,6 +1399,87 @@ function saveState() {
   localStorage.setItem('brunch_tickets', JSON.stringify(state));
 }
 
+// Sauvegarder un ticket dans Supabase
+async function updateTicketInSupabase(code, used, usedAt) {
+  try {
+    console.log('🔄 Mise à jour ticket Supabase:', { code, used, usedAt });
+    const { error } = await supabaseClient
+      .from('tickets')
+      .update({ used: used, used_at: usedAt })
+      .eq('code', code);
+    if (error) throw error;
+    console.log('✅ Ticket mis à jour dans Supabase');
+  } catch(e) {
+    console.error('❌ Erreur mise à jour ticket:', e);
+  }
+}
+
+// Charger l'état depuis Supabase
+async function loadStateFromSupabase() {
+  try {
+    console.log('📥 Chargement des tickets depuis Supabase...');
+    const { data, error } = await supabaseClient
+      .from('tickets')
+      .select('*');
+    
+    if (error) throw error;
+    
+    if (!data || data.length === 0) {
+      console.log('⚠️ Aucun ticket dans Supabase, création en cours...');
+      return null; // Créer les tickets
+    }
+    
+    // Convertir les données Supabase au format local
+    const tickets = {};
+    data.forEach(row => {
+      tickets[row.code] = {
+        code: row.code,
+        lot: row.lot,
+        num: parseInt(row.code.substring(1)),
+        type: row.type,
+        used: row.used,
+        usedAt: row.used_at
+      };
+    });
+    console.log('✅ Tickets chargés:', data.length);
+    return tickets;
+  } catch(e) {
+    console.warn('⚠️ Erreur chargement Supabase:', e);
+    return null; // Fallback sur localStorage
+  }
+}
+
+// Créer les tickets dans Supabase
+async function createTicketsInSupabase() {
+  try {
+    console.log('🆕 Création des tickets dans Supabase...');
+    const ticketsToInsert = [];
+    Object.values(state).forEach(ticket => {
+      ticketsToInsert.push({
+        code: ticket.code,
+        lot: ticket.lot,
+        type: ticket.type,
+        used: ticket.used,
+        used_at: ticket.usedAt
+      });
+    });
+    
+    const { error } = await supabaseClient
+      .from('tickets')
+      .insert(ticketsToInsert);
+    
+    if (error) {
+      // Si erreur de doublon, c'est OK (les tickets existent déjà)
+      if (error.code !== '23505') throw error;
+      console.log('✅ Les tickets existent déjà dans Supabase');
+    } else {
+      console.log('✅ Tickets créés dans Supabase');
+    }
+  } catch(e) {
+    console.error('❌ Erreur création tickets:', e);
+  }
+}
+
 // Charger les scans depuis Supabase ou localStorage (fallback)
 async function loadScanLog() {
   try {
@@ -1443,45 +1525,48 @@ async function saveScanToSupabase(code, ok, detail, timeStr, ts) {
   }
 }
 
-let state = loadState();
+let state = {};
 let scanLog = [];
 let cameraStream = null;
 let scanInterval = null;
-let pendingConfirmation = null; // Stocke le ticket en attente de confirmation
+let pendingConfirmation = null;
 
-// Charger les scans et mettre en place les listeners temps réel
-async function initializeScanSync() {
+async function initializeTicketsSync() {
+  console.log('🎫 Initialisation de la synchro des tickets...');
+  const supabaseTickets = await loadStateFromSupabase();
+  
+  if (supabaseTickets) {
+    state = supabaseTickets;
+    console.log('✅ Tickets chargés depuis Supabase');
+  } else {
+    state = loadState();
+    await createTicketsInSupabase();
+  }
+  
+  supabaseClient.channel('tickets-changes')
+    .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'tickets'}, (payload) => {
+      const updatedTicket = payload.new;
+      if (state[updatedTicket.code]) {
+        state[updatedTicket.code].used = updatedTicket.used;
+        state[updatedTicket.code].usedAt = updatedTicket.used_at;
+      }
+      const view = document.querySelector('.view.active');
+      if (view && view.id === 'view-dashboard') renderDashboard();
+    })
+    .subscribe();
+  
   scanLog = await loadScanLog();
   
-  // Listener temps réel : recevoir les nouveaux scans des autres appareils
-  supabaseClient
-    .channel('scans-changes')
-    .on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'scans'
-      },
-      (payload) => {
-        const newScan = payload.new;
-        const entry = {
-          code: newScan.code,
-          ok: newScan.scanned,
-          detail: newScan.detail || '',
-          time: newScan.time || '',
-          ts: newScan.scanned_at,
-          id: newScan.id
-        };
-        scanLog.unshift(entry);
-        displayLogItem(newScan.code, newScan.scanned, newScan.detail, newScan.time);
-        updateScanCount();
-        
-        // Rafraîchir le dashboard si visible
-        const view = document.querySelector('.view.active');
-        if (view && view.id === 'view-dashboard') renderDashboard();
-      }
-    )
+  supabaseClient.channel('scans-changes')
+    .on('postgres_changes', {event: 'INSERT', schema: 'public', table: 'scans'}, (payload) => {
+      const newScan = payload.new;
+      const entry = {code: newScan.code, ok: newScan.scanned, detail: newScan.detail || '', time: newScan.time || '', ts: newScan.scanned_at, id: newScan.id};
+      scanLog.unshift(entry);
+      displayLogItem(newScan.code, newScan.scanned, newScan.detail, newScan.time);
+      updateScanCount();
+      const view = document.querySelector('.view.active');
+      if (view && view.id === 'view-dashboard') renderDashboard();
+    })
     .subscribe();
 }
 
@@ -1782,6 +1867,7 @@ function confirmTicket() {
   ticket.used = true;
   ticket.usedAt = new Date().toISOString();
   saveState();
+  updateTicketInSupabase(code, true, ticket.usedAt);
   
   // Mettre à jour l'affichage du résultat
   const result = document.getElementById('scan-result');
@@ -1866,8 +1952,10 @@ function updateScanCount() {
 }
 
 // ─── INIT ───
-initializeScanSync();
-checkAuthentication();
+(async () => {
+  await initializeTicketsSync();
+  checkAuthentication();
+})();
 </script>
 </body>
 </html>
