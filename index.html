@@ -2029,90 +2029,131 @@ async function startCamera() {
     return;
   }
 
-  if (navigator.permissions) {
+  // Vérifier jsQR
+  if (typeof window.jsQR !== 'function') {
+    console.error('❌ jsQR n\'est pas chargé!');
+    setCamStatus('⚠️ Librairie de scan en cours de chargement... Essaie dans 2 secondes.', '#e67e22');
+    btn.disabled = false;
+    return;
+  }
+
+  // Vérifier permissions sur Android
+  if (navigator.permissions && /Android/.test(navigator.userAgent)) {
     try {
       const perm = await navigator.permissions.query({ name: 'camera' });
       if (perm.state === 'denied') {
-        setCamStatus('❌ Accès refusé. Va dans Réglages > Confidentialité > Caméra pour autoriser.', 'var(--error)');
+        setCamStatus('❌ Permission caméra refusée. Va dans Réglages pour autoriser.', 'var(--error)');
         btn.disabled = false;
         return;
       }
-    } catch(e) { /* permissions API non dispo, on continue */ }
+    } catch(e) { /* permissions API non dispo */ }
   }
 
   try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
-    });
+    // Essayer avec des contraintes adaptées au mobile
+    const constraints = {
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { min: 320, ideal: 640, max: 1280 },
+        height: { min: 240, ideal: 480, max: 720 },
+        focusMode: { ideal: 'continuous' }
+      },
+      audio: false
+    };
+    
+    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
     const video = document.getElementById('video-preview');
     video.srcObject = cameraStream;
-    video.play().catch(() => {});
+    
+    // Attendre que la vidéo soit prête
+    await new Promise((resolve) => {
+      video.onloadedmetadata = () => {
+        video.play().catch(() => {});
+        resolve();
+      };
+      setTimeout(resolve, 2000); // Timeout de sécurité
+    });
+    
     btn.textContent = '⏹ Arrêter la caméra';
     btn.disabled = false;
     setCamStatus('✅ Caméra active — pointez vers un QR code', 'var(--success)');
 
     console.log('📷 Caméra activée');
-    console.log('   window.jsQR:', typeof window.jsQR);
+    console.log('   Résolution:', video.videoWidth, 'x', video.videoHeight);
+    console.log('   jsQR type:', typeof window.jsQR);
 
-    if (typeof window.jsQR === 'function') {
-      console.log('✅ jsQR détecté, démarrage du scan...');
-      const canvas = document.createElement('canvas');
-      let lastCode = null, lastCodeTime = 0;
-      let scanCount = 0;
-      
-      scanInterval = setInterval(() => {
+    // Démarrer la boucle de scan
+    const canvas = document.createElement('canvas');
+    let lastCode = null;
+    let lastCodeTime = 0;
+    let noQRCount = 0;
+    
+    scanInterval = setInterval(() => {
+      try {
+        // Vérifier que la vidéo est prête et a une résolution valide
+        if (video.readyState !== video.HAVE_ENOUGH_DATA || video.videoWidth === 0) {
+          return;
+        }
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        
+        // Ajouter un peu de flou pour améliorer la détection
+        ctx.filter = 'brightness(1.1) contrast(1.1)';
+        ctx.drawImage(video, 0, 0);
+        
+        const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        
         try {
-          if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            scanCount++;
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            
-            if (canvas.width === 0 || canvas.height === 0) {
-              return;
+          // Essayer avec différents modes de scan
+          let qr = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
+          
+          if (qr && qr.data) {
+            const now = Date.now();
+            // Déduplica: ignorer si le même code dans les 2 dernières secondes
+            if (qr.data !== lastCode || now - lastCodeTime > 2000) {
+              lastCode = qr.data;
+              lastCodeTime = now;
+              noQRCount = 0;
+              console.log('🎯 QR détecté:', qr.data);
+              const parts = qr.data.split('|');
+              validateCode(parts[0]);
             }
-            
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
-            const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            
-            try {
-              const qr = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
-              
-              if (qr && qr.data) {
-                const now = Date.now();
-                if (qr.data !== lastCode || now - lastCodeTime > 3000) {
-                  lastCode = qr.data;
-                  lastCodeTime = now;
-                  console.log('🎯 QR détecté:', qr.data);
-                  const parts = qr.data.split('|');
-                  validateCode(parts[0]);
-                }
-              }
-            } catch(qrError) {
-              console.warn('⚠️ Erreur jsQR:', qrError.message);
+          } else {
+            noQRCount++;
+            // Feedback tous les 5 secondes si aucun QR détecté
+            if (noQRCount > 200) { // 200 * 250ms = 50 secondes
+              setCamStatus('💡 Pointez le QR code mieux vers la caméra...', '#e67e22');
+              noQRCount = 0;
             }
           }
-        } catch(e) {
-          console.error('❌ Erreur boucle scan:', e);
+        } catch(qrError) {
+          console.warn('⚠️ Erreur jsQR:', qrError.message);
         }
-      }, 250);
-      
-      console.log('✅ Boucle de scan lancée (tous les 250ms)');
-    } else {
-      console.error('❌ jsQR NOT FOUND - Type:', typeof window.jsQR);
-      setCamStatus('⚠️ Scanner QR indisponible. Utilisez l\'entrée manuelle.', '#e67e22');
-    }
+      } catch(e) {
+        console.error('❌ Erreur boucle scan:', e);
+      }
+    }, 250);
+    
+    console.log('✅ Boucle de scan lancée (250ms interval)');
+    
   } catch(e) {
     console.error('❌ Erreur startCamera:', e);
     btn.disabled = false;
+    btn.textContent = '▶ Activer la caméra';
+    
+    // Messages d'erreur détaillés
     if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-      setCamStatus('❌ Permission refusée. Autorise la caméra dans les réglages du navigateur.', 'var(--error)');
-    } else if (e.name === 'NotFoundError') {
-      setCamStatus('❌ Aucune caméra détectée.', 'var(--error)');
-    } else if (e.name === 'NotReadableError') {
-      setCamStatus('❌ Caméra utilisée par une autre app. Ferme-la et réessaie.', 'var(--error)');
+      setCamStatus('❌ Permission caméra refusée. Clique sur l\'icône de caméra refusée en haut et autorise.', 'var(--error)');
+    } else if (e.name === 'NotFoundError' || e.message.includes('no camera')) {
+      setCamStatus('❌ Aucune caméra détectée sur cet appareil.', 'var(--error)');
+    } else if (e.name === 'NotReadableError' || e.message.includes('already in use')) {
+      setCamStatus('❌ Caméra déjà utilisée. Ferme les autres apps et réessaie.', 'var(--error)');
+    } else if (e.name === 'TypeError') {
+      setCamStatus('❌ Erreur de configuration caméra. Rafraîchis la page.', 'var(--error)');
     } else {
-      setCamStatus('❌ Erreur : ' + e.message, 'var(--error)');
+      setCamStatus('❌ ' + e.message, 'var(--error)');
     }
   }
 }
@@ -2281,41 +2322,70 @@ function updateScanCount() {
   try {
     console.log('🚀 Démarrage de l\'application The Brunch...');
     
-    // Attendre le chargement de jsQR (max 5 secondes)
+    // Attendre le chargement de jsQR (max 8 secondes avec retry)
     let waitTime = 0;
-    while (typeof window.jsQR === 'undefined' && waitTime < 5000) {
-      await new Promise(r => setTimeout(r, 100));
-      waitTime += 100;
+    let jsQRLoaded = false;
+    
+    while (!jsQRLoaded && waitTime < 8000) {
+      if (typeof window.jsQR === 'function') {
+        jsQRLoaded = true;
+        break;
+      }
+      await new Promise(r => setTimeout(r, 200));
+      waitTime += 200;
     }
     
-    // Vérifier que jsQR est chargé
+    // Vérifier les librairies
     console.log('📦 Vérification des librairies:');
     console.log('   - QRCode (génération):', typeof QRCode);
-    console.log('   - jsQR (lecture):', typeof window.jsQR);
+    console.log('   - jsQR (lecture):', typeof window.jsQR, jsQRLoaded ? '✅' : '❌');
     console.log('   - Supabase:', typeof supabase);
     
-    if (typeof window.jsQR === 'undefined') {
-      console.error('❌ ERREUR CRITIQUE: jsQR n\'est pas chargé après 5s!');
-      console.log('Tentative de chargement depuis un CDN alternatif...');
+    // Si jsQR n'est pas chargé, essayer le fallback
+    if (!jsQRLoaded || typeof window.jsQR !== 'function') {
+      console.warn('⚠️ jsQR pas chargé du CDN principal, tentative fallback...');
       
-      // Charger depuis un CDN alternatif
+      // Essayer le CDN alternatif
       const script = document.createElement('script');
       script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
-      script.onerror = () => {
-        console.error('❌ Impossible de charger jsQR. Scan QR désactivé.');
-        alert('⚠️ Erreur: Le scanner QR n\'est pas disponible.\n\nUtilisez la saisie manuelle des codes.');
+      script.async = true;
+      
+      script.onload = async () => {
+        console.log('✅ jsQR chargé depuis fallback CDN');
+        await initializeTicketsSync();
+        checkAuthentication();
+        console.log('✅ Application prête (mode fallback) !');
       };
+      
+      script.onerror = () => {
+        console.error('❌ Impossible de charger jsQR. Scanner QR désactivé.');
+        console.log('ℹ️ Utilise l\'entrée manuelle pour les codes');
+        // Continuer quand même
+        initializeTicketsSync().then(() => {
+          checkAuthentication();
+          console.log('✅ Application prête (sans scanner QR) !');
+        });
+      };
+      
       document.head.appendChild(script);
     } else {
-      console.log('✅ jsQR chargé avec succès!');
+      console.log('✅ jsQR chargé avec succès du CDN principal!');
+      await initializeTicketsSync();
+      console.log('✅ Synchronisation tickets OK');
+      checkAuthentication();
+      console.log('✅ Application prête !');
     }
     
-    await initializeTicketsSync();
-    console.log('✅ Synchronisation tickets OK');
-    checkAuthentication();
-    console.log('✅ Application prête !');
   } catch(e) {
     console.error('❌ Erreur initialisation:', e);
+    // Continuer quand même
+    try {
+      await initializeTicketsSync();
+      checkAuthentication();
+      console.log('✅ Application prête (mode dégradé) !');
+    } catch(e2) {
+      console.error('❌ Erreur critique:', e2);
+    }
   }
 })();
 </script>
