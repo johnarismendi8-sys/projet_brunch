@@ -898,8 +898,8 @@
           </div>
           <div id="cam-status" style="margin-top:10px;font-size:12px;text-align:center;min-height:18px;padding:0 4px;"></div>
           <div class="manual-input-row" style="margin-top:20px;">
-            <input type="text" id="manual-code" placeholder="Ex: A01 ou B12" style="text-transform:uppercase" maxlength="5"
-              oninput="this.value=this.value.toUpperCase()"
+            <input type="text" id="manual-code" placeholder="Ex: A001 ou U020" style="text-transform:uppercase" maxlength="4"
+              oninput="this.value=this.value.toUpperCase().replace(/[^A-U0-9]/g, '')"
               onkeydown="if(event.key==='Enter')validateCode(document.getElementById('manual-code').value)">
             <button class="btn btn-gold" onclick="validateCode(document.getElementById('manual-code').value)">Valider</button>
           </div>
@@ -952,7 +952,6 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script>
 // ─── AUTHENTIFICATION ───
@@ -2024,31 +2023,57 @@ async function startCamera() {
     btn.disabled = false;
     setCamStatus('✅ Caméra active — pointez vers un QR code', 'var(--success)');
 
-    if (typeof jsQR !== 'undefined') {
+    console.log('📷 Vérification jsQR:', typeof window.jsQR);
+
+    if (typeof window.jsQR === 'function' || (typeof jsQR !== 'undefined' && typeof jsQR === 'function')) {
+      console.log('✅ jsQR détecté, démarrage du scan...');
       const canvas = document.createElement('canvas');
       let lastCode = null, lastCodeTime = 0;
+      let scanAttempts = 0;
+      
       scanInterval = setInterval(() => {
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          canvas.getContext('2d').drawImage(video, 0, 0);
-          const img = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
-          const qr = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
-          if (qr) {
-            const now = Date.now();
-            if (qr.data !== lastCode || now - lastCodeTime > 3000) {
-              lastCode = qr.data;
-              lastCodeTime = now;
-              const parts = qr.data.split('|');
-              validateCode(parts[0]);
+        try {
+          if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            scanAttempts++;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            if (canvas.width === 0 || canvas.height === 0) {
+              console.warn('⚠️ Canvas vide:', canvas.width, 'x', canvas.height);
+              return;
+            }
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Utiliser window.jsQR ou jsQR selon ce qui est disponible
+            const qrFunction = window.jsQR || jsQR;
+            const qr = qrFunction(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+            
+            if (qr && qr.data) {
+              const now = Date.now();
+              if (qr.data !== lastCode || now - lastCodeTime > 3000) {
+                lastCode = qr.data;
+                lastCodeTime = now;
+                console.log('🎯 QR détecté:', qr.data);
+                const parts = qr.data.split('|');
+                validateCode(parts[0]);
+              }
             }
           }
+        } catch(e) {
+          console.error('❌ Erreur scan:', e);
         }
-      }, 400);
+      }, 300);
+      
+      console.log('✅ Scan lancé tous les 300ms');
     } else {
-      setCamStatus('⚠️ jsQR non chargé — utilise la saisie manuelle.', '#e67e22');
+      console.error('❌ jsQR NOT FOUND - window.jsQR:', window.jsQR, 'jsQR:', typeof jsQR);
+      setCamStatus('⚠️ jsQR non détecté. Vérifiez la console. Utilise la saisie manuelle.', '#e67e22');
     }
   } catch(e) {
+    console.error('❌ Erreur startCamera:', e);
     btn.disabled = false;
     if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
       setCamStatus('❌ Permission refusée. Autorise la caméra dans les réglages du navigateur.', 'var(--error)');
@@ -2225,6 +2250,18 @@ function updateScanCount() {
 (async () => {
   try {
     console.log('🚀 Démarrage de l\'application The Brunch...');
+    
+    // Vérifier que jsQR est chargé
+    console.log('📦 Vérification des librairies:');
+    console.log('   - QRCode (génération):', typeof QRCode);
+    console.log('   - jsQR (lecture):', typeof jsQR, 'typeof window.jsQR:', typeof window.jsQR);
+    console.log('   - Supabase:', typeof supabase);
+    
+    if (typeof jsQR === 'undefined' && typeof window.jsQR === 'undefined') {
+      console.error('❌ ERREUR CRITIQUE: jsQR n\'est pas chargé!');
+      alert('⚠️ Erreur: La librairie de scan QR n\'est pas chargée. Rechargez la page.');
+    }
+    
     await initializeTicketsSync();
     console.log('✅ Synchronisation tickets OK');
     checkAuthentication();
