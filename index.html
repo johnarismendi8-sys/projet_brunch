@@ -760,16 +760,6 @@
     animation: slideDown 0.3s ease;
   }
   .login-error.show { display: block; }
-  @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-  .login-card code {
-    background: var(--surface-2);
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--ink);
-  }
 
   /* ─── SETTINGS FAB ─── */
   .settings-btn {
@@ -911,17 +901,10 @@
     <div class="login-subtitle">Gestion des tickets</div>
     <div class="login-error" id="login-error"></div>
     <form class="login-form" onsubmit="handleLogin(event)">
-      <input type="text" id="login-username" placeholder="Utilisateur : user ou admin" required autocomplete="off">
+      <input type="text" id="login-username" placeholder="Nom d'utilisateur" required autocomplete="off">
       <input type="password" id="login-password" placeholder="Mot de passe" required autocomplete="off">
       <button type="submit" class="login-btn">Se connecter</button>
     </form>
-    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:11px;color:#888;text-align:center;line-height:1.6;">
-      <strong>Identifiants par défaut :</strong><br>
-      👤 Utilisateur : <code style="background:#f5f0e8;padding:2px 6px;border-radius:3px;font-size:10px;">user</code><br>
-      🔑 Mot de passe : <code style="background:#f5f0e8;padding:2px 6px;border-radius:3px;font-size:10px;">user123</code><br><br>
-      👨‍💼 Admin : <code style="background:#f5f0e8;padding:2px 6px;border-radius:3px;font-size:10px;">admin</code><br>
-      🔑 Mot de passe : <code style="background:#f5f0e8;padding:2px 6px;border-radius:3px;font-size:10px;">admin@brunch2024</code>
-    </div>
   </div>
 </div>
 
