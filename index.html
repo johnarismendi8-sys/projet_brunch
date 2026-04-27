@@ -1398,19 +1398,92 @@ function saveState() {
   localStorage.setItem('brunch_tickets', JSON.stringify(state));
 }
 
-function loadScanLog() {
-  const raw = localStorage.getItem('brunch_scanlog');
-  return raw ? JSON.parse(raw) : [];
+// Charger les scans depuis Supabase ou localStorage (fallback)
+async function loadScanLog() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('scans')
+      .select('*')
+      .order('scanned_at', { ascending: false })
+      .limit(100);
+    
+    if (error) throw error;
+    
+    // Convertir format Supabase vers format local
+    return data.map(row => ({
+      code: row.code,
+      ok: row.scanned,
+      detail: row.detail || '',
+      time: row.time || '',
+      ts: row.scanned_at,
+      id: row.id
+    }));
+  } catch(e) {
+    console.warn('Erreur chargement scans Supabase:', e);
+    const raw = localStorage.getItem('brunch_scanlog');
+    return raw ? JSON.parse(raw) : [];
+  }
 }
-function saveScanLog() {
-  localStorage.setItem('brunch_scanlog', JSON.stringify(scanLog));
+
+// Sauvegarder un scan dans Supabase
+async function saveScanToSupabase(code, ok, detail, timeStr, ts) {
+  try {
+    const { error } = await supabaseClient.from('scans').insert([
+      {
+        code: code,
+        scanned: ok,
+        detail: detail,
+        time: timeStr,
+        scanned_at: ts
+      }
+    ]);
+    if (error) throw error;
+  } catch(e) {
+    console.error('Erreur sauvegarde Supabase:', e);
+  }
 }
 
 let state = loadState();
-let scanLog = loadScanLog();
+let scanLog = [];
 let cameraStream = null;
 let scanInterval = null;
 let pendingConfirmation = null; // Stocke le ticket en attente de confirmation
+
+// Charger les scans et mettre en place les listeners temps réel
+async function initializeScanSync() {
+  scanLog = await loadScanLog();
+  
+  // Listener temps réel : recevoir les nouveaux scans des autres appareils
+  supabaseClient
+    .channel('scans-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'scans'
+      },
+      (payload) => {
+        const newScan = payload.new;
+        const entry = {
+          code: newScan.code,
+          ok: newScan.scanned,
+          detail: newScan.detail || '',
+          time: newScan.time || '',
+          ts: newScan.scanned_at,
+          id: newScan.id
+        };
+        scanLog.unshift(entry);
+        displayLogItem(newScan.code, newScan.scanned, newScan.detail, newScan.time);
+        updateScanCount();
+        
+        // Rafraîchir le dashboard si visible
+        const view = document.querySelector('.view.active');
+        if (view && view.id === 'view-dashboard') renderDashboard();
+      }
+    )
+    .subscribe();
+}
 
 // ─── NAVIGATION ───
 function showView(name, btn) {
@@ -1761,10 +1834,18 @@ document.addEventListener('DOMContentLoaded', function() {
 function addLog(code, ok, detail) {
   const now = new Date();
   const timeStr = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-  const entry = { code, ok, detail, time: timeStr, ts: now.toISOString() };
+  const ts = now.toISOString();
+  const entry = { code, ok, detail, time: timeStr, ts: ts };
   scanLog.unshift(entry);
-  saveScanLog();
+  
+  // Sauvegarder dans Supabase
+  saveScanToSupabase(code, ok, detail, timeStr, ts);
 
+  displayLogItem(code, ok, detail, timeStr);
+  updateScanCount();
+}
+
+function displayLogItem(code, ok, detail, timeStr) {
   const log = document.getElementById('scan-log');
   if (log.querySelector('.empty-state')) log.innerHTML = '';
   const item = document.createElement('div');
@@ -1776,13 +1857,16 @@ function addLog(code, ok, detail) {
     <span class="log-time">${timeStr}</span>
   `;
   log.prepend(item);
+}
 
+function updateScanCount() {
   const count = document.getElementById('scan-count');
   const validated = scanLog.filter(l => l.ok).length;
   count.textContent = `${validated} validé(s)`;
 }
 
 // ─── INIT ───
+initializeScanSync();
 checkAuthentication();
 </script>
 </body>
