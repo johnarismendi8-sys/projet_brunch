@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Brunch — Gestion des Tickets</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -2023,23 +2023,23 @@ async function startCamera() {
     btn.disabled = false;
     setCamStatus('✅ Caméra active — pointez vers un QR code', 'var(--success)');
 
-    console.log('📷 Vérification jsQR:', typeof window.jsQR);
+    console.log('📷 Caméra activée');
+    console.log('   window.jsQR:', typeof window.jsQR);
 
-    if (typeof window.jsQR === 'function' || (typeof jsQR !== 'undefined' && typeof jsQR === 'function')) {
+    if (typeof window.jsQR === 'function') {
       console.log('✅ jsQR détecté, démarrage du scan...');
       const canvas = document.createElement('canvas');
       let lastCode = null, lastCodeTime = 0;
-      let scanAttempts = 0;
+      let scanCount = 0;
       
       scanInterval = setInterval(() => {
         try {
           if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            scanAttempts++;
+            scanCount++;
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             
             if (canvas.width === 0 || canvas.height === 0) {
-              console.warn('⚠️ Canvas vide:', canvas.width, 'x', canvas.height);
               return;
             }
             
@@ -2047,30 +2047,32 @@ async function startCamera() {
             ctx.drawImage(video, 0, 0);
             const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
             
-            // Utiliser window.jsQR ou jsQR selon ce qui est disponible
-            const qrFunction = window.jsQR || jsQR;
-            const qr = qrFunction(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
-            
-            if (qr && qr.data) {
-              const now = Date.now();
-              if (qr.data !== lastCode || now - lastCodeTime > 3000) {
-                lastCode = qr.data;
-                lastCodeTime = now;
-                console.log('🎯 QR détecté:', qr.data);
-                const parts = qr.data.split('|');
-                validateCode(parts[0]);
+            try {
+              const qr = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+              
+              if (qr && qr.data) {
+                const now = Date.now();
+                if (qr.data !== lastCode || now - lastCodeTime > 3000) {
+                  lastCode = qr.data;
+                  lastCodeTime = now;
+                  console.log('🎯 QR détecté:', qr.data);
+                  const parts = qr.data.split('|');
+                  validateCode(parts[0]);
+                }
               }
+            } catch(qrError) {
+              console.warn('⚠️ Erreur jsQR:', qrError.message);
             }
           }
         } catch(e) {
-          console.error('❌ Erreur scan:', e);
+          console.error('❌ Erreur boucle scan:', e);
         }
-      }, 300);
+      }, 250);
       
-      console.log('✅ Scan lancé tous les 300ms');
+      console.log('✅ Boucle de scan lancée (tous les 250ms)');
     } else {
-      console.error('❌ jsQR NOT FOUND - window.jsQR:', window.jsQR, 'jsQR:', typeof jsQR);
-      setCamStatus('⚠️ jsQR non détecté. Vérifiez la console. Utilise la saisie manuelle.', '#e67e22');
+      console.error('❌ jsQR NOT FOUND - Type:', typeof window.jsQR);
+      setCamStatus('⚠️ Scanner QR indisponible. Utilisez l\'entrée manuelle.', '#e67e22');
     }
   } catch(e) {
     console.error('❌ Erreur startCamera:', e);
@@ -2251,15 +2253,33 @@ function updateScanCount() {
   try {
     console.log('🚀 Démarrage de l\'application The Brunch...');
     
+    // Attendre le chargement de jsQR (max 5 secondes)
+    let waitTime = 0;
+    while (typeof window.jsQR === 'undefined' && waitTime < 5000) {
+      await new Promise(r => setTimeout(r, 100));
+      waitTime += 100;
+    }
+    
     // Vérifier que jsQR est chargé
     console.log('📦 Vérification des librairies:');
     console.log('   - QRCode (génération):', typeof QRCode);
-    console.log('   - jsQR (lecture):', typeof jsQR, 'typeof window.jsQR:', typeof window.jsQR);
+    console.log('   - jsQR (lecture):', typeof window.jsQR);
     console.log('   - Supabase:', typeof supabase);
     
-    if (typeof jsQR === 'undefined' && typeof window.jsQR === 'undefined') {
-      console.error('❌ ERREUR CRITIQUE: jsQR n\'est pas chargé!');
-      alert('⚠️ Erreur: La librairie de scan QR n\'est pas chargée. Rechargez la page.');
+    if (typeof window.jsQR === 'undefined') {
+      console.error('❌ ERREUR CRITIQUE: jsQR n\'est pas chargé après 5s!');
+      console.log('Tentative de chargement depuis un CDN alternatif...');
+      
+      // Charger depuis un CDN alternatif
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+      script.onerror = () => {
+        console.error('❌ Impossible de charger jsQR. Scan QR désactivé.');
+        alert('⚠️ Erreur: Le scanner QR n\'est pas disponible.\n\nUtilisez la saisie manuelle des codes.');
+      };
+      document.head.appendChild(script);
+    } else {
+      console.log('✅ jsQR chargé avec succès!');
     }
     
     await initializeTicketsSync();
