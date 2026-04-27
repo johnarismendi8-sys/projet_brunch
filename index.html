@@ -1624,6 +1624,28 @@ let scanInterval = null;
 let pendingConfirmation = null;
 let stateReady = false;
 
+// 🔥 IMMÉDIATEMENT charger les tickets de localStorage (synchrone)
+try {
+  const raw = localStorage.getItem('brunch_tickets');
+  if (raw) {
+    state = JSON.parse(raw);
+    console.log('✅ Tickets chargés IMMÉDIATEMENT de localStorage:', Object.keys(state).length);
+  }
+} catch(e) {
+  console.warn('⚠️ Erreur chargement localStorage');
+}
+
+// Si state est vide après localStorage, créer les 620 tickets
+if (Object.keys(state).length === 0) {
+  console.log('🆕 Création des 620 tickets frais...');
+  state = buildFreshState();
+  localStorage.setItem('brunch_tickets', JSON.stringify(state));
+  console.log('✅ Tickets créés et sauvegardés');
+}
+
+stateReady = true;
+console.log('✅ STATE PRÊT:', Object.keys(state).length, 'tickets disponibles');
+
 async function initializeTicketsSync() {
   console.log('🎫 Initialisation de la synchro des tickets...');
   updateSyncStatus('🔄 Chargement des données...');
