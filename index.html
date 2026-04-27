@@ -1276,7 +1276,14 @@ function closeResetConfirm() {
   pendingReset = null;
 }
 
-async function executeReset(type) {
+async function executeReset(type) {async function executeReset(type) {
+  const password = prompt('🔐 Entrez le mot de passe administrateur pour confirmer :');
+  if (password === null) return; // annulé
+  if (simpleHash(password) !== simpleHash('admin@brunch2024')) {
+    alert('❌ Mot de passe incorrect. Réinitialisation annulée.');
+    return;
+  }
+
   if (type === 'scans' || type === 'all') {
     scanLog = [];
     localStorage.removeItem('brunch_scanlog');
@@ -1296,6 +1303,7 @@ async function executeReset(type) {
   }
   renderDashboard();
   alert('✅ Réinitialisation effectuée !');
+}
 }
 
 // ─── LEGACY RESET MODAL ───
