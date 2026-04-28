@@ -46,6 +46,10 @@
     top: 0;
     z-index: 100;
     box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    display: none;
+  }
+  #login-page[style*="display: none"] ~ header {
+    display: block;
   }
   .header-inner {
     display: flex;
@@ -1192,6 +1196,7 @@ function handleLogin(event) {
   currentUser = username;
   localStorage.setItem('brunch_currentUser', username);
   document.getElementById('login-page').style.display = 'none';
+  document.querySelector('header').style.display = 'block';
   document.querySelector('.sync-bar').style.display = 'flex';
   document.body.style.overflow = 'auto';
   document.getElementById('current-username').textContent = account.displayName;
@@ -1206,6 +1211,7 @@ function logout() {
     localStorage.removeItem('brunch_currentUser');
     stopCamera();
     document.getElementById('login-page').style.display = 'flex';
+    document.querySelector('header').style.display = 'none';
     document.querySelector('.sync-bar').style.display = 'none';
     document.body.style.overflow = 'hidden';
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -1227,17 +1233,20 @@ function checkAuthentication() {
       currentUser = savedUser;
       isLoggedIn = true;
       document.getElementById('login-page').style.display = 'none';
+      document.querySelector('header').style.display = 'block';
       document.querySelector('.sync-bar').style.display = 'flex';
       document.getElementById('current-username').textContent = account.displayName;
       renderDashboard();
     } else {
       localStorage.removeItem('brunch_currentUser');
       document.getElementById('login-page').style.display = 'flex';
+      document.querySelector('header').style.display = 'none';
       document.querySelector('.sync-bar').style.display = 'none';
       document.body.style.overflow = 'hidden';
     }
   } else {
     document.getElementById('login-page').style.display = 'flex';
+    document.querySelector('header').style.display = 'none';
     document.querySelector('.sync-bar').style.display = 'none';
     document.body.style.overflow = 'hidden';
   }
