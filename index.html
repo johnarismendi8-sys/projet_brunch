@@ -86,16 +86,17 @@
     scrollbar-width: none;
     flex: 1;
     justify-content: flex-end;
+    min-width: 0;
   }
   .nav-tabs::-webkit-scrollbar { display: none; }
   .nav-tab {
-    padding: 7px 12px;
+    padding: 8px 14px;
     border-radius: 6px;
     border: none;
     background: transparent;
     color: #aaa;
     font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -118,6 +119,8 @@
     justify-content: flex-end;
     border-top: 1px solid rgba(255,255,255,0.05);
   }
+  #login-page ~ header .sync-bar { display: none; }
+  #login-page { overflow: hidden; }
 
   /* ─── VIEWS ─── */
   .view { display: none; padding: 16px; }
@@ -339,6 +342,11 @@
     transition: background 0.2s;
   }
   .ticket-card .tick-btn:active { background: #FFE0E0; }
+  .ticket-card.used .tick-btn {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none;
+  }
 
   /* ─── SCANNER ─── */
   .scanner-layout {
@@ -798,7 +806,7 @@
     .header-inner { padding: 14px 40px; }
     .brand-name { font-size: 24px; }
     .brand-icon { width: 44px; height: 44px; font-size: 20px; }
-    .nav-tab { padding: 9px 20px; font-size: 14px; min-height: 40px; }
+    .nav-tab { padding: 10px 22px; font-size: 15px; min-height: 40px; }
     .stats-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px; }
     .stat-card { padding: 18px; }
     .stat-value { font-size: 32px; }
@@ -1734,6 +1742,7 @@ function generateTickets() {
 
 function toggleUsed(code) {
   if (!state[code]) return;
+  if (state[code].used) return;
   state[code].used = !state[code].used;
   state[code].usedAt = state[code].used ? new Date().toISOString() : null;
   saveState();
