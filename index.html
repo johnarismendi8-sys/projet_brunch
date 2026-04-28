@@ -85,18 +85,20 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     flex: 1;
-    justify-content: flex-end;
+    justify-content: flex-start;
     min-width: 0;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
   }
   .nav-tabs::-webkit-scrollbar { display: none; }
   .nav-tab {
-    padding: 8px 14px;
+    padding: 9px 16px;
     border-radius: 6px;
     border: none;
     background: transparent;
     color: #aaa;
     font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -105,6 +107,7 @@
     min-height: 36px;
     display: flex;
     align-items: center;
+    flex-shrink: 0;
   }
   .nav-tab:hover { color: var(--gold-light); background: rgba(201,168,76,0.08); }
   .nav-tab.active { background: var(--gold); color: var(--ink); }
@@ -118,8 +121,10 @@
     display: flex;
     justify-content: flex-end;
     border-top: 1px solid rgba(255,255,255,0.05);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-  #login-page ~ header .sync-bar { display: none; }
   #login-page { overflow: hidden; }
 
   /* ─── VIEWS ─── */
@@ -329,24 +334,7 @@
   }
   .ticket-status.used { background: #FDECEA; color: var(--error); }
 
-  .ticket-card .tick-btn {
-    position: absolute;
-    top: 6px; right: 6px;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--surface-2);
-    border: none;
-    cursor: pointer;
-    font-size: 11px;
-    transition: background 0.2s;
-  }
-  .ticket-card .tick-btn:active { background: #FFE0E0; }
-  .ticket-card.used .tick-btn {
-    cursor: not-allowed;
-    opacity: 0.5;
-    pointer-events: none;
-  }
+  .ticket-card .tick-btn { display: none; }
 
   /* ─── SCANNER ─── */
   .scanner-layout {
@@ -1204,6 +1192,7 @@ function handleLogin(event) {
   currentUser = username;
   localStorage.setItem('brunch_currentUser', username);
   document.getElementById('login-page').style.display = 'none';
+  document.querySelector('.sync-bar').style.display = 'flex';
   document.body.style.overflow = 'auto';
   document.getElementById('current-username').textContent = account.displayName;
   renderDashboard();
@@ -1217,6 +1206,7 @@ function logout() {
     localStorage.removeItem('brunch_currentUser');
     stopCamera();
     document.getElementById('login-page').style.display = 'flex';
+    document.querySelector('.sync-bar').style.display = 'none';
     document.body.style.overflow = 'hidden';
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('login-username').value = '';
@@ -1237,15 +1227,18 @@ function checkAuthentication() {
       currentUser = savedUser;
       isLoggedIn = true;
       document.getElementById('login-page').style.display = 'none';
+      document.querySelector('.sync-bar').style.display = 'flex';
       document.getElementById('current-username').textContent = account.displayName;
       renderDashboard();
     } else {
       localStorage.removeItem('brunch_currentUser');
       document.getElementById('login-page').style.display = 'flex';
+      document.querySelector('.sync-bar').style.display = 'none';
       document.body.style.overflow = 'hidden';
     }
   } else {
     document.getElementById('login-page').style.display = 'flex';
+    document.querySelector('.sync-bar').style.display = 'none';
     document.body.style.overflow = 'hidden';
   }
 }
@@ -1723,7 +1716,6 @@ function generateTickets() {
         <span class="ticket-type ${t.type.toLowerCase()}">${t.type}</span>
         <div class="qr-container" id="qr-${t.code}"></div>
         <span class="ticket-status ${t.used ? 'used' : ''}">${t.used ? '✓ Validé' : '● Disponible'}</span>
-        <button class="tick-btn" onclick="toggleUsed('${t.code}')">✕</button>
       `;
       grid.appendChild(card);
       try {
